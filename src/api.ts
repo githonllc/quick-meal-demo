@@ -1,5 +1,13 @@
 import type { HomeData, MenuView, SearchResponse } from '../shared/types'
 
+export class ApiError extends Error {
+  status: number
+  constructor(message: string, status: number) {
+    super(message)
+    this.status = status
+  }
+}
+
 async function get<T>(path: string, params: URLSearchParams, signal?: AbortSignal): Promise<T> {
   const query = new URLSearchParams(params)
   // Lets us demo the error state with /quick-meal?fail=1
@@ -8,7 +16,7 @@ async function get<T>(path: string, params: URLSearchParams, signal?: AbortSigna
   const res = await fetch(qs ? `${path}?${qs}` : path, { signal })
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as { error?: string }
-    throw new Error(body.error ?? 'Request failed')
+    throw new ApiError(body.error ?? 'Request failed', res.status)
   }
   return (await res.json()) as T
 }
