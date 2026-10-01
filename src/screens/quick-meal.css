@@ -220,3 +220,100 @@
   color: var(--muted);
   font-size: 13px;
 }
+
+/* Filter sheets: groups of steps, the budget slider and the footer. */
+.grp {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.grp h3 {
+  margin: 0;
+  font-size: 15px;
+}
+.grp-help {
+  margin: -4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.opts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.opts.two {
+  grid-template-columns: repeat(2, 1fr);
+}
+.opt {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.opt.on {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+.sheet-foot {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.sheet-clear {
+  font-weight: 700;
+  padding: 0 4px;
+}
+.sheet-foot .sheet-go {
+  flex: 1;
+  margin-top: 0;
+}
+
+/* Budget slider: ink fill up to the thumb (--fill), grey after it. */
+.slider {
+  display: grid;
+  gap: 6px;
+}
+.slider-val {
+  margin: 0;
+  font-size: 15px;
+}
+.slider-val b {
+  font-size: 18px;
+}
+.slider input {
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  margin: 12px 0;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--ink) var(--fill), var(--line) var(--fill));
+}
+.slider input::-webkit-slider-thumb {
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+.slider input::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--ink);
+}
+.slider-ends {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 13px;
+}

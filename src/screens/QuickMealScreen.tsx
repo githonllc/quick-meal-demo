@@ -1,18 +1,23 @@
 import { useEffect, useState } from 'react'
-import { SORTS } from '../../shared/constants'
+import { DISTANCE_STEPS, SORTS, TIME_STEPS } from '../../shared/constants'
 import { pluralize } from '../../shared/format'
 import type { MealCard as Meal, SearchResponse } from '../../shared/types'
 import { searchMeals } from '../api'
 import { BreakdownSheet } from '../components/BreakdownSheet'
+import { BudgetSheet } from '../components/BudgetSheet'
 import { CuisineTabs } from '../components/CuisineTabs'
 import { FilterChips } from '../components/FilterChips'
+import { FiltersSheet } from '../components/FiltersSheet'
 import type { SheetKind } from '../components/FilterChips'
 import { MealCard } from '../components/MealCard'
 import { Skeleton } from '../components/Skeleton'
+import { StepSheet } from '../components/StepSheet'
+import { useToast } from '../components/Toast'
 import { SlidersIcon, TopBar } from '../components/TopBar'
 import { navigate, useRoute } from '../router'
 import { initialFilters, parseUrl, toQuery, withQuery } from '../state/filters'
 import type { UiFilters } from '../state/filters'
+import { firstSave, saveDefault } from '../state/savedDefault'
 import './quick-meal.css'
 
 // The URL holds the filters. Every change rewrites it, and the fetch follows the URL.
@@ -38,6 +43,8 @@ export function QuickMealScreen() {
   // The answer to one request. data is null when the request failed.
   const [result, setResult] = useState<{ req: string; data: SearchResponse | null } | null>(null)
   const [priced, setPriced] = useState<Meal | null>(null)
+  const [open, setOpen] = useState<SheetKind | null>(null)
+  const { show } = useToast()
 
   // Only rewrites the URL when the start filters differ from it (#9: saved default).
   useEffect(() => {
@@ -57,8 +64,16 @@ export function QuickMealScreen() {
     return () => controller.abort()
   }, [key, req])
 
-  // #9 opens the filter sheets from here.
-  const onOpen = (kind: SheetKind) => void kind
+  const onOpen = (kind: SheetKind) => setOpen(kind)
+  const close = () => setOpen(null)
+
+  // Every way a user applies filters also saves them as the default (design P8).
+  const apply = (f: UiFilters) => {
+    setFilters(f)
+    saveDefault(f)
+    if (firstSave()) show('Saved. Quick Meal will open with these filters.')
+    close()
+  }
 
   // Until the current request answers, show skeletons (not the old list).
   const done = result?.req === req
@@ -121,6 +136,31 @@ export function QuickMealScreen() {
             />
           ))}
         </>
+      )}
+
+      {open === 'filters' && (
+        <FiltersSheet filters={filters} total={data?.total ?? null} onApply={apply} onClose={close} />
+      )}
+      {open === 'budget' && (
+        <BudgetSheet filters={filters} total={data?.total ?? null} onApply={apply} onClose={close} />
+      )}
+      {open === 'time' && (
+        <StepSheet
+          kind="time"
+          steps={TIME_STEPS}
+          value={filters.time}
+          onPick={(time) => apply({ ...filters, time })}
+          onClose={close}
+        />
+      )}
+      {open === 'distance' && (
+        <StepSheet
+          kind="distance"
+          steps={DISTANCE_STEPS}
+          value={filters.distance}
+          onPick={(distance) => apply({ ...filters, distance })}
+          onClose={close}
+        />
       )}
 
       {priced && (
