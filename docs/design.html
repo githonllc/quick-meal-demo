@@ -1,0 +1,727 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quick Meal Demo Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (~760px) with a full-bleed strip of phone mockups that scrolls sideways on small screens. */
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --fg: #17181b;
+  --muted: #5d6068;
+  --line: #e1e3e8;
+  --accent: #d6311f;
+  --accent-soft: #fdecea;
+  --ok: #16723c;
+  --warn: #a8570a;
+  --warn-soft: #fff3e3;
+  --code-bg: #eef0f3;
+  --f-display: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+  --f-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131417; --surface: #1c1d21; --fg: #eceef2; --muted: #a2a6af; --line: #2e3036;
+    --accent: #ff6a55; --accent-soft: #3a1d1a; --ok: #5fd08e; --warn: #f0a650; --warn-soft: #3a2a15; --code-bg: #24262b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131417; --surface: #1c1d21; --fg: #eceef2; --muted: #a2a6af; --line: #2e3036;
+  --accent: #ff6a55; --accent-soft: #3a1d1a; --ok: #5fd08e; --warn: #f0a650; --warn-soft: #3a2a15; --code-bg: #24262b;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 800px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 80px; }
+h1, h2, h3 { font-family: var(--f-display); line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2rem, 5vw, 2.8rem); letter-spacing: -0.02em; }
+h2 { font-size: 1.55rem; letter-spacing: -0.01em; }
+h3 { font-size: 1.1rem; }
+p { margin: 0; }
+a { color: var(--accent); }
+code, .mono { font-family: var(--f-mono); font-size: 0.86em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+.eyebrow { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.muted { color: var(--muted); }
+
+header.top { display: grid; gap: 14px; margin-bottom: 32px; }
+header.top .meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 0.9rem; color: var(--muted); }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 600; padding: 2px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+
+.summary { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px; display: grid; gap: 12px; }
+.summary ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+
+section { margin-top: 56px; display: grid; gap: 16px; }
+section > p, section li { max-width: 68ch; }
+
+/* Phones */
+.strip { margin-top: 36px; overflow-x: auto; padding-bottom: 12px; }
+.strip-inner { display: flex; gap: 22px; width: max-content; padding-inline: max(20px, calc((100vw - 1180px) / 2)); }
+.phone-col { display: grid; gap: 10px; width: 262px; }
+.phone-col .cap { font-size: 0.86rem; color: var(--muted); line-height: 1.4; }
+.phone-col .cap b { color: var(--fg); }
+.phone {
+  --p-bg: #ffffff; --p-fg: #191919; --p-muted: #6b6b6b; --p-line: #e6e6e6; --p-red: #eb3b24; --p-chip: #f1f1f1;
+  position: relative; width: 262px; height: 540px; border-radius: 34px; background: var(--p-bg); color: var(--p-fg);
+  border: 8px solid #1f2024; overflow: hidden; font-family: var(--f-body); font-size: 11px; line-height: 1.35;
+  box-shadow: 0 12px 30px rgba(20, 22, 28, 0.14);
+}
+.phone .sb { height: 22px; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; font-size: 10px; font-weight: 700; }
+.phone svg { display: block; }
+.ph-home-head { background: var(--p-red); color: #fff; padding-bottom: 10px; }
+.ph-home-head .sb { color: #fff; }
+.ph-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 12px; }
+.ph-row .loc { font-weight: 700; font-size: 13px; }
+.ph-dots { display: flex; gap: 6px; }
+.ph-dots span { width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.22); }
+.ph-cats { display: flex; gap: 10px; padding: 8px 10px 4px; overflow: hidden; }
+.ph-cat { display: grid; justify-items: center; gap: 3px; font-size: 9.5px; flex: none; color: #fff; }
+.ph-cat .ic { width: 30px; height: 30px; display: grid; place-items: center; }
+.ph-cat.new .ic { background: #fff; border-radius: 10px; color: var(--p-red); position: relative; }
+.ph-cat.new .ic::after { content: "NEW"; position: absolute; top: -6px; right: -12px; background: #ffd23f; color: #3b2a00; font-size: 6.5px; font-weight: 800; padding: 1px 3px; border-radius: 4px; }
+.ph-cat.new { font-weight: 700; }
+.ph-banner { margin: 8px 10px 0; height: 92px; border-radius: 12px; background: linear-gradient(135deg, #c72c18, #f26a3d); display: grid; place-items: center; color: #fff; font-family: var(--f-display); font-weight: 700; font-size: 16px; text-align: center; line-height: 1.05; }
+.ph-sec { padding: 10px 12px 4px; font-weight: 700; font-size: 13px; }
+.ph-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 12px; }
+.ph-chip { background: var(--p-chip); border-radius: 999px; padding: 5px 10px; font-size: 10px; font-weight: 600; }
+.ph-search { position: absolute; left: 10px; right: 10px; bottom: 12px; background: #fff; border-radius: 999px; box-shadow: 0 2px 10px rgba(0,0,0,0.15); padding: 8px 12px; font-size: 11px; font-weight: 600; display: flex; gap: 6px; align-items: center; }
+.tap { position: absolute; width: 38px; height: 38px; border-radius: 50%; border: 2px solid #ffd23f; box-shadow: 0 0 0 4px rgba(255, 210, 63, 0.35); pointer-events: none; }
+
+.ph-bar { display: flex; align-items: center; justify-content: space-between; padding: 6px 12px 8px; }
+.ph-bar .t { font-weight: 700; font-size: 13px; }
+.ph-sub { padding: 0 12px 6px; color: var(--p-muted); font-size: 10px; }
+.ph-filters { display: flex; gap: 5px; padding: 4px 10px 8px; overflow: hidden; border-bottom: 1px solid var(--p-line); }
+.ph-f { flex: none; display: inline-flex; align-items: center; gap: 3px; border: 1px solid var(--p-line); border-radius: 999px; padding: 4px 8px; font-size: 9.5px; font-weight: 600; white-space: nowrap; }
+.ph-f.on { background: #191919; color: #fff; border-color: #191919; }
+.ph-f .badge { background: var(--p-red); color: #fff; border-radius: 999px; font-size: 8px; padding: 0 4px; font-weight: 700; }
+.ph-count { padding: 8px 12px 2px; font-size: 10px; color: var(--p-muted); }
+.ph-card { padding: 6px 12px 8px; }
+.ph-img { height: 74px; border-radius: 10px; }
+.img1 { background: linear-gradient(135deg, #f2b45a, #c8612d); }
+.img2 { background: linear-gradient(135deg, #9ccf7a, #3f8f4e); }
+.img3 { background: linear-gradient(135deg, #e7765c, #9c2f2b); }
+.img4 { background: linear-gradient(135deg, #f0d08c, #b88a3a); }
+.ph-name { font-weight: 700; font-size: 11.5px; margin-top: 5px; }
+.ph-meta { color: var(--p-muted); font-size: 9.5px; }
+.ph-fit { margin-top: 3px; display: flex; justify-content: space-between; gap: 6px; font-size: 9.5px; }
+.ph-fit .ok { color: #16723c; font-weight: 700; }
+.ph-fit .miss { color: #a8570a; font-weight: 700; background: #fff3e3; padding: 0 5px; border-radius: 4px; }
+
+.ph-dim { position: absolute; inset: 0; background: rgba(0,0,0,0.38); }
+.ph-sheet { position: absolute; left: 0; right: 0; bottom: 0; top: 64px; background: #fff; border-radius: 18px 18px 0 0; padding: 12px 12px 0; display: flex; flex-direction: column; gap: 8px; }
+.ph-sheet h4 { margin: 0; font-family: var(--f-display); font-size: 17px; }
+.ph-grp { border-top: 1px solid var(--p-line); padding-top: 7px; display: grid; gap: 5px; }
+.ph-grp .gt { font-weight: 700; font-size: 11px; }
+.ph-grp .gd { color: var(--p-muted); font-size: 9px; }
+.ph-opts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.ph-o { border: 1px solid var(--p-line); border-radius: 999px; text-align: center; padding: 4px 0; font-size: 9px; font-weight: 600; }
+.ph-o.on { background: #191919; color: #fff; border-color: #191919; }
+.ph-slider { display: grid; gap: 4px; padding-top: 2px; }
+.ph-sl-val { font-size: 10px; }
+.ph-sl-val b { font-size: 12px; }
+.ph-track { position: relative; height: 4px; background: var(--p-line); border-radius: 2px; margin: 8px 7px; }
+.ph-fill { position: absolute; left: 0; top: 0; bottom: 0; background: #191919; border-radius: 2px; }
+.ph-thumb { position: absolute; top: 50%; width: 18px; height: 18px; margin-left: -9px; margin-top: -9px; border-radius: 50%; background: #fff; border: 2px solid #191919; box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
+.ph-sl-ends { display: flex; justify-content: space-between; color: var(--p-muted); font-size: 8.5px; }
+.decision .call.ok { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
+.ph-foot { margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 8px 0 14px; border-top: 1px solid var(--p-line); }
+.ph-foot .clr { font-weight: 700; font-size: 11px; padding: 0 6px; }
+.ph-foot .go { flex: 1; background: var(--p-red); color: #fff; border-radius: 999px; text-align: center; font-weight: 700; padding: 9px 0; font-size: 11px; }
+
+.ph-empty { margin: 10px 12px 4px; background: #f6f6f6; border-radius: 12px; padding: 10px; display: grid; gap: 6px; }
+.ph-empty b { font-size: 12px; }
+.ph-relax { display: flex; flex-wrap: wrap; gap: 5px; }
+.ph-relax span { border: 1px solid #191919; border-radius: 999px; padding: 3px 8px; font-size: 9px; font-weight: 700; background: #fff; }
+.ph-near { padding: 6px 12px 0; font-weight: 700; font-size: 11.5px; }
+.ph-mini { display: flex; gap: 8px; padding: 6px 12px; align-items: center; }
+.ph-mini .ph-img { width: 50px; height: 50px; flex: none; border-radius: 8px; }
+.ph-mini > div:last-child { min-width: 0; flex: 1; }
+
+/* Decisions */
+.decision { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; display: grid; gap: 10px; }
+.decision .head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.decision .id { font-family: var(--f-mono); font-size: 0.78rem; color: var(--muted); }
+.decision .call { display: inline-flex; font-size: 0.74rem; font-weight: 700; padding: 1px 9px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); }
+.decision dl { margin: 0; display: grid; grid-template-columns: 7.5rem 1fr; gap: 6px 14px; }
+.decision dt { font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; padding-top: 3px; }
+.decision dd { margin: 0; min-width: 0; }
+@media (max-width: 560px) { .decision dl { grid-template-columns: 1fr; gap: 2px; } .decision dd { margin-bottom: 8px; } }
+
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700; background: var(--code-bg); }
+tr:last-child td { border-bottom: 0; }
+td.num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+td.zero { color: var(--warn); font-weight: 700; }
+
+/* Receipt for all-in price */
+.receipt { font-family: var(--f-mono); font-size: 0.88rem; background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; padding: 14px 18px; max-width: 380px; display: grid; gap: 3px; font-variant-numeric: tabular-nums; }
+.receipt div { display: flex; justify-content: space-between; gap: 16px; }
+.receipt .tot { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 6px; font-weight: 500; color: var(--accent); }
+
+pre { margin: 0; background: var(--code-bg); border-radius: 10px; padding: 14px 16px; overflow-x: auto; font-family: var(--f-mono); font-size: 0.8rem; line-height: 1.55; }
+ol.steps { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
+ul.plain { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.qs { counter-reset: q; display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.qs li { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; }
+.qs li .ref { font-family: var(--f-mono); font-size: 0.76rem; color: var(--muted); margin-right: 6px; }
+footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
+/* Meal cards, menu page, breakdown sheet */
+.ph-sheet-body { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 8px; }
+.ph-opts.cu .ph-o { font-size: 8.5px; }
+.ph-dt { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; margin-top: 5px; }
+.ph-dt .ph-name { margin: 0; }
+.like { display: inline-flex; align-items: center; gap: 2px; font-size: 9.5px; color: var(--p-muted); white-space: nowrap; }
+.ph-rest-l { font-size: 9.5px; color: var(--p-fg); font-weight: 600; }
+.ph-rest-l span { color: var(--p-muted); font-weight: 400; }
+.ph-more { margin-top: 4px; font-size: 9.5px; font-weight: 700; color: #191919; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-hero { height: 64px; background: linear-gradient(135deg, #f2b45a, #c8612d); }
+.ph-rest { padding: 7px 12px 6px; }
+.ph-rest .ph-name { margin: 0; font-size: 13px; }
+.ph-bud { margin: 0 12px; padding: 6px 9px; background: #f4f4f4; border-radius: 8px; font-size: 9.5px; display: flex; justify-content: space-between; }
+.ph-bud b { color: #191919; }
+.ph-bud u { font-weight: 700; text-decoration: none; }
+.ph-msec { padding: 9px 12px 3px; font-weight: 700; font-size: 11px; }
+.ph-item { display: flex; gap: 8px; padding: 6px 12px; align-items: center; border-bottom: 1px solid var(--p-line); }
+.ph-item .th { width: 36px; height: 36px; border-radius: 7px; flex: none; }
+.ph-item .info { flex: 1; min-width: 0; }
+.ph-item .nm { font-weight: 700; font-size: 10.5px; }
+.ph-item .pr { text-align: right; font-size: 9.5px; white-space: nowrap; display: grid; gap: 1px; }
+.ph-item .pr .mp { color: var(--p-muted); }
+.ph-item .pr .ok { color: #16723c; font-weight: 700; }
+.ph-item .pr .ov { color: #a8570a; font-weight: 700; }
+.ph-sheet.low { top: 150px; gap: 6px; }
+.ph-rc { display: grid; gap: 3px; font-size: 10px; font-variant-numeric: tabular-nums; }
+.ph-rc div { display: flex; justify-content: space-between; }
+.ph-rc .hot { color: #a8570a; font-weight: 700; }
+.ph-rc .tt { border-top: 1px solid var(--p-line); padding-top: 5px; margin-top: 3px; font-weight: 800; font-size: 11.5px; }
+.ph-note { font-size: 9px; color: var(--p-muted); }
+.ph-tabs { display: flex; gap: 13px; padding: 0 12px; border-bottom: 1px solid var(--p-line); overflow: hidden; font-size: 10.5px; font-weight: 600; color: var(--p-muted); }
+.ph-tabs span { flex: none; white-space: nowrap; padding: 5px 0 6px; }
+.ph-tabs .on { color: #191919; box-shadow: inset 0 -2px 0 #191919; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">MSSM final assignment · Demo design</span>
+    <h1>Quick Meal Demo Design</h1>
+    <p class="muted" style="max-width:62ch">A mobile web demo of a DoorDash concept. Built for university students in the Bay Area and across the US. A student opens Quick Meal, sets a budget, time and distance, and sees which meals fit. If nothing fits, the app shows the closest meals and a one-tap way to loosen the search.</p>
+    <div class="meta"><span class="pill">Final design</span><span>Version 26</span><span>Sep 30, 2026</span><span>Concept mockups, not affiliated with DoorDash</span></div>
+  </header>
+
+  <div class="summary">
+    <span class="eyebrow">Design in short</span>
+    <ul>
+      <li>Screens: a thin Home, the <b>Quick Meal</b> list, a <b>Filters</b> sheet, a restaurant <b>menu in budget view</b>, and a <b>price breakdown</b> sheet.</li>
+      <li>Budget means the <b>estimated all-in price of one meal</b>: food, fees, tax and tip. This links the demo to our Week 3 top concept, Budget-First Ordering.</li>
+      <li>Results are <b>meals</b>, one per restaurant. Other meals that fit show as "+2 more under $20" and open the restaurant's menu.</li>
+      <li><b>Cuisine tabs</b> across the top (All, Chinese, Indian …), one at a time. Filters: a budget <b>slider</b> plus time and distance steps.</li>
+      <li>No match is a designed state. It shows the <b>closest meals</b>, says how each one misses, and offers chips like "Budget up to $17 · 1 result".</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Mockups -->
+<div class="strip" aria-label="Mockups of the six key screens">
+  <div class="strip-inner">
+
+    <!-- 1 Home -->
+    <div class="phone-col">
+      <div class="phone">
+        <div class="ph-home-head">
+          <div class="sb"><span>16:40</span><span>●●● ▮</span></div>
+          <div class="ph-row"><span class="loc">SJSU ▾</span><div class="ph-dots"><span></span><span></span><span></span></div></div>
+          <div class="ph-cats">
+            <div class="ph-cat new"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg></div>Quick Meal</div>
+            <div class="ph-cat"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M3 12V3h9l9 9-9 9-9-9z"/><circle cx="7.5" cy="7.5" r="1.5" fill="#fff"/></svg></div>Deals</div>
+            <div class="ph-cat"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 9h16l-2 11H6L4 9z"/><path d="M9 9a3 3 0 0 1 6 0"/></svg></div>Grocery</div>
+            <div class="ph-cat"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="6" y="3" width="12" height="18" rx="2"/><circle cx="12" cy="12" r="3"/></svg></div>Convenience</div>
+            <div class="ph-cat"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></div>Reserve</div>
+          </div>
+          <div class="ph-banner">$0 delivery<br>on your first<br>Quick Meal</div>
+        </div>
+        <div class="ph-sec">What can we get you?</div>
+        <div class="ph-chips"><span class="ph-chip">Chinese</span><span class="ph-chip">Healthy</span><span class="ph-chip">Pizza</span><span class="ph-chip">Mexican</span><span class="ph-chip">Fast Food</span><span class="ph-chip">Burgers</span></div>
+        <div class="ph-sec">Near campus</div>
+        <div class="ph-card" style="display:flex; gap:8px; padding-top:2px">
+          <div style="flex:1"><div class="ph-img img1" style="height:56px"></div><div class="ph-name" style="font-size:10px">Paseo Rice Bowl</div><div class="ph-meta">4.6 ★ · 0.4 mi · 18 min</div></div>
+          <div style="flex:1"><div class="ph-img img2" style="height:56px"></div><div class="ph-name" style="font-size:10px">Guadalupe Greens</div><div class="ph-meta">4.5 ★ · 0.7 mi · 22 min</div></div>
+        </div>
+        <div class="ph-search"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#191919" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Search DoorDash</div>
+        <div class="tap" style="left:14px; top:66px"></div>
+      </div>
+      <p class="cap"><b>1 · Home.</b> Quick Meal is the first item in the category row, with a white tile and a NEW tag. A cuisine chip also opens Quick Meal with that cuisine tab selected.</p>
+    </div>
+
+    <!-- 2 Results -->
+    <div class="phone-col">
+      <div class="phone">
+        <div class="sb"><span>16:43</span><span>●●● ▮</span></div>
+        <div class="ph-bar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#191919" stroke-width="2.4"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+          <span class="t">Quick Meal</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#191919" stroke-width="2.4"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+        </div>
+        <div class="ph-sub">Deliver to SJSU · Now</div>
+        <div class="ph-filters">
+          <span class="ph-f"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#191919" stroke-width="3"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/></svg>Filters <span class="badge">2</span></span>
+          <span class="ph-f on">Up to $20 ▾</span>
+          <span class="ph-f on">30 min ▾</span>
+          <span class="ph-f">Distance ▾</span>
+        </div>
+        <div class="ph-tabs"><span class="on">All</span><span>Chinese</span><span>Indian</span><span>Mexican</span><span>Pizza</span><span>Burgers</span><span>Healthy</span></div>
+        <div class="ph-count">6 places have a meal that fits · best match</div>
+        <div class="ph-card">
+          <div class="ph-img img1"></div>
+          <div class="ph-dt"><span class="ph-name">Chicken Rice Bowl</span><span class="like"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21h4V9H2v12zm20-11a2 2 0 0 0-2-2h-6.3l1-4.6v-.3c0-.4-.2-.8-.4-1.1L13.2 1 6.6 7.6C6.2 8 6 8.5 6 9v10c0 1.1.9 2 2 2h9c.8 0 1.5-.5 1.8-1.2l3-7.1c.1-.2.2-.5.2-.7v-2z"/></svg>88% (120)</span></div>
+          <div class="ph-rest-l">Paseo Rice Bowl <span>· 4.6 ★ (800+)</span></div>
+          <div class="ph-fit"><span>Est. <b>$18.73</b> all-in · 18 min · 0.4 mi</span><span class="ok">Fits</span></div>
+          <div class="ph-more">+2 more under $20: Tofu Rice Bowl, Spam Musubi Plate ›</div>
+        </div>
+        <div class="ph-card">
+          <div class="ph-img img3"></div>
+          <div class="ph-dt"><span class="ph-name">Dan Dan Noodles</span><span class="like"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21h4V9H2v12zm20-11a2 2 0 0 0-2-2h-6.3l1-4.6v-.3c0-.4-.2-.8-.4-1.1L13.2 1 6.6 7.6C6.2 8 6 8.5 6 9v10c0 1.1.9 2 2 2h9c.8 0 1.5-.5 1.8-1.2l3-7.1c.1-.2.2-.5.2-.7v-2z"/></svg>91% (240)</span></div>
+          <div class="ph-rest-l">4th St. Noodle Bar <span>· 4.4 ★ (1k+)</span></div>
+          <div class="ph-fit"><span>Est. <b>$15.90</b> all-in · 19 min · 0.3 mi</span><span class="ok">Fits</span></div>
+          <div class="ph-more">+1 more under $20: Wonton Soup ›</div>
+        </div>
+      </div>
+      <p class="cap"><b>2 · Meal list.</b> Filter chips first, then cuisine tabs that split the filtered meals, starting at All. Each card is one meal: dish photo, dish name with its like rate, then the restaurant with its stars. One meal per place. "+N more" names the other meals that fit.</p>
+    </div>
+
+    <!-- 3 Filters sheet -->
+    <div class="phone-col">
+      <div class="phone">
+        <div class="sb"><span>16:45</span><span>●●● ▮</span></div>
+        <div class="ph-bar"><span class="t">&nbsp;</span></div>
+        <div class="ph-dim"></div>
+        <div class="ph-sheet">
+          <h4>Filters</h4>
+          <div class="ph-sheet-body">
+            <div class="ph-grp">
+              <span class="gt">Budget per meal</span>
+              <span class="gd">Estimated all-in: food, fees, tax and tip</span>
+              <div class="ph-slider" aria-hidden="true">
+                <div class="ph-sl-val">Up to <b>$20</b></div>
+                <div class="ph-track"><div class="ph-fill" style="width:33.3%"></div><div class="ph-thumb" style="left:33.3%"></div></div>
+                <div class="ph-sl-ends"><span>$10</span><span>$40+ (any)</span></div>
+              </div>
+            </div>
+            <div class="ph-grp">
+              <span class="gt">Delivery time</span>
+              <div class="ph-opts"><span class="ph-o">15 min</span><span class="ph-o">20 min</span><span class="ph-o on">30 min</span><span class="ph-o">45 min</span></div>
+            </div>
+            <div class="ph-grp">
+              <span class="gt">Distance</span>
+              <div class="ph-opts"><span class="ph-o">0.5 mi</span><span class="ph-o">1 mi</span><span class="ph-o">2 mi</span><span class="ph-o">3 mi</span></div>
+            </div>
+            <div class="ph-grp">
+              <span class="gt">Sort by</span>
+              <div class="ph-opts" style="grid-template-columns: repeat(2, 1fr)"><span class="ph-o on">Best match</span><span class="ph-o">Lowest price</span><span class="ph-o">Fastest</span><span class="ph-o">Nearest</span></div>
+            </div>
+          </div>
+          <div class="ph-foot"><span class="clr">Clear all</span><span class="go">Show 6 results</span></div>
+        </div>
+      </div>
+      <p class="cap"><b>3 · Filters sheet.</b> Opens from the top-right icon or the Filters chip. Budget slider, time and distance steps, and sort. Cuisine is not here; it lives in the tabs. The button count updates as you go.</p>
+    </div>
+
+    <!-- 4 No match -->
+    <div class="phone-col">
+      <div class="phone">
+        <div class="sb"><span>16:47</span><span>●●● ▮</span></div>
+        <div class="ph-bar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#191919" stroke-width="2.4"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+          <span class="t">Quick Meal</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#191919" stroke-width="2.4"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+        </div>
+        <div class="ph-filters">
+          <span class="ph-f">Filters <span class="badge">3</span></span>
+          <span class="ph-f on">Up to $15 ▾</span>
+          <span class="ph-f on">15 min ▾</span>
+          <span class="ph-f on">0.5 mi ▾</span>
+        </div>
+        <div class="ph-tabs"><span class="on">All</span><span>Chinese</span><span>Indian</span><span>Mexican</span><span>Pizza</span><span>Burgers</span><span>Healthy</span></div>
+        <div class="ph-empty">
+          <b>No exact matches</b>
+          <span class="ph-meta" style="color:#555">Nothing fits a $15 budget, 15 min and 0.5 mi. Here are the closest meals.</span>
+          <div class="ph-relax"><span>Budget up to $17 · 1 result</span><span>Time up to 20 min · 1 result</span></div>
+        </div>
+        <div class="ph-near">Closest to your search</div>
+        <div class="ph-mini"><div class="ph-img img3"></div><div><div class="ph-name" style="margin:0">Pork Dumplings (12)</div><div class="ph-meta">Taylor St. Dumplings · 14 min · 0.4 mi</div><div class="ph-meta">Est. <b style="color:#191919">$16.40</b> all-in</div><div class="ph-fit"><span class="miss">$1.40 over budget</span></div></div></div>
+        <div class="ph-mini"><div class="ph-img img1"></div><div><div class="ph-name" style="margin:0">Wonton Soup</div><div class="ph-meta">4th St. Noodle Bar · 19 min · 0.3 mi</div><div class="ph-meta">Est. <b style="color:#191919">$14.60</b> all-in</div><div class="ph-fit"><span class="miss">4 min slower</span></div></div></div>
+        <div class="ph-mini"><div class="ph-img img4"></div><div><div class="ph-name" style="margin:0">Chicken Tacos (2)</div><div class="ph-meta">Santa Clara Taco Co. · 16 min · 0.9 mi</div><div class="ph-meta">Est. <b style="color:#191919">$14.90</b> all-in</div><div class="ph-fit"><span class="miss">1 min slower · 0.4 mi farther</span></div></div></div>
+      </div>
+      <p class="cap"><b>4 · No match.</b> A short message, one-tap relax chips, and the closest meals. Each card says exactly how it misses.</p>
+    </div>
+
+    <!-- 5 Menu in budget view -->
+    <div class="phone-col">
+      <div class="phone">
+        <div class="sb"><span>16:48</span><span>●●● ▮</span></div>
+        <div class="ph-hero"></div>
+        <div class="ph-rest">
+          <div class="ph-name">Paseo Rice Bowl</div>
+          <div class="ph-meta">4.6 ★ (800+) · 0.4 mi · 18 min</div>
+        </div>
+        <div class="ph-bud"><span>Your budget: <b>up to $20</b> est. all-in</span><u>Change</u></div>
+        <div class="ph-msec">Under your budget (3)</div>
+        <div class="ph-item"><div class="th img1"></div><div class="info"><div class="nm">Chicken Rice Bowl</div><span class="like"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21h4V9H2v12zm20-11a2 2 0 0 0-2-2h-6.3l1-4.6v-.3c0-.4-.2-.8-.4-1.1L13.2 1 6.6 7.6C6.2 8 6 8.5 6 9v10c0 1.1.9 2 2 2h9c.8 0 1.5-.5 1.8-1.2l3-7.1c.1-.2.2-.5.2-.7v-2z"/></svg>88%</span></div><div class="pr"><span class="mp">$12.00</span><span>Est. <b>$18.73</b></span><span class="ok">Fits</span></div></div>
+        <div class="ph-item"><div class="th img2"></div><div class="info"><div class="nm">Tofu Rice Bowl</div><span class="like"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21h4V9H2v12zm20-11a2 2 0 0 0-2-2h-6.3l1-4.6v-.3c0-.4-.2-.8-.4-1.1L13.2 1 6.6 7.6C6.2 8 6 8.5 6 9v10c0 1.1.9 2 2 2h9c.8 0 1.5-.5 1.8-1.2l3-7.1c.1-.2.2-.5.2-.7v-2z"/></svg>82%</span></div><div class="pr"><span class="mp">$10.75</span><span>Est. <b>$19.48</b></span><span class="ok">Fits</span></div></div>
+        <div class="ph-item"><div class="th img4"></div><div class="info"><div class="nm">Spam Musubi Plate</div><span class="like"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21h4V9H2v12zm20-11a2 2 0 0 0-2-2h-6.3l1-4.6v-.3c0-.4-.2-.8-.4-1.1L13.2 1 6.6 7.6C6.2 8 6 8.5 6 9v10c0 1.1.9 2 2 2h9c.8 0 1.5-.5 1.8-1.2l3-7.1c.1-.2.2-.5.2-.7v-2z"/></svg>79%</span></div><div class="pr"><span class="mp">$8.00</span><span>Est. <b>$15.65</b></span><span class="ok">Fits</span></div></div>
+        <div class="ph-msec">Over your budget (2)</div>
+        <div class="ph-item"><div class="th img2"></div><div class="info"><div class="nm">Veggie Bowl</div><span class="like"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21h4V9H2v12zm20-11a2 2 0 0 0-2-2h-6.3l1-4.6v-.3c0-.4-.2-.8-.4-1.1L13.2 1 6.6 7.6C6.2 8 6 8.5 6 9v10c0 1.1.9 2 2 2h9c.8 0 1.5-.5 1.8-1.2l3-7.1c.1-.2.2-.5.2-.7v-2z"/></svg>85%</span></div><div class="pr"><span class="mp">$11.50</span><span>Est. <b>$20.54</b></span><span class="ov">$0.54 over</span></div></div>
+        <div class="ph-item"><div class="th img3"></div><div class="info"><div class="nm">Salmon Poke Bowl</div><span class="like"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21h4V9H2v12zm20-11a2 2 0 0 0-2-2h-6.3l1-4.6v-.3c0-.4-.2-.8-.4-1.1L13.2 1 6.6 7.6C6.2 8 6 8.5 6 9v10c0 1.1.9 2 2 2h9c.8 0 1.5-.5 1.8-1.2l3-7.1c.1-.2.2-.5.2-.7v-2z"/></svg>91%</span></div><div class="pr"><span class="mp">$15.50</span><span>Est. <b>$23.62</b></span><span class="ov">$3.62 over</span></div></div>
+        <div class="tap" style="left:188px; top:234px"></div>
+      </div>
+      <p class="cap"><b>5 · Menu in budget view.</b> Opens from a card or its "+N more" line. Meals that fit come first, in the same order as the list, so the card's meal (Chicken Rice Bowl) is at the top. Meals just over the budget follow, tagged by how much. Next, the user taps the Tofu Rice Bowl price.</p>
+    </div>
+
+    <!-- 6 Price breakdown -->
+    <div class="phone-col">
+      <div class="phone">
+        <div class="sb"><span>16:49</span><span>●●● ▮</span></div>
+        <div class="ph-hero"></div>
+        <div class="ph-rest"><div class="ph-name">Paseo Rice Bowl</div></div>
+        <div class="ph-dim"></div>
+        <div class="ph-sheet low">
+          <h4>Tofu Rice Bowl</h4>
+          <span class="ph-note" style="margin-top:-4px">Paseo Rice Bowl</span>
+          <div class="ph-grp">
+            <span class="gt">Estimated all-in price</span>
+            <div class="ph-rc">
+              <div><span>Tofu Rice Bowl</span><span>$10.75</span></div>
+              <div><span>Delivery fee</span><span>$1.99</span></div>
+              <div class="hot"><span>Small-order fee (food under $12)</span><span>$2.50</span></div>
+              <div><span>Service fee (15%)</span><span>$1.61</span></div>
+              <div><span>Tax (9.5%)</span><span>$1.02</span></div>
+              <div><span>Tip (15%)</span><span>$1.61</span></div>
+              <div class="tt"><span>Est. all-in</span><span>$19.48</span></div>
+            </div>
+            <span class="ph-note">Tip is 15% by default. The final price is shown at checkout.</span>
+          </div>
+          <div class="ph-foot"><span class="go">Add to cart · Est. $19.48</span></div>
+        </div>
+      </div>
+      <p class="cap"><b>6 · Price breakdown.</b> Opened by tapping the Tofu Rice Bowl price on screen 5. Any price on a card or the menu opens this sheet. This bowl is $1.25 cheaper on the menu than the Chicken Rice Bowl, but $0.75 more all-in because of the small-order fee.</p>
+    </div>
+
+  </div>
+</div>
+
+<div class="wrap" style="padding-block: 0 80px">
+
+  <section>
+    <span class="eyebrow">Product decisions</span>
+    <h2>How Quick Meal works</h2>
+    <p class="muted">These hold for the real product, in any city.</p>
+
+    <div class="decision">
+      <div class="head"><span class="id">P1</span><h3>Entry point</h3></div>
+      <dl>
+        <dt>Decision</dt><dd>First item in the Home category row, left of Deals. White tile, red lightning icon, a NEW tag. A Home cuisine chip also opens Quick Meal with that cuisine tab selected.</dd>
+        <dt>Why</dt><dd>The row scrolls sideways and only about five items fit on screen. First place is always visible, and a white tile stands out on red.</dd>
+      </dl>
+    </div>
+
+    <div class="decision">
+      <div class="head"><span class="id">P2</span><h3>Filter controls</h3></div>
+      <dl>
+        <dt>Layout</dt><dd>Two rows under the title. First the chip row: Filters · Budget · Time · Distance. Then the cuisine tabs, right above the list.</dd>
+        <dt>Why this order</dt><dd>Filters set the pool of meals that fit. A tab then shows one cuisine from that pool. Tabs sit next to the list they switch, the usual place for tabs. Changing a filter keeps the current tab.</dd>
+        <dt>Not DoorDash's order</dt><dd>DoorDash puts store-type tabs above filters because the tab decides which filters apply. Here the filters decide which meals fit, and the cuisine tab only splits them, so filters go first. With filters under the tabs, they would look like they belong to one tab, and users would wonder whether switching tabs keeps or resets them. With filters on top, it is clear they stay the same across every tab.</dd>
+        <dt>Budget</dt><dd>Slider for the maximum all-in price per meal. Range $10 to $40, in $1 steps. The value shows above the thumb: "Up to $20". The far right end reads "$40+ (any)" and means no budget filter.</dd>
+        <dt>Time</dt><dd>Steps: 15 · 20 · 30 · 45 min</dd>
+        <dt>Distance</dt><dd>Steps depend on the user's location. A dense area like downtown San Jose gets 0.5 · 1 · 2 · 3 mi. A spread-out suburb gets 1 · 2 · 3 · 5 mi.</dd>
+        <dt>Cuisine</dt><dd>Tabs: All · Chinese · Indian · Mexican · Pizza · Burgers · Healthy · Fast Food · Sushi. One at a time; All means any cuisine. The row scrolls sideways. A place can carry several tags, since Healthy and Fast Food are tags rather than cuisines, so one place can appear under more than one tab. Tabs show no counts. The Filters badge does not count the tab, because the selected tab is already visible. The count on "Show N results" is for the current tab, the same list the user will see.</dd>
+        <dt>Sort</dt><dd>Best match · Lowest price · Fastest · Nearest. Only in the full sheet.</dd>
+        <dt>Chip tap</dt><dd>Each chip opens a small sheet for that one filter. Time and Distance apply at once when you pick a step. Budget shows a "Show N results" button, so a drag does not reload the list on every dollar. A tab applies at once.</dd>
+        <dt>Live count</dt><dd>While you drag, the count on the button updates after a 150 ms pause, and again when you let go.</dd>
+        <dt>Why</dt><dd>Budget is a number students already have in mind, often not a round one, so a slider fits it. Time and distance are rough choices, so a few steps are faster to tap. Cuisine answers "what am I in the mood for", which usually has one answer. A tab makes that one tap instead of three.</dd>
+      </dl>
+    </div>
+
+    <div class="decision">
+      <div class="head"><span class="id">P3</span><h3>The "Filters" chip</h3></div>
+      <dl>
+        <dt>Decision</dt><dd>The first chip shows a sliders icon plus "Filters", with a badge for the active count. It opens the full Filters sheet, the same as the top-right icon.</dd>
+        <dt>Why</dt><dd>On most apps "All" means "no filter", so a chip named "All" that opens a sheet would surprise people. "Filters 2" also shows at a glance how many filters are on.</dd>
+      </dl>
+    </div>
+
+    <div class="decision">
+      <div class="head"><span class="id">P4</span><h3>Budget is the all-in price</h3></div>
+      <dl>
+        <dt>Decision</dt><dd>Budget is the all-in price of one meal: the item, delivery fee, small-order fee, service fee, tax and tip. Every card and menu row shows it. Tap a price to see the breakdown (screen 6). Tax follows the restaurant's address. The tip is 15% by default.</dd>
+        <dt>Small-order fee</dt><dd>Some places charge a fee when the food costs less than a minimum. A single cheap meal often hits it, so it is part of the all-in price. It can make a cheaper menu item cost more: the $10.75 Tofu Rice Bowl comes to $19.48, more than the $12.00 Chicken Rice Bowl at $18.73.</dd>
+        <dt>Why</dt><dd>This is our Week 3 top concept, Budget-First Ordering. Students set a budget before they open the app but see the real total only at checkout. One interviewee put it as "the total jumped from like $13 to $24". A menu-price filter would repeat that problem.</dd>
+        <dt>Label</dt><dd>Cards say "Est. $18.73 all-in". The slider header says "Estimated all-in: food, fees, tax and tip". The breakdown is titled "Estimated all-in price". "Out-the-door price" is longer and comes from car buying.</dd>
+        <dt>Why "Est."</dt><dd>The price cannot be exact before checkout. The tip is the user's choice, the delivery and service fees can vary, and tax is estimated. "Est." keeps the number honest. It still shows cents, so it compares cleanly with the budget.</dd>
+      </dl>
+      <div class="receipt" aria-label="Example estimated all-in price breakdown">
+        <div style="font-weight:500">Estimated all-in price</div>
+        <div><span>Chicken Rice Bowl</span><span>$12.00</span></div>
+        <div><span>Delivery fee</span><span>$1.99</span></div>
+        <div><span>Small-order fee (food under $12)</span><span>$0.00</span></div>
+        <div><span>Service fee (15%, no DashPass)</span><span>$1.80</span></div>
+        <div><span>Tax (9.5%, by restaurant location)</span><span>$1.14</span></div>
+        <div><span>Tip (15%)</span><span>$1.80</span></div>
+        <div class="tot"><span>Est. all-in</span><span>$18.73</span></div>
+        <div class="muted" style="font-size:0.8rem">Tip is 15% by default. The final price is shown at checkout.</div>
+      </div>
+      <p class="muted" style="font-size:0.88rem">A $12.00 menu price becomes $18.73. The fee and tax values in this example are listed in D4.</p>
+    </div>
+
+    <div class="decision">
+      <div class="head"><span class="id">P5</span><h3>Results are meals, one per place</h3></div>
+      <dl>
+        <dt>Decision</dt><dd>Each result card is one meal. Dish photo on top. Then the dish name with its like rate, the restaurant with its star rating, and the est. all-in price, time, distance and "Fits".</dd>
+        <dt>Why meals</dt><dd>The budget is per meal, so the meal is what the student is choosing. An all-in price belongs to a dish, not to a place.</dd>
+        <dt>One per place</dt><dd>Each restaurant shows one lead meal. Its other meals that fit are named under it: "+2 more under $20: Tofu Rice Bowl, Spam Musubi Plate ›". The count reads "6 places have a meal that fits".</dd>
+        <dt>Why one</dt><dd>If every fitting meal were listed, one cheap place could fill the screen with five bowls. One per place keeps the list varied and quick to scan.</dd>
+        <dt>Lead meal</dt><dd>The card shows the first meal of that restaurant's menu in budget view (P6). One ordering rule serves both places. With Best match, Fastest or Nearest: most-liked first. With Lowest price: lowest est. all-in price first. With no budget set, the line reads "+4 more on the menu".</dd>
+        <dt>Other meals</dt><dd>Two ways, both one step. Read the names in the "+N more" line without leaving the list. Or tap the line or the card to open that restaurant's menu in budget view (P6).</dd>
+        <dt>Ratings</dt><dd>Two kinds, shown apart. The dish gets a thumbs-up rate and count, "88% (120)", next to its name. The restaurant gets stars, "4.6 ★ (800+)", next to its name. Different icon, different line, so they do not mix. The like rate helps pick the meal; the stars help trust the place.</dd>
+      </dl>
+    </div>
+
+    <div class="decision">
+      <div class="head"><span class="id">P6</span><h3>Restaurant menu in budget view</h3></div>
+      <dl>
+        <dt>Decision</dt><dd>Tapping a card or its "+N more" line opens that restaurant's full menu. Nothing is highlighted. The meal from the card is simply the first item, because the card always shows the first meal of this view.</dd>
+        <dt>Layout</dt><dd>A budget bar on top: "Your budget: up to $20 est. all-in · Change". Change opens the budget sheet. Then "Under your budget (3)", in the current sort order: most-liked first, or cheapest first with Lowest price. Then "Over your budget (2)", smallest overage first, each tagged like "$0.54 over". Every row shows the dish, its like rate, the menu price and the est. all-in price.</dd>
+        <dt>Why one page</dt><dd>The student sees what fits and also what is just over. A $0.54 overage may be worth it, and a separate "fits only" list would hide it. It also keeps the restaurant's real menu as the single place to browse dishes.</dd>
+        <dt>No budget</dt><dd>The full menu in one list, in the same sort order, with an est. all-in price on every row and no sections.</dd>
+        <dt>Example</dt><dd>At Paseo Rice Bowl, the $11.50 Veggie Bowl is over a $20 budget while the $12.00 Chicken Rice Bowl fits. The small-order fee explains the gap, and tapping the price shows it.</dd>
+      </dl>
+    </div>
+
+    <div class="decision">
+      <div class="head"><span class="id">P7</span><h3>Time and distance work together</h3></div>
+      <dl>
+        <dt>Decision</dt><dd>Delivery time and distance are separate filters. You can set one, both or neither. A place must pass every filter that is on. Setting one never clears the other.</dd>
+        <dt>Why</dt><dd>They measure different things. Delivery time is cooking time plus wait plus travel, so a close place can be slow and a farther one can be fast. Making them exclusive would quietly clear one filter when you set the other, and add a special rule to the page, the URL and the API.</dd>
+        <dt>Empty results</dt><dd>When both together are too tight, the no-match state shows the closest meals and one-tap relax chips.</dd>
+      </dl>
+    </div>
+
+    <div class="decision">
+      <div class="head"><span class="id">P8</span><h3>Filters are saved as the default</h3></div>
+      <dl>
+        <dt>Decision</dt><dd>Quick Meal remembers the budget, time and distance you set and opens with them next time. A student sets "$20 · 30 min" once and does not set it again.</dd>
+        <dt>What saves</dt><dd>Only choices the user makes: "Show N results" in the Filters sheet, or a value picked in a chip sheet. "Clear all" plus apply saves "no filters".</dd>
+        <dt>What does not</dt><dd>Relax chips on the no-match screen change the results for this visit only. The cuisine tab is never saved and goes back to All each visit.</dd>
+        <dt>Why</dt><dd>A student's budget is a fixed number. A one-time "Budget up to $17" should not quietly raise it for good. Cuisine is the mood of one meal; a saved "Pizza" would hide everything else next time.</dd>
+        <dt>Feedback</dt><dd>The first time filters are applied, a short toast says "Saved. Quick Meal will open with these filters." After that, the black chips are enough.</dd>
+        <dt>Edge cases</dt><dd>A link with filters in the URL wins over the saved default. A saved value outside the current range is moved to the nearest valid value.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Demo decisions</span>
+    <h2>How this demo is built</h2>
+    <p class="muted">These only shape the demo. They are not product decisions.</p>
+
+    <div class="decision">
+      <div class="head"><span class="id">D1</span><h3>Screen scope</h3></div>
+      <dl>
+        <dt>Decision</dt><dd>Home (thin) → Quick Meal list → Filters sheet (plus a small single-filter sheet per chip) → Restaurant menu in budget view → Price breakdown sheet.</dd>
+        <dt>Home</dt><dd>Clickable but shallow. Category row, one banner, cuisine chips, a "Near campus" row. Search shows a toast: "Search is not part of this demo."</dd>
+        <dt>Not built</dt><dd>Cart, checkout, search and account. "Add to cart" shows a toast: "Cart is not part of this demo."</dd>
+        <dt>Why</dt><dd>The demo is about choosing a meal on a budget. The menu page shows the Week 3 concept in full: all-in prices on the list and the menu, with what breaks the budget marked.</dd>
+      </dl>
+    </div>
+
+    <div class="decision">
+      <div class="head"><span class="id">D2</span><h3>Fixed location and time</h3></div>
+      <dl>
+        <dt>Decision</dt><dd>The location is fixed at San José State University in downtown San Jose, CA. "Now" is the only time. Closed places never appear. The page uses the dense-area distance steps. Filter steps, the slider range and the cuisine tabs are fixed in the page.</dd>
+        <dt>Why</dt><dd>A fixed location gives the same results in every run, so the demo script and the acceptance criteria stay stable. Asking for the phone's location would add a permission prompt during a live demo and change the results by where the presenter stands.</dd>
+      </dl>
+    </div>
+
+    <div class="decision">
+      <div class="head"><span class="id">D3</span><h3>Mock data, branding and photos</h3></div>
+      <dl>
+        <dt>Decision</dt><dd>Realistic mock data with made-up restaurant names near campus. DoorDash-like red and layout, but no DoorDash logo. Footer line: "Concept demo for a CMU course. Not affiliated with DoorDash."</dd>
+        <dt>Realism</dt><dd>Menu prices, delivery fees and wait times follow what students see near the campus. The cuisine mix matches the area. A few places are "close but slow" or "far but fast", such as 4th St. Noodle Bar (0.3 mi, 19 min) and Santa Clara Taco Co. (0.9 mi, 16 min), so time and distance filters both matter.</dd>
+        <dt>Photos</dt><dd>About 15 to 20 free food photos (Unsplash or Pexels license), one per dish type such as bowl, noodles, burger or taco, shared by similar dishes. Compressed and bundled. Fallback: colored tiles with the dish type.</dd>
+        <dt>Why</dt><dd>DoorDash's US consumer terms, section 5 (p) to (r), ban collecting its text, photos or data by automated means or by "systematic retrieval", and its photos belong to DoorDash or the restaurants. The demo also lives on a public URL, where real store names next to made-up ratings, prices and wait times would show false facts about real businesses.</dd>
+      </dl>
+    </div>
+
+    <div class="decision">
+      <div class="head"><span class="id">D4</span><h3>Fee and tax values</h3></div>
+      <dl>
+        <dt>Service fee</dt><dd>15%. This matches DoorDash's published California rate for orders without DashPass (5% with DashPass). The demo prices every meal as a non-member, the case after a student's free DashPass year ends.</dd>
+        <dt>Tax</dt><dd>One assumed rate of 9.5% for every place, stored per restaurant so the formula already works per address.</dd>
+        <dt>Small-order fee</dt><dd>$2.50 when the food costs less than $12. Assumed value.</dd>
+        <dt>Tip</dt><dd>15%, the default the user would see.</dd>
+        <dt>Rounding</dt><dd>All math in integer cents, each line rounded half up, so every breakdown adds up to the cent.</dd>
+      </dl>
+    </div>
+
+    <div class="decision">
+      <div class="head"><span class="id">D5</span><h3>Build choices</h3></div>
+      <dl>
+        <dt>Saved filters</dt><dd>Stored in the phone's browser (local storage). The demo has no login, so a server copy would still be tied to one browser. If the browser blocks storage (some private modes), Quick Meal opens with no saved filters and shows no error.</dd>
+        <dt>Budget slider</dt><dd>A native range input with custom styling. It works with touch, mouse and keyboard, and screen readers read its value.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">No-match results</span>
+    <h2>When nothing matches</h2>
+    <p>The API always returns three lists. The page picks the layout from them, so there is no special code path for "empty".</p>
+<pre>GET /api/quick-meal/search?budget=15&amp;time=15&amp;distance=0.5
+
+{
+  "filters": { "budget": 15, "time": 15, "distance": 0.5, "cuisine": null, "sort": "best" },
+  "exact": [],
+  "near": [
+    { "restaurantId": "taylor-dumplings", "restaurant": "Taylor St. Dumplings",
+      "dish": "Pork Dumplings (12)", "allIn": 16.40, "etaMin": 14, "distanceMi": 0.4,
+      "miss": [ { "filter": "budget", "over": 1.40, "label": "$1.40 over budget" } ] },
+    { "restaurantId": "fourth-noodle", "dish": "Wonton Soup",
+      "miss": [ { "filter": "time", "over": 4, "label": "4 min slower" } ] }
+  ],
+  "relax": [
+    { "filter": "budget", "to": 17, "count": 1, "label": "Budget up to $17 · 1 result" },
+    { "filter": "time",   "to": 20, "count": 1, "label": "Time up to 20 min · 1 result" }
+  ]
+}</pre>
+    <ul class="plain">
+      <li><b>Exact.</b> One lead meal per open place that passes every active filter.</li>
+      <li><b>Near.</b> Only filled when exact is empty. For each open place, take its meal that misses least. Score the miss: budget overshoot ÷ $5, time overshoot ÷ 10 min, distance overshoot ÷ 1 mi, then add them up. Show the 5 lowest scores. Each card lists what it misses in plain words.</li>
+      <li><b>Cuisine stays fixed.</b> Near meals only miss on budget, time or distance, never on cuisine. A student who picked Indian never sees a burger as "close". If no place of that cuisine is nearby at all, the relax chip reads "All cuisines · N results" and tapping it switches to the All tab.</li>
+      <li><b>Relax.</b> One suggestion per active filter, with the others held. Budget is a slider, so it suggests the lowest whole-dollar budget that gives at least one result ($16.40 rounds up to $17). Time and distance move to the next step that gives a result. If no single change helps, offer "Remove distance" or "Remove time". Tapping a chip applies it, moves the slider or step to match, and shows the new results.</li>
+      <li><b>Copy.</b> Title "No exact matches". Body "Nothing fits a $15 budget, 15 min and 0.5 mi. Here are the closest meals." No apology, no dead end.</li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="eyebrow">Edge cases</span>
+    <h2>Other states the demo covers</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Case</th><th>What the user sees</th></tr></thead>
+        <tbody>
+          <tr><td>First visit</td><td>No filters on. One meal per open place, best match first. A hint above the list: "Set a budget to see what fits."</td></tr>
+          <tr><td>Return visit</td><td>Saved budget, time and distance come back (P8). The cuisine tab is back on All.</td></tr>
+          <tr><td>Tab with no result</td><td>The no-match state, limited to that cuisine. If the cuisine has no place nearby at all, it offers "All cuisines · N results".</td></tr>
+          <tr><td>Sort change</td><td>The lead meal on a card can change. Lowest price shows each place's cheapest fitting meal, and the menu lists that meal first too.</td></tr>
+          <tr><td>Slider at the ends</td><td>Far right "$40+ (any)" removes the budget filter and the Budget chip turns grey again. Far left "$10" is allowed. It usually gives no exact match, which leads to the no-match state.</td></tr>
+          <tr><td>One filter only</td><td>Works like the rest. The other chips stay grey.</td></tr>
+          <tr><td>Clear all</td><td>In the sheet: resets choices, count goes back to the full total. Nothing applies until "Show N results".</td></tr>
+          <tr><td>Close sheet without applying</td><td>Swipe down or tap outside. The list keeps its old filters.</td></tr>
+          <tr><td>Menu with nothing under budget</td><td>The "Under your budget" section reads "Nothing here fits $15. Closest:" and the over section starts with the smallest overage.</td></tr>
+          <tr><td>Loading</td><td>Grey card skeletons. The mock API adds a 300 ms delay so this is visible in the demo.</td></tr>
+          <tr><td>API error</td><td>"Could not load meals. Check your connection and try again." with a Retry button. Test it with <code>?fail=1</code>.</td></tr>
+          <tr><td>Back and refresh</td><td>Filters live in the URL, e.g. <code>/quick-meal?budget=20&amp;time=30&amp;cuisine=chinese</code>. Back, refresh and shared links keep them.</td></tr>
+          <tr><td>Small screens</td><td>Built for 375 px wide. Chip row scrolls sideways. Sheet footer sits above the iPhone home bar.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Validation</span>
+    <h2>Acceptance criteria</h2>
+    <p>Quick Meal has no AI feature, so every must-have feature is validated with an acceptance criterion. Each one is walked through the deployed demo on a phone and recorded with a screenshot. Criteria with numbers are also checked by an automated test on the mock data, so the walkthrough and the test must agree.</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>ID</th><th>Feature</th><th>Given / When / Then</th><th>How verified</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">AC-01</td><td>Quick Meal entry</td><td>Given the Home screen, when the user taps Quick Meal in the category row, then the Quick Meal screen opens with the chip row (Filters, Budget, Time, Distance), the cuisine tabs below it (All selected) and a list of meal cards, with no Restaurant or Grocery tabs.</td><td>Walk it on a phone; screenshot</td></tr>
+          <tr><td class="mono">AC-02</td><td>All-in budget</td><td>Given a budget of $20, when results load, then every card shows a meal with an estimated all-in price of $20.00 or less, and the breakdown behind any price (item, delivery fee, small-order fee, service fee, tax, tip) adds up to that price to the cent, and the small-order fee appears only when the item costs less than $12.</td><td>Walk it and tap 3 prices; screenshot. Automated test checks every meal.</td></tr>
+          <tr><td class="mono">AC-03</td><td>Filters sheet</td><td>Given the Filters sheet, opened from either the top-right icon or the Filters chip, when the user sets the budget to $20 and time to 30 min, then the button reads "Show 6 results" before applying, and after applying the list shows 6 meal cards from 6 different places, the chips read "Up to $20" and "30 min", and the Filters badge shows 2.</td><td>Walk it from both entry points; screenshot. Count matches the scenario test.</td></tr>
+          <tr><td class="mono">AC-04</td><td>Combined filters</td><td>Given budget $20, time 20 min and distance 1 mi are on, when the user taps the Chinese tab, then every card is a Chinese place that passes all three filters, and the count (2) is lower than on the All tab (4).</td><td>Walk it; screenshot. Automated test.</td></tr>
+          <tr><td class="mono">AC-05</td><td>No match and relax</td><td>Given budget $15, time 15 min and distance 0.5 mi, when results load, then the screen shows "No exact matches", up to 5 closest meals each labeled with how it misses (for example "$1.40 over budget"), and relax chips with result counts. When the user taps "Budget up to $17 · 1 result", the list shows exactly 1 meal and the slider moves to $17, while the saved default budget stays at $15.</td><td>Walk it, then reopen Quick Meal; screenshot both</td></tr>
+          <tr><td class="mono">AC-06</td><td>Menu in budget view</td><td>Given a budget of $20, when the user taps "+2 more" on the Paseo Rice Bowl card, then the menu opens with "Under your budget (3)" listing the Chicken Rice Bowl first (the card's meal), then the Tofu Rice Bowl and Spam Musubi Plate, and the Veggie Bowl shows "$0.54 over".</td><td>Walk it; screenshot</td></tr>
+          <tr><td class="mono">AC-07</td><td>Saved default</td><td>Given the user applied budget $20 and time 30 min and is on the Chinese tab, when they leave Quick Meal and come back, including after closing the browser tab, then budget $20 and time 30 min are on, the All tab is selected, and the 6 meal cards for $20 · 30 min show.</td><td>Walk it on a phone; screenshot before and after</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted" style="font-size:0.9rem">Must-have features by screen: Quick Meal entry (1), meal list with all-in prices, cuisine tabs and chip row (2), Filters sheet (3), no-match results with relax chips (4), menu in budget view (5), price breakdown (6), saved default (2 and 3). For the 3 to 5 screens in Section 9, screens 5 and 6 can be one screenshot with the breakdown open over the menu. The results table records pass or fail for AC-01 to AC-07 after the walkthrough.</p>
+  </section>
+
+  <section>
+    <span class="eyebrow">Backend</span>
+    <h2>API</h2>
+    <p>All read-only <code>GET</code> calls with query strings. Easy to test in a browser and easy to show in slides. Everything new lives under <code>/api/quick-meal/</code>. Existing restaurant and menu APIs stay as they are; Quick Meal reads their data and adds the estimated all-in prices on top. Other screens never see a change.</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Route</th><th>Returns</th></tr></thead>
+        <tbody>
+          <tr><td><code>GET /api/home</code></td><td>Categories, banner, cuisine chips, "Near campus" row.</td></tr>
+          <tr><td><code>GET /api/quick-meal/search</code></td><td>Params <code>budget</code>, <code>time</code>, <code>distance</code>, <code>cuisine</code> (one value, empty for All), <code>sort</code>. Returns <code>exact</code> (one lead meal per place, with its other fitting meals), <code>near</code>, <code>relax</code>, and <code>total</code>. The sheet calls it on each change for the live count.</td></tr>
+          <tr><td><code>GET /api/quick-meal/restaurants/:id?budget=</code></td><td>One restaurant and its full menu in budget view. Each item has its est. all-in price, the breakdown lines, and, when a budget is given, "fits" or how much it is over.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Mock data</span>
+    <h2>Data built for the demo script</h2>
+    <p>About 30 made-up restaurants within 3 miles of campus, 2 of them closed. Each has 4 to 6 menu items with a like rate. The data is tuned so the demo scenarios below always give the same counts. A unit test checks each row, so a data edit cannot break the live demo.</p>
+<pre>{
+  "id": "paseo-rice-bowl",
+  "name": "Paseo Rice Bowl",
+  "cuisine": ["Healthy"],
+  "rating": 4.6, "ratingCount": 812,
+  "distanceMi": 0.4, "etaMin": 18,
+  "deliveryFee": 1.99, "smallOrderFee": 2.50, "taxRate": 0.095,
+  "isOpen": true,
+  "menu": [
+    { "id": "chicken-bowl", "name": "Chicken Rice Bowl", "price": 12.00, "likePct": 88, "likeCount": 120, "photo": "bowl.webp" },
+    { "id": "tofu-bowl",    "name": "Tofu Rice Bowl",    "price": 10.75, "likePct": 82, "likeCount": 64,  "photo": "bowl.webp" },
+    { "id": "veggie-bowl",  "name": "Veggie Bowl",       "price": 11.50, "likePct": 85, "likeCount": 51,  "photo": "salad.webp" }
+  ]
+}
+allIn = price + deliveryFee + (price &lt; 12 ? smallOrderFee : 0) + 15% service + price × taxRate + 15% tip
+// Compute in integer cents and round each line half up: 1150 × 15% = 172.5 → 173 cents ($1.73).
+// Float math would give $1.72 here and break the "$0.54 over" example.
+// taxRate is stored per restaurant. The demo uses one assumed rate; a real backend would look it up by address.</pre>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Scenario</th><th>Filters</th><th style="text-align:right">Places with a fitting meal</th></tr></thead>
+        <tbody>
+          <tr><td>Open Quick Meal</td><td>none</td><td class="num">28</td></tr>
+          <tr><td>Budget only</td><td>Up to $20</td><td class="num">10</td></tr>
+          <tr><td>Slide budget up</td><td>Up to $25</td><td class="num">18</td></tr>
+          <tr><td>Happy path</td><td>Up to $20 · 30 min</td><td class="num">6</td></tr>
+          <tr><td>Tight but OK</td><td>Up to $20 · 20 min · 1 mi</td><td class="num">4</td></tr>
+          <tr><td>Add a cuisine</td><td>Up to $20 · 20 min · 1 mi · Chinese tab</td><td class="num">2</td></tr>
+          <tr><td>Cuisine only</td><td>Up to $20 · Chinese tab</td><td class="num">3</td></tr>
+          <tr><td>No match</td><td>Up to $15 · 15 min · 0.5 mi</td><td class="num zero">0 exact, 5 near</td></tr>
+          <tr><td>Relax from no match</td><td>Up to $17 · 15 min · 0.5 mi</td><td class="num">1</td></tr>
+          <tr><td>Fast only</td><td>Under 15 min</td><td class="num">3</td></tr>
+          <tr><td>Paseo menu</td><td>Up to $20</td><td class="num">3 fit, 2 over</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted" style="font-size:0.9rem">These counts are targets. The mock data is shaped to hit them, and tests lock them in. Each place shows one meal card, so the count of cards equals the count of places.</p>
+  </section>
+
+  <section>
+    <span class="eyebrow">For the presentation</span>
+    <h2>Demo script, about 2 minutes</h2>
+    <ol class="steps">
+      <li>Home. Tap <b>Quick Meal</b>.</li>
+      <li>Tap <b>Budget ▾</b>. Slide to $25, then back to $20, and watch the count change. Show 10 places with a meal that fits.</li>
+      <li>Tap the top-right icon. Add 30 min. The button reads "Show 6 results". Apply.</li>
+      <li>On the Paseo Rice Bowl card, tap "+2 more". The menu shows 3 bowls that fit and 2 that do not. The Tofu Rice Bowl is cheaper on the menu, but tap its price: the small-order fee makes it $19.48, more than the $18.73 Chicken Rice Bowl.</li>
+      <li>Go back. Tighten to $15 · 15 min · 0.5 mi. Show the no-match state and how each meal misses. Tap "Budget up to $17 · 1 result". The slider moves to $17 and one meal shows.</li>
+    </ol>
+  </section>
+
+  <footer>Mockups are concept sketches for a CMU MSSM course. Not affiliated with DoorDash. Prices and fee rates are demo values.</footer>
+</div>
