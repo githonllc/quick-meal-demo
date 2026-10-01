@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { waitForResults } from './helpers'
 
 // Start every test with no saved default.
 test.beforeEach(async ({ page }) => {
@@ -22,6 +23,7 @@ test('AC-05: no exact match shows the message, relax chips and near cards', asyn
 test('a relax chip loosens the view', async ({ page }) => {
   await page.goto('/quick-meal?budget=15&time=15&distance=0.5')
   await page.getByTestId('relax-chip').first().click()
+  await waitForResults(page)
   await expect(page.getByTestId('meal-card')).toHaveCount(1)
   await expect(page.getByTestId('meal-card')).toContainText('Taylor St. Dumplings')
   await expect(page.getByTestId('chip-budget')).toHaveText('Up to $17 ▾')
@@ -36,9 +38,11 @@ test('a relax chip does not change the saved default', async ({ page }) => {
   await sheet.getByTestId('step-time-15').click()
   await sheet.getByTestId('step-distance-0.5').click()
   await sheet.getByTestId('sheet-apply').click()
+  await waitForResults(page)
   await expect(page.getByTestId('no-match')).toBeVisible()
 
   await page.getByTestId('relax-chip').first().click()
+  await waitForResults(page)
   await expect(page.getByTestId('chip-budget')).toHaveText('Up to $17 ▾')
 
   await page.goto('/')

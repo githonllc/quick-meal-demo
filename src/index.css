@@ -106,3 +106,27 @@ button {
 .tile-card { width: 100%; height: 120px; }
 .tile-thumb { width: 64px; height: 64px; border-radius: 10px; }
 .tile-hero { width: 100%; height: 100px; }
+
+/* Refetch state: the old results stay, dimmed, under a moving red bar. */
+.loading-bar {
+  position: relative;
+  height: 3px;
+  margin: 4px 0;
+  overflow: hidden;
+  background: var(--chip);
+}
+.loading-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: var(--red);
+  animation: loading-slide 1s ease-in-out infinite;
+}
+@keyframes loading-slide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+.dim {
+  opacity: 0.6;
+}

@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import type { Locator } from '@playwright/test'
+import { waitForResults } from './helpers'
 
 // "$18.73" -> 1873. Item names may hold digits, so read only the dollar amount.
 async function cents(el: Locator): Promise<number> {
@@ -24,6 +25,7 @@ test('AC-01: Home opens Quick Meal with chips, tabs and meal cards', async ({ pa
 
 test('AC-02: every price fits the budget and each breakdown adds up', async ({ page }) => {
   await page.goto('/quick-meal?budget=20')
+  await waitForResults(page)
   const prices = page.getByTestId('meal-price')
   await expect(prices.first()).toBeVisible()
   for (const price of await prices.all()) {
@@ -52,6 +54,7 @@ test('AC-04: a cuisine tab splits the filtered meals and keeps the chips', async
   await page.goto('/quick-meal?budget=20&time=20&distance=1')
   await expect(page.getByTestId('meal-card')).toHaveCount(4)
   await page.getByTestId('cuisine-tab-chinese').click()
+  await waitForResults(page)
   await expect(page.getByTestId('meal-card')).toHaveCount(2)
   await expect(page.getByTestId('cuisine-tab-chinese')).toHaveAttribute('aria-selected', 'true')
   await expect(page).toHaveURL(/cuisine=chinese/)

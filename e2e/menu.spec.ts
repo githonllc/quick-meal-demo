@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
+import { waitForResults } from './helpers'
 
 const MENU = '/quick-meal/restaurants/paseo-rice-bowl'
 
@@ -17,6 +18,7 @@ test('AC-06: the menu shows what fits first, then what is just over', async ({ p
   const card = page.getByTestId('meal-card').filter({ hasText: 'Paseo Rice Bowl' })
   await card.getByTestId('meal-more').click()
   await expect(page).toHaveURL(new RegExp(`${MENU}\\?budget=20$`))
+  await waitForResults(page, 'menu-results')
 
   await expect(page.getByTestId('menu-fits-title')).toHaveText('Under your budget (3)')
   expect(await names(page, 'menu-fits')).toEqual(['Chicken Rice Bowl', 'Tofu Rice Bowl', 'Spam Musubi Plate'])
@@ -37,6 +39,7 @@ test('the est. price opens the price breakdown', async ({ page }) => {
 
 test('the sort from the list carries over', async ({ page }) => {
   await page.goto(`${MENU}?budget=20&sort=price`)
+  await waitForResults(page, 'menu-results')
   await expect(page.getByTestId('menu-fits-title')).toBeVisible()
   expect(await names(page, 'menu-fits')).toEqual(['Spam Musubi Plate', 'Chicken Rice Bowl', 'Tofu Rice Bowl'])
 })
@@ -55,6 +58,7 @@ test('Change sets a new budget and saves it as the default', async ({ page }) =>
   await page.getByTestId('sheet-apply').click()
 
   await expect(page).toHaveURL(new RegExp(`${MENU}\\?budget=25$`))
+  await waitForResults(page, 'menu-results')
   await expect(page.getByTestId('menu-fits-title')).toHaveText('Under your budget (5)')
   await expect(page.getByTestId('menu-fits').getByTestId('menu-row')).toHaveCount(5)
   await expect(page.getByTestId('menu-over')).toHaveCount(0)
