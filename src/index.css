@@ -87,6 +87,22 @@ button {
   font-weight: 600;
   text-transform: capitalize;
 }
+.tile img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.tile-thumb span {
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  font-size: 9px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .tile-card { width: 100%; height: 120px; }
 .tile-thumb { width: 64px; height: 64px; border-radius: 10px; }
 .tile-hero { width: 100%; height: 100px; }
