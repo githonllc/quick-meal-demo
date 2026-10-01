@@ -124,7 +124,7 @@ export function HomeScreen() {
           <h2 className="home-sec">What can we get you?</h2>
           <div className="chips">
             {home.cuisines.map((c) => (
-              <button key={c.id} className="chip" onClick={() => navigate(`/quick-meal?cuisine=${c.id}`)}>
+              <button key={c.id} className="chip" onClick={() => show(NOT_IN_DEMO)}>
                 {c.label}
               </button>
             ))}
@@ -132,7 +132,7 @@ export function HomeScreen() {
           <h2 className="home-sec">Near campus</h2>
           <div className="near">
             {home.nearCampus.map((r) => (
-              <button key={r.id} className="near-card" onClick={() => navigate(`/quick-meal/restaurants/${r.id}`)}>
+              <button key={r.id} className="near-card" onClick={() => show(NOT_IN_DEMO)}>
                 <FoodTile kind={r.heroPhoto} size="hero" />
                 <div className="near-name">{r.name}</div>
                 <div className="near-meta">
