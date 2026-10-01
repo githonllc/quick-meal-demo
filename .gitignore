@@ -34,3 +34,6 @@ dist-ssr
 .tmp-playwright
 test-results/
 playwright-report/
+
+# Keep the mock data even if a global ignore rule has data/
+!worker/data/
