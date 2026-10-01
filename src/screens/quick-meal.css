@@ -1,0 +1,222 @@
+.qm-sub {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Filter chips: one row that scrolls sideways. */
+.fchips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0 10px;
+  scrollbar-width: none;
+}
+.fchip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.fchip.on {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+.fchip-badge {
+  background: var(--red);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Cuisine tabs: the selected tab has an ink underline. */
+.ctabs {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  margin: 0 -16px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+  scrollbar-width: none;
+}
+.ctab {
+  flex: none;
+  padding: 10px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.ctab[aria-selected='true'] {
+  color: var(--ink);
+  box-shadow: inset 0 -2px 0 var(--ink);
+}
+
+.count-line,
+.qm-hint {
+  margin: 12px 0 4px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.qm-hint {
+  margin-top: 0;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* Meal card */
+.meal,
+.meal-skel {
+  display: grid;
+  gap: 4px;
+  padding: 12px 0;
+}
+.meal {
+  cursor: pointer;
+}
+.meal .tile {
+  margin-bottom: 4px;
+}
+.meal-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.meal-name {
+  font-weight: 700;
+  font-size: 16px;
+  text-align: left;
+}
+.meal-like {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.meal-rest {
+  font-size: 14px;
+  font-weight: 600;
+}
+.meal-rest span,
+.meal-meta {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 14px;
+}
+.meal-price {
+  color: var(--ink);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.fits {
+  color: var(--ok);
+  font-weight: 700;
+  font-size: 14px;
+}
+.meal-more {
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Bottom sheet. Below the toast (z-index 50) so its messages stay visible. */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.38);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.sheet {
+  width: 100%;
+  max-width: 480px;
+  max-height: 90svh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 18px 18px 0 0;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  outline: none;
+}
+.sheet-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.sheet-head h2 {
+  margin: 0;
+  font-size: 20px;
+}
+.sheet-sub {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.sheet-close {
+  font-size: 26px;
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+}
+.sheet-go {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px 0;
+  border-radius: 999px;
+  background: var(--red);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Breakdown */
+.bd-head {
+  margin: 14px 0 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 15px;
+}
+.bd-rows {
+  display: grid;
+  gap: 6px;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.bd-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.bd-row.hot {
+  color: var(--warn);
+  font-weight: 700;
+}
+.bd-total {
+  border-top: 1px solid var(--line);
+  margin-top: 4px;
+  padding-top: 8px;
+  font-weight: 800;
+  font-size: 17px;
+}
+.bd-note {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
