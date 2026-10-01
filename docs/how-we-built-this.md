@@ -8,20 +8,85 @@ Quick Meal is a concept feature for a food delivery app. A student sets a budget
 
 Live demo: https://quick-meal-demo.ioenv.workers.dev
 
-## Step 1: Design with AI
+## Step 1: Polish the design with AI
 
 We did not start with code. We started with a design page and argued about it.
 
-The AI wrote a first proposal: phone mockups, product decisions and acceptance criteria. The team read it, pushed back, and the AI revised it. This went on for many rounds, up to version 26, before any code was written. You can read the result in [docs/design.html](design.html) (or the picture, [docs/design.png](design.png)).
+### The first draft was rough
 
-Some human corrections that changed the design:
+The PM's brief had three parts: an entry on the Home screen, a list with filters (budget, time, distance), and a sheet to set the filters. Plus one rule: say something useful when nothing fits.
 
-- **Results became meals, not restaurants.** The first draft listed restaurants. We said a hungry student picks a dish, so each card now shows one meal and its price (design P5).
-- **The budget became an estimated all-in price.** A $10.75 dish is not a $10.75 meal. Fees, tax and tip are included, and a tap shows the breakdown (design P2 and screen 6).
-- **Filters moved above the cuisine tabs.** Filters set the pool and the tab splits it, so the order on screen says what applies to what (design P2).
-- **The target users changed.** An early draft was set in one city. We said our users are Bay Area students, so the demo location became San José State University.
+From that, the AI drew version 1 in a few minutes:
 
-The AI was fast at drafting. People decided. The product decisions (P1 to P8) are the team's. The AI proposed options and wrote them down.
+![Design version 1: Home, a list of restaurants, a Filters sheet with fixed budget buttons, and a no-match screen](design-history/v1-phones.png)
+
+It looked finished. It was not. The cards listed restaurants, not meals. Budget was four fixed buttons. There were no cuisine tabs, no menu and no price breakdown. The location was a campus our users do not live near.
+
+### About 30 rounds in two hours
+
+The design was one web page with phone mockups, product decisions and acceptance criteria. The AI republished it after every change, so the PM always looked at the latest version. Before any code was written, the page went through 26 versions in about two hours, driven by about 30 messages from the PM. These are the questions that shaped the product.
+
+**Restaurants or meals?** Looking at a card, the PM saw the problem: a hungry student picks a dish, not a restaurant. So each card became one meal, with the dish photo and the dish's own rating (thumbs-up %), which is not the same as the restaurant's stars. We kept one meal per place, so the result count still means "places that fit".
+
+**How do I see the other dishes?** The next question came straight from the new card. The answer is a line like "+2 more under $20: Tofu Rice Bowl, Spam Musubi Plate". It opens that restaurant's menu, split into "Under your budget" and "Over your budget". A dish only $0.54 over might still be wanted, so it stays visible with the amount. A later round removed the highlight on the tapped dish. The card's meal is simply first on the menu, because the list and the menu share one sort rule.
+
+**A dish detail page?** The PM asked if we needed one. We chose one extra screen, the restaurant menu, and no dish page, cart or checkout. The menu answers "what else fits here?", which is the real question.
+
+**Two campuses showed a hidden problem.** When the location moved from Pittsburgh to the Bay Area, the AI guessed that 0.5 mi around one campus has almost no restaurants. It did not check this. The guess still raised a real point: good distance steps depend on how dense the area is. So the rule is that the backend picks one of two step sets: 0.5, 1, 2, 3 mi for a dense area and 1, 2, 3, 5 mi for a suburb. The demo uses one dense location (San José State University) and one set. Showing two locations was rejected: it doubles the mock data and is not in the acceptance criteria.
+
+**What does the price mean?** The budget is the estimated all-in price of one meal: food, fees, tax and tip.
+
+- "All-in" won over "out-the-door". It is shorter and plainer.
+- The PM said the total can never be exact. So cards say "Est. $18.73", and the breakdown is titled "Estimated all-in price".
+- Tax became a per-restaurant rate. The demo uses one assumed rate.
+- A small-order fee was added: $2.50 when the food is under $12.
+- The PM doubted the 15% service fee. The AI looked it up on DoorDash's help page, which listed 15% in California, and labeled the row "no DashPass".
+- The PM asked where the "tip is 15%" note appears. There was no screen for it. That question added screen 6, the price breakdown.
+
+**Cuisine: filter or tabs?** Cuisine started as a filter, became single-select tabs, and then the filters moved above the tabs. DoorDash puts tabs on top, so we asked whether to follow it. We kept our order for two reasons. On DoorDash a tab picks the store type, which decides which filters apply. Here the filters decide what fits and the tabs only split it. And filters under the tabs would look like they reset when the tab changes.
+
+**Fewer API routes.** The PM removed an "options" route the page did not need, and asked whether a new restaurant route could clash with the app's own API. Everything new now lives under `/api/quick-meal/`.
+
+**Who is it for?** An early draft said our users were students at one Pittsburgh campus. The PM corrected it: Bay Area students, and any US student. Prices, the budget range, distance steps and street names were all redone for the new location.
+
+**How do we know it works?** The AI first proposed a user-test plan. The PM pasted the course's validation format, and the AI rewrote it as seven acceptance criteria (AC-01 to AC-07), each tied to a screen. The PM also split the decisions into product decisions (P1 to P8, true in any city) and demo decisions (D1 to D5, only for this demo).
+
+**Smaller rules.** Budget became a slider, because students have a number in mind and it is often not round. Time and distance are separate filters, and both apply. Applied filters are saved as the user's default, but a one-tap "relax" is not. Real DoorDash data was ruled out after reading the terms of use, so the data is invented. Money is computed in whole cents.
+
+### The final six screens
+
+<table>
+  <tr>
+    <td align="center"><img src="design/1-home.png" width="200" alt="Home"><br>1 Home</td>
+    <td align="center"><img src="design/2-meal-list.png" width="200" alt="Meal list"><br>2 Meal list</td>
+    <td align="center"><img src="design/3-filters.png" width="200" alt="Filters sheet"><br>3 Filters sheet</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="design/4-no-match.png" width="200" alt="No match"><br>4 No match</td>
+    <td align="center"><img src="design/5-menu.png" width="200" alt="Menu in budget view"><br>5 Menu in budget view</td>
+    <td align="center"><img src="design/6-breakdown.png" width="200" alt="Price breakdown"><br>6 Price breakdown</td>
+  </tr>
+</table>
+
+The whole page is in [docs/design.html](design.html). GitHub shows it as code, so open the [live design page](https://quick-meal-demo.ioenv.workers.dev/design) or the image [docs/design.png](design.png).
+
+### Why talk over a picture
+
+Most of the questions above came from looking at a screen, not from reading a spec.
+
+- "How do I see other dishes?" only comes up once a card shows one dish.
+- The PM noticed that screen 6 showed the Tofu Rice Bowl while screen 5 marked the Chicken Rice Bowl. Two sentences in a text spec would never clash so visibly.
+- "Do the filters reset when I change tabs?" is a question about where things sit on the screen.
+
+A text brief of three parts reads as complete. A drawing shows what is missing.
+
+### Who did what
+
+- **The PM** asked questions from the student's seat, caught clashes between screens, and made every product call.
+- **The AI** drew each version in minutes, offered options with a recommendation, looked up facts (the terms of use, the fee page), recomputed every price, and kept the page consistent.
+- **The AI also made mistakes.** It guessed about restaurant density without checking. It forgot the breakdown screen until the PM asked. Two scenario counts on the page were wrong until a script checked them against the data (see below).
+
+The AI was fast at drafting. People decided.
 
 ## Step 2: Turn the design into refined issues
 
@@ -56,6 +121,20 @@ PRs #15 to #27 were all merged on 2026-09-30. `git log` shows the times.
 
 [#13](https://github.com/githonllc/quick-meal-demo/issues/13) deployed the app as one Cloudflare Worker and ran the full e2e suite against the live URL. [docs/validation.md](validation.md) lists each acceptance criterion, its result and the test that checks it, with five screenshots.
 
+## Step 5: Use it on a real phone
+
+All acceptance criteria passed. Then the PM used the live demo on a phone and found five problems that no test had caught.
+
+1. **Home cuisine chips opened Quick Meal.** The design said so: tap "Chinese" and Quick Meal opens on the Chinese tab. In use, the PM expected the normal category page. These chips and the "Near campus" cards now show a "not in this demo" note ([#30](https://github.com/githonllc/quick-meal-demo/issues/30)).
+2. **The menu's "Change" shows only the budget.** This one is by design. Time and distance belong to a restaurant, not to a dish, so only budget and sort change a menu. No change.
+3. **The page behind a sheet scrolled.** Dragging inside a filter sheet also scrolled the list behind it. The page now locks while a sheet is open ([#31](https://github.com/githonllc/quick-meal-demo/issues/31)).
+4. **Lists felt slow.** Part of it was ours: the Worker waited 0.3 seconds on purpose so the loading state would show in a demo. The delay is gone, photos and scripts are cached, and the list stays on screen with a thin loading bar while new results load ([#32](https://github.com/githonllc/quick-meal-demo/issues/32)). The "2 seconds blank" the PM saw was not reproduced in our tests.
+5. **"Show 0 results" that then shows meals.** Since version 1, the sheet's button showed a live count, like "Show 6 results". That needs a request on every change, and on a slow network the number can be out of date. We dropped it. The button now says "Show results" and the search runs only when the user applies ([#36](https://github.com/githonllc/quick-meal-demo/issues/36)).
+
+Two of these undid design decisions. The live count was in the design from the first draft and in AC-03. It looked right in a mockup and felt wrong on a phone. The design page was updated to version 29 to match ([#37](https://github.com/githonllc/quick-meal-demo/issues/37)).
+
+The lesson: a mockup catches what is missing, and a real phone catches how it feels. You need both.
+
 ## What went wrong and what we changed
 
 The AI made mistakes. So did the design. Most were caught by a check, not by luck.
@@ -72,9 +151,10 @@ The AI made mistakes. So did the design. Most were caught by a check, not by luc
 ## Tips for your own MVP
 
 1. **Design before code.** A design page with decisions and acceptance criteria is cheap to change. Code is not.
-2. **Write acceptance criteria as numbers.** "Shows 6 results" can be tested. "Works well" cannot.
-3. **Make the mock data serve the demo.** Hand-tune it to your demo script, and lock the counts with tests so an edit cannot break the live demo.
-4. **Give the AI small, exact tasks.** One issue with files, rules and test cases beats one big request.
-5. **Check, do not trust.** Re-run the tests yourself and look at the screen. An AI report of success is a claim, not proof.
-6. **Keep a human on every decision.** Let the AI propose and draft. People choose what the product does.
-7. **Write down what went wrong.** It is the most useful part for the next team.
+2. **Argue over pictures, not text.** Ask the AI to draw the screens, then ask questions as a user. Most good questions come from looking at a screen.
+3. **Write acceptance criteria as numbers.** "Shows 6 results" can be tested. "Works well" cannot.
+4. **Make the mock data serve the demo.** Hand-tune it to your demo script, and lock the counts with tests so an edit cannot break the live demo.
+5. **Give the AI small, exact tasks.** One issue with files, rules and test cases beats one big request.
+6. **Check, do not trust.** Re-run the tests yourself and look at the screen. Then use it on a real phone. An AI report of success is a claim, not proof.
+7. **Keep a human on every decision.** Let the AI propose and draft. People choose what the product does.
+8. **Write down what went wrong.** It is the most useful part for the next team.

@@ -2,8 +2,8 @@
 
 - Date: 2026-09-30
 - Live URL: https://quick-meal-demo.ioenv.workers.dev
-- Deployed commit: `96522f6`
-- Worker version: `d786eb98-ef5b-4ca8-bd01-a83f14c77c60`
+- Deployed commit: `8ea3646`
+- Worker version: `a1f815af-fe64-48ee-a24c-ec60c42d01ab`
 
 Every acceptance criterion from the "Validation" section of [design.html](design.html) was run as an automated Playwright test against the live URL.
 
@@ -13,13 +13,15 @@ Every acceptance criterion from the "Validation" section of [design.html](design
 |---|---|---|---|
 | AC-01 | **Quick Meal entry.** Given the Home screen, when the user taps Quick Meal in the category row, then the Quick Meal screen opens with the chip row (Filters, Budget, Time, Distance), the cuisine tabs below it (All selected) and a list of meal cards, with no Restaurant or Grocery tabs. | Pass | `e2e/list.spec.ts`: "AC-01: Home opens Quick Meal with chips, tabs and meal cards" |
 | AC-02 | **All-in budget.** Given a budget of $20, when results load, then every card shows a meal with an estimated all-in price of $20.00 or less, and the breakdown behind any price (item, delivery fee, small-order fee, service fee, tax, tip) adds up to that price to the cent, and the small-order fee appears only when the item costs less than $12. | Pass | `e2e/list.spec.ts`: "AC-02: every price fits the budget and each breakdown adds up" |
-| AC-03 | **Filters sheet.** Given the Filters sheet, opened from either the top-right icon or the Filters chip, when the user sets the budget to $20 and time to 30 min, then the button reads "Show 6 results" before applying, and after applying the list shows 6 meal cards from 6 different places, the chips read "Up to $20" and "30 min", and the Filters badge shows 2. | Pass | `e2e/filters.spec.ts`: "AC-03: the Filters sheet opens from the chip and the top-right icon" |
+| AC-03 | **Filters sheet.** Given the Filters sheet, opened from either the top-right icon or the Filters chip, when the user sets the budget to $20 and time to 30 min, then the button reads "Show results", and after applying the list shows 6 meal cards from 6 different places, the chips read "Up to $20" and "30 min", and the Filters badge shows 2. | Pass | `e2e/filters.spec.ts`: "AC-03: the Filters sheet opens from the chip and the top-right icon" |
 | AC-04 | **Combined filters.** Given budget $20, time 20 min and distance 1 mi are on, when the user taps the Chinese tab, then every card is a Chinese place that passes all three filters, and the count (2) is lower than on the All tab (4). | Pass | `e2e/list.spec.ts`: "AC-04: a cuisine tab splits the filtered meals and keeps the chips" |
 | AC-05 | **No match and relax.** Given budget $15, time 15 min and distance 0.5 mi, when results load, then the screen shows "No exact matches", up to 5 closest meals each labeled with how it misses (for example "$1.32 over budget"), and relax chips with result counts. When the user taps "Budget up to $17 · 1 result", the list shows exactly 1 meal and the slider moves to $17, while the saved default budget stays at $15. | Pass | `e2e/no-match.spec.ts`: "AC-05: no exact match shows the message, relax chips and near cards", "a relax chip loosens the view" and "a relax chip does not change the saved default" |
 | AC-06 | **Menu in budget view.** Given a budget of $20, when the user taps "+2 more" on the Paseo Rice Bowl card, then the menu opens with "Under your budget (3)" listing the Chicken Rice Bowl first (the card's meal), then the Tofu Rice Bowl and Spam Musubi Plate, and the Veggie Bowl shows "$0.54 over". | Pass | `e2e/menu.spec.ts`: "AC-06: the menu shows what fits first, then what is just over" |
 | AC-07 | **Saved default.** Given the user applied budget $20 and time 30 min and is on the Chinese tab, when they leave Quick Meal and come back, including after closing the browser tab, then budget $20 and time 30 min are on, the All tab is selected, and the 6 meal cards for $20 · 30 min show. | Pass | `e2e/filters.spec.ts`: "AC-07: applied filters come back next visit, the cuisine tab does not" |
 
-We ran the full suite three times. The first run started seconds after the first deploy and had 6 failures (the first API call got a 404), most likely because the new Worker had not yet reached every edge location. Runs 2 and 3, a minute later, both passed 24 of 24.
+First deploy (`96522f6`): we ran the full suite three times. The first run started seconds after the deploy and had 6 failures (the first API call got a 404), most likely because the new Worker had not yet reached every edge location. Runs 2 and 3, a minute later, both passed 24 of 24.
+
+After the real-phone walkthrough fixes (`8ea3646`): 28 tests ran against the live URL and all passed. The 5 screenshot tests are skipped in a normal run.
 
 ## How to re-run
 
@@ -49,7 +51,7 @@ All shots are 390x844 at 3x, taken from the live URL.
 
 **3. Filters sheet.** Must-have feature: Filters sheet. Also saved default (applying saves the filters).
 
-![Filters sheet open with Show 6 results](screenshots/3-filters.png)
+![Filters sheet open with the Show results button](screenshots/3-filters.png)
 
 **4. No match at $15, 15 min and 0.5 mi.** Must-have feature: no-match results with relax chips.
 
@@ -61,8 +63,10 @@ All shots are 390x844 at 3x, taken from the live URL.
 
 ## Manual walkthrough
 
-The team also walks through the demo once on a real phone and notes anything found here.
+The PM walked through the live demo on a real phone after all the tests passed. Each finding and what we did:
 
-Manual walkthrough notes:
-
--
+1. Home cuisine chips and "Near campus" cards opened Quick Meal. They should open the normal pages, which are not in this demo. They now show a "not in this demo" note ([#30](https://github.com/githonllc/quick-meal-demo/issues/30)).
+2. On a menu, "Change" shows only the budget, not time or distance. By design: time and distance belong to a restaurant, so only budget and sort change a menu. No change.
+3. Dragging inside a filter sheet also scrolled the page behind it. The page now locks while a sheet is open ([#31](https://github.com/githonllc/quick-meal-demo/issues/31)). Still to check by hand on iOS and Android.
+4. Long lists felt slow to load. The 0.3 second demo delay was removed, photos and scripts are cached, and the list stays on screen with a loading bar while new results load ([#32](https://github.com/githonllc/quick-meal-demo/issues/32)).
+5. The live count on the sheet ("Show N results") could be out of date on a slow network. It was removed. The button says "Show results" and the search runs only on apply ([#36](https://github.com/githonllc/quick-meal-demo/issues/36)). The design page was updated to match ([#37](https://github.com/githonllc/quick-meal-demo/issues/37)).
