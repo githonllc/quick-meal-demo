@@ -18,7 +18,11 @@ Live demo: https://quick-meal-demo.ioenv.workers.dev
 
 ## Design
 
-See the [live design page](https://quick-meal-demo.ioenv.workers.dev/design.html) or [docs/design.html](docs/design.html).
+The full design page has the screens, product decisions and acceptance criteria.
+
+- [Live design page](https://quick-meal-demo.ioenv.workers.dev/design): open it in a browser.
+- [docs/design.png](docs/design.png): the whole page as one image. GitHub shows it directly.
+- [docs/design.html](docs/design.html): the source. GitHub shows it as code.
 
 <table>
   <tr>
