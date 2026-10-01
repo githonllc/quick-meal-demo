@@ -1,0 +1,96 @@
+.menu-name {
+  margin: 12px 0 2px;
+  font-size: 20px;
+}
+.menu-meta {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.menu-budget-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--chip);
+  font-size: 14px;
+}
+.menu-change {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.menu-section {
+  margin: 18px 0 4px;
+  font-size: 16px;
+}
+
+.menu-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+.menu-info {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.menu-dish {
+  font-size: 15px;
+}
+.menu-like {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.menu-right {
+  display: grid;
+  gap: 2px;
+  justify-items: end;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.menu-price {
+  color: var(--muted);
+}
+.menu-est {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.menu-tag {
+  font-size: 13px;
+  font-weight: 700;
+}
+.menu-tag.fits {
+  color: var(--ok);
+}
+.menu-tag.over {
+  color: var(--warn);
+}
+
+.menu-skel {
+  margin: 12px 0;
+  border-radius: 12px;
+}
+.menu-error {
+  padding: 24px 0;
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+.menu-retry {
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: var(--red);
+  color: #fff;
+  font-weight: 700;
+}
