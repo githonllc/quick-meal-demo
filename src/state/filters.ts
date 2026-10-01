@@ -1,5 +1,6 @@
 import { BUDGET_MAX, BUDGET_MIN, CUISINES, DISTANCE_STEPS, SORTS, TIME_STEPS } from '../../shared/constants'
 import type { CuisineId, DistanceStep, SortId, TimeStep } from '../../shared/types'
+import { browserStorage, loadDefault } from './savedDefault'
 
 // What the Quick Meal page shows. Budget is in whole dollars, null means "any".
 export interface UiFilters {
@@ -45,9 +46,14 @@ export function toQuery(f: UiFilters): string {
   return q.toString()
 }
 
-// The filters to start from when the page opens. #9 adds the saved default here.
-export function initialFilters(search: string): UiFilters {
-  return parseUrl(search)
+// The filters to start from when the page opens. Any of the four filter keys in the URL
+// (even budget=40, "any") means the URL wins; otherwise the saved default fills them.
+// Cuisine always comes from the URL (design P8).
+export function initialFilters(search: string, store = browserStorage()): UiFilters {
+  const url = parseUrl(search)
+  const q = new URLSearchParams(search)
+  if (['budget', 'time', 'distance', 'sort'].some((k) => q.has(k))) return url
+  return { ...url, ...loadDefault(store), cuisine: url.cuisine }
 }
 
 // The Filters badge counts budget, time and distance. Tab and sort do not count.
