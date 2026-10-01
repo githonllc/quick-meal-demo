@@ -15,7 +15,8 @@
     "lint": "oxlint",
     "preview": "npm run build && vite preview",
     "deploy": "npm run build && wrangler deploy",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "icons": "bash scripts/make-icons.sh"
   },
   "dependencies": {
     "react": "^19.2.8",
