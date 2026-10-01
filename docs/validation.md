@@ -2,8 +2,8 @@
 
 - Date: 2026-09-30
 - Live URL: https://quick-meal-demo.ioenv.workers.dev
-- Deployed commit: `8ea3646`
-- Worker version: `a1f815af-fe64-48ee-a24c-ec60c42d01ab`
+- Deployed commit: `67ee67f`
+- Worker version: `d940aeb5-ee3a-49ad-b03b-91c4f4d166c1`
 
 Every acceptance criterion from the "Validation" section of [design.html](design.html) was run as an automated Playwright test against the live URL.
 
@@ -21,7 +21,7 @@ Every acceptance criterion from the "Validation" section of [design.html](design
 
 First deploy (`96522f6`): we ran the full suite three times. The first run started seconds after the deploy and had 6 failures (the first API call got a 404), most likely because the new Worker had not yet reached every edge location. Runs 2 and 3, a minute later, both passed 24 of 24.
 
-After the real-phone walkthrough fixes (`8ea3646`): 28 tests ran against the live URL and all passed. The 5 screenshot tests are skipped in a normal run.
+After the real-phone walkthrough fixes, the Home Screen install and the white Home (`67ee67f`): 29 tests ran against the live URL and all passed. The 5 screenshot tests are skipped in a normal run.
 
 ## How to re-run
 
@@ -70,3 +70,4 @@ The PM walked through the live demo on a real phone after all the tests passed. 
 3. Dragging inside a filter sheet also scrolled the page behind it. The page now locks while a sheet is open ([#31](https://github.com/githonllc/quick-meal-demo/issues/31)). Still to check by hand on iOS and Android.
 4. Long lists felt slow to load. The 0.3 second demo delay was removed, photos and scripts are cached, and the list stays on screen with a loading bar while new results load ([#32](https://github.com/githonllc/quick-meal-demo/issues/32)).
 5. The live count on the sheet ("Show N results") could be out of date on a slow network. It was removed. The button says "Show results" and the search runs only on apply ([#36](https://github.com/githonllc/quick-meal-demo/issues/36)). The design page was updated to match ([#37](https://github.com/githonllc/quick-meal-demo/issues/37)).
+6. Installed on an iPhone Home Screen ([#42](https://github.com/githonllc/quick-meal-demo/issues/42)), the white status bar faded into Home's red header. Home is now white like the current DoorDash app ([#44](https://github.com/githonllc/quick-meal-demo/issues/44)). Still to check by hand on an iPhone and an Android phone.
