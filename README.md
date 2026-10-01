@@ -4,6 +4,8 @@ Quick Meal is a demo of a fast meal ordering app for university students. It run
 
 Concept demo for a CMU course. Not affiliated with DoorDash.
 
+Live demo: https://quick-meal-demo.ioenv.workers.dev
+
 ## Scripts
 
 - `npm run dev`: start the dev server
@@ -17,3 +19,7 @@ Concept demo for a CMU course. Not affiliated with DoorDash.
 ## Design
 
 See [docs/design.html](docs/design.html).
+
+## Validation
+
+See [docs/validation.md](docs/validation.md) for the acceptance test results on the live demo and the screenshots.
