@@ -133,6 +133,8 @@ All acceptance criteria passed. Then the PM used the live demo on a phone and fo
 
 Two of these undid design decisions. The live count was in the design from the first draft and in AC-03. It looked right in a mockup and felt wrong on a phone. The design page was updated to version 29 to match ([#37](https://github.com/githonllc/quick-meal-demo/issues/37)).
 
+Installing the demo on an iPhone Home Screen ([#42](https://github.com/githonllc/quick-meal-demo/issues/42)) showed one more thing. The white status bar faded into Home's red header. The current DoorDash Home has a white top, so we matched it instead of patching the status bar ([#44](https://github.com/githonllc/quick-meal-demo/issues/44)). The design page went to version 30.
+
 The lesson: a mockup catches what is missing, and a real phone catches how it feels. You need both.
 
 ## What went wrong and what we changed

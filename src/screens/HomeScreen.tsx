@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { HomeData } from '../../shared/types'
-import { formatMiles } from '../../shared/format'
+import { formatCount, formatMiles } from '../../shared/format'
 import { getHome } from '../api'
 import { FoodTile } from '../components/FoodTile'
 import { useToast } from '../components/Toast'
@@ -34,11 +34,24 @@ const ICONS = {
 }
 
 const CATEGORIES: { label: string; icon: ReactNode }[] = [
-  { label: 'Deals', icon: svg(<><path d="M3 12V3h9l9 9-9 9-9-9z" /><circle cx="7.5" cy="7.5" r="1.5" /></>, 26) },
-  { label: 'Grocery', icon: svg(<><path d="M4 9h16l-2 11H6L4 9z" /><path d="M9 9a3 3 0 0 1 6 0" /></>, 26) },
-  { label: 'Convenience', icon: svg(<><rect x="6" y="3" width="12" height="18" rx="2" /><circle cx="12" cy="12" r="3" /></>, 26) },
-  { label: 'Reserve', icon: svg(<><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></>, 26) },
+  { label: 'Deals', icon: svg(<><path d="M3 12V3h9l9 9-9 9-9-9z" /><circle cx="7.5" cy="7.5" r="1.5" /></>, 28) },
+  { label: 'Late Night', icon: svg(<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />, 28) },
+  { label: 'Grocery', icon: svg(<><path d="M4 9h16l-2 11H6L4 9z" /><path d="M9 9a3 3 0 0 1 6 0" /></>, 28) },
+  { label: 'Reservations', icon: svg(<><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></>, 28) },
+  { label: 'Convenience', icon: svg(<><rect x="6" y="3" width="12" height="18" rx="2" /><circle cx="12" cy="12" r="3" /></>, 28) },
 ]
+
+// Small pictures before each cuisine label, like the current DoorDash Home.
+const CUISINE_EMOJI: Record<string, string> = {
+  chinese: '🥡',
+  indian: '🍛',
+  mexican: '🌮',
+  pizza: '🍕',
+  burgers: '🍔',
+  healthy: '🥑',
+  'fast-food': '🍟',
+  sushi: '🍣',
+}
 
 function Loading() {
   return (
@@ -77,7 +90,9 @@ export function HomeScreen() {
     <>
       <header className="home-head">
         <div className="home-row">
-          <span className="home-loc">SJSU ▾</span>
+          <span className="home-loc">
+            SJSU {svg(<path d="m6 9 6 6 6-6" />, 18)}
+          </span>
           <div className="home-icons">
             {(['profile', 'bell', 'cart'] as const).map((name) => (
               <button key={name} className="icon-btn" aria-label={name} onClick={() => show(NOT_IN_DEMO)}>
@@ -101,13 +116,6 @@ export function HomeScreen() {
             </button>
           ))}
         </div>
-        <button className="banner" onClick={() => navigate('/quick-meal')}>
-          $0 delivery
-          <br />
-          on your first
-          <br />
-          Quick Meal
-        </button>
       </header>
 
       {failed && (
@@ -123,24 +131,44 @@ export function HomeScreen() {
         <>
           <h2 className="home-sec">What can we get you?</h2>
           <div className="chips">
-            {home.cuisines.map((c) => (
-              <button key={c.id} className="chip" onClick={() => show(NOT_IN_DEMO)}>
-                {c.label}
-              </button>
+            {[0, 1].map((row) => (
+              <div key={row} className="chip-row">
+                {home.cuisines
+                  .filter((_, i) => i % 2 === row)
+                  .map((c) => (
+                    <button key={c.id} className="chip" onClick={() => show(NOT_IN_DEMO)}>
+                      <span aria-hidden="true">{CUISINE_EMOJI[c.id]}</span>
+                      {c.label}
+                    </button>
+                  ))}
+              </div>
             ))}
           </div>
-          <h2 className="home-sec">Near campus</h2>
-          <div className="near">
+          <hr className="home-rule" />
+          <div className="home-sec-row">
+            <h2 className="home-sec">Near campus</h2>
+            <button className="icon-btn" aria-label="See all near campus" onClick={() => show(NOT_IN_DEMO)}>
+              {svg(<path d="M5 12h14M13 6l6 6-6 6" />)}
+            </button>
+          </div>
+          <div className="home-near">
             {home.nearCampus.map((r) => (
               <button key={r.id} className="near-card" onClick={() => show(NOT_IN_DEMO)}>
                 <FoodTile kind={r.heroPhoto} size="hero" />
                 <div className="near-name">{r.name}</div>
                 <div className="near-meta">
-                  {r.rating.toFixed(1)} ★ · {formatMiles(r.distanceMi)} · {r.etaMin} min
+                  {r.rating.toFixed(1)} ★ ({formatCount(r.ratingCount)}) · {formatMiles(r.distanceMi)} · {r.etaMin} min
                 </div>
               </button>
             ))}
           </div>
+          <button className="banner" onClick={() => navigate('/quick-meal')}>
+            $0 delivery
+            <br />
+            on your first
+            <br />
+            Quick Meal
+          </button>
         </>
       )}
 
