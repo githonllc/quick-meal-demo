@@ -317,3 +317,61 @@
   color: var(--muted);
   font-size: 13px;
 }
+
+/* No-match state */
+.no-match {
+  margin: 16px 0;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--chip);
+}
+.no-match p {
+  margin: 4px 0 12px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.relax-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.relax-chip {
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  background: #fff;
+}
+.near-head {
+  margin: 8px 0 0;
+  font-size: 16px;
+}
+.near {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  cursor: pointer;
+}
+.near .tile {
+  flex: none;
+}
+.near-body {
+  display: grid;
+  gap: 2px;
+  justify-items: start;
+  min-width: 0;
+}
+.near-line {
+  font-size: 13px;
+  color: var(--muted);
+}
+.miss-tag {
+  margin-top: 2px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--warn-bg);
+  color: var(--warn);
+  font-size: 12px;
+  font-weight: 600;
+}
