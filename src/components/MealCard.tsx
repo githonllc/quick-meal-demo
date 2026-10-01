@@ -1,4 +1,4 @@
-import { formatCents, formatCount, formatDollars, formatMiles } from '../../shared/format'
+import { formatCents, formatCount, formatDollars, formatEtaRange, formatMiles } from '../../shared/format'
 import type { MealCard as Meal } from '../../shared/types'
 import { FoodTile } from './FoodTile'
 
@@ -47,6 +47,7 @@ export function MealCard({
       </div>
       <div className="meal-row">
         <span className="meal-meta">
+          Est. {formatEtaRange(r.etaMin)} · {formatMiles(r.distanceMi)} ·{' '}
           <button
             className="meal-price"
             data-testid="meal-price"
@@ -55,9 +56,8 @@ export function MealCard({
               onPrice()
             }}
           >
-            Est. <b>{formatCents(price.totalCents)}</b> all-in
-          </button>{' '}
-          · {r.etaMin} min · {formatMiles(r.distanceMi)}
+            {formatCents(price.totalCents)} all-in
+          </button>
         </span>
         {budget !== null && <span className="fits">Fits</span>}
       </div>

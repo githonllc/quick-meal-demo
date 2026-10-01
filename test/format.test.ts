@@ -3,6 +3,7 @@ import {
   formatCents,
   formatCount,
   formatDollars,
+  formatEtaRange,
   formatMiles,
   formatPercentBps,
   pluralize,
@@ -19,6 +20,10 @@ describe('format', () => {
   it('formatMiles', () => {
     expect(formatMiles(0.5)).toBe('0.5 mi')
     expect(formatMiles(1)).toBe('1 mi')
+  })
+  it('formatEtaRange', () => {
+    expect(formatEtaRange(14)).toBe('9–14 min')
+    expect(formatEtaRange(3)).toBe('1–3 min')
   })
   it('formatPercentBps', () => {
     expect(formatPercentBps(950)).toBe('9.5%')

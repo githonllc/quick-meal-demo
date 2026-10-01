@@ -25,6 +25,8 @@ const ROWS: Row[] = [
   { budget: 1500, time: 15, distance: 0.5, cuisine: null, total: 0 },
   { budget: 1700, time: 15, distance: 0.5, cuisine: null, total: 1 },
   { budget: null, time: 15, distance: null, cuisine: null, total: 3 },
+  { budget: null, time: 30, distance: null, cuisine: null, total: 17 },
+  { budget: 2500, time: 30, distance: null, cuisine: null, total: 13 },
 ]
 
 function find(id: string): Restaurant {

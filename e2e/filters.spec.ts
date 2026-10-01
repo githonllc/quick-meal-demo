@@ -32,6 +32,7 @@ test('AC-03: the Filters sheet opens from the chip and the top-right icon', asyn
     await page.goto('/quick-meal')
     await expect(page.getByTestId('meal-card')).toHaveCount(28)
     await opener.click()
+    await expect(page.getByTestId('sheet-filters').locator('.grp h3').first()).toHaveText('How much time do you have?')
     await pickBudget20Time30(page)
     await page.getByTestId('sheet-apply').click()
     await expect(page.getByTestId('sheet-filters')).toHaveCount(0)
