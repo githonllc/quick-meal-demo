@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
+import { waitForResults } from './helpers'
 
 // Start every test with no saved default and no "Saved" toast flag.
 test.beforeEach(async ({ page }) => {
@@ -17,6 +18,7 @@ async function pickBudget20Time30(page: Page) {
 }
 
 async function expectBudget20Time30(page: Page) {
+  await waitForResults(page)
   await expect(page.getByTestId('meal-card')).toHaveCount(6)
   await expect(page.getByTestId('chip-budget')).toHaveText('Up to $20 ▾')
   await expect(page.getByTestId('chip-time')).toHaveText('30 min ▾')
@@ -46,6 +48,7 @@ test('AC-07: applied filters come back next visit, the cuisine tab does not', as
   await expectBudget20Time30(page)
   await page.getByTestId('cuisine-tab-chinese').click()
   await expect(page).toHaveURL(/cuisine=chinese/)
+  await waitForResults(page)
 
   // Leave and come back from Home in a new tab.
   const again = await context.newPage()
@@ -92,6 +95,7 @@ test('Clear all then apply removes every filter', async ({ page }) => {
   // Clear all only changes the draft.
   await expect(page.getByTestId('chip-filters-badge')).toHaveText('2')
   await page.getByTestId('sheet-apply').click()
+  await waitForResults(page)
   await expect(page.getByTestId('count-line')).toHaveText('28 places open now · Best match')
   await expect(page.getByTestId('chip-filters-badge')).toHaveCount(0)
   await expect(page).toHaveURL(/\/quick-meal$/)

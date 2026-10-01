@@ -9,6 +9,7 @@ import { CuisineTabs } from '../components/CuisineTabs'
 import { FilterChips } from '../components/FilterChips'
 import { FiltersSheet } from '../components/FiltersSheet'
 import type { SheetKind } from '../components/FilterChips'
+import { LoadingBar } from '../components/LoadingBar'
 import { MealCard } from '../components/MealCard'
 import { NoMatch } from '../components/NoMatch'
 import { Skeleton } from '../components/Skeleton'
@@ -43,6 +44,8 @@ export function QuickMealScreen() {
   const [attempt, setAttempt] = useState(0)
   // The answer to one request. data is null when the request failed.
   const [result, setResult] = useState<{ req: string; data: SearchResponse | null } | null>(null)
+  // The last successful answer. It stays on screen while the next request loads.
+  const [shown, setShown] = useState<SearchResponse | null>(null)
   const [priced, setPriced] = useState<Meal | null>(null)
   const [open, setOpen] = useState<SheetKind | null>(null)
   const { show } = useToast()
@@ -58,7 +61,12 @@ export function QuickMealScreen() {
   useEffect(() => {
     const controller = new AbortController()
     searchMeals(new URLSearchParams(key), controller.signal)
-      .then((data) => setResult({ req, data }))
+      // A cached answer can arrive after the abort, so check it here too.
+      .then((data) => {
+        if (controller.signal.aborted) return
+        setResult({ req, data })
+        setShown(data)
+      })
       .catch(() => {
         if (!controller.signal.aborted) setResult({ req, data: null })
       })
@@ -92,9 +100,11 @@ export function QuickMealScreen() {
       ),
     )
 
-  // Until the current request answers, show skeletons (not the old list).
+  // Derived in the same render as the URL change, so old results never look final.
   const done = result?.req === req
+  const pending = !done
   const failed = done && result.data === null
+  // The answer for the current filters only (the sheets seed their count from it).
   const data = done ? result.data : null
 
   return (
@@ -120,41 +130,51 @@ export function QuickMealScreen() {
         </div>
       )}
 
-      {!failed && !data && (
-        <div aria-busy="true">
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
-        </div>
-      )}
+      {!failed && (
+        <section data-testid="results" aria-busy={pending ? 'true' : 'false'}>
+          {/* Skeletons only on the first load, when there is nothing to show yet. */}
+          {pending && !shown && (
+            <>
+              <Skeleton />
+              <Skeleton />
+              <Skeleton />
+            </>
+          )}
+          {pending && shown && <LoadingBar />}
 
-      {!failed && data && data.exact.length === 0 && (
-        <NoMatch
-          filters={filters}
-          near={data.near}
-          relax={data.relax}
-          onRelax={relaxTo}
-          onOpen={(card) => openMenu(card.restaurant.id)}
-          onPrice={setPriced}
-        />
-      )}
+          {shown && (
+            <div className={pending ? 'dim' : undefined}>
+              {shown.exact.length === 0 && (
+                <NoMatch
+                  filters={filters}
+                  near={shown.near}
+                  relax={shown.relax}
+                  onRelax={relaxTo}
+                  onOpen={(card) => openMenu(card.restaurant.id)}
+                  onPrice={setPriced}
+                />
+              )}
 
-      {!failed && data && data.exact.length > 0 && (
-        <>
-          <p className="count-line" data-testid="count-line">
-            {countLine(data, filters)}
-          </p>
-          {filters.budget === null && <p className="qm-hint">Set a budget to see what fits.</p>}
-          {data.exact.map((card) => (
-            <MealCard
-              key={card.restaurant.id}
-              card={card}
-              budget={filters.budget}
-              onOpen={() => openMenu(card.restaurant.id)}
-              onPrice={() => setPriced(card)}
-            />
-          ))}
-        </>
+              {shown.exact.length > 0 && (
+                <>
+                  <p className="count-line" data-testid="count-line">
+                    {countLine(shown, filters)}
+                  </p>
+                  {filters.budget === null && <p className="qm-hint">Set a budget to see what fits.</p>}
+                  {shown.exact.map((card) => (
+                    <MealCard
+                      key={card.restaurant.id}
+                      card={card}
+                      budget={filters.budget}
+                      onOpen={() => openMenu(card.restaurant.id)}
+                      onPrice={() => setPriced(card)}
+                    />
+                  ))}
+                </>
+              )}
+            </div>
+          )}
+        </section>
       )}
 
       {open === 'filters' && (

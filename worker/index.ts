@@ -5,7 +5,8 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname.startsWith("/api/")) {
-      return handleApi(request, { delayMs: 300 });
+      // Raise this to see the loading states in a demo.
+      return handleApi(request, { delayMs: 0 });
     }
     return new Response(null, { status: 404 });
   },

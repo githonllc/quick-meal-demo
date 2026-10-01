@@ -6,6 +6,7 @@ import { BackIcon } from '../components/TopBar'
 import { BreakdownSheet } from '../components/BreakdownSheet'
 import { BudgetSheet } from '../components/BudgetSheet'
 import { FoodTile } from '../components/FoodTile'
+import { LoadingBar } from '../components/LoadingBar'
 import { MenuRow } from '../components/MenuRow'
 import { useToast } from '../components/Toast'
 import { back, navigate, useRoute } from '../router'
@@ -25,6 +26,8 @@ export function MenuScreen() {
 
   const [attempt, setAttempt] = useState(0)
   const [result, setResult] = useState<Result | null>(null)
+  // The last menu that loaded. It stays on screen while a new budget loads.
+  const [menu, setMenu] = useState<MenuView | null>(null)
   const [priced, setPriced] = useState<Row | null>(null)
   const [budgetOpen, setBudgetOpen] = useState(false)
   const { show } = useToast()
@@ -34,7 +37,12 @@ export function MenuScreen() {
   useEffect(() => {
     const controller = new AbortController()
     getMenu(params.id, new URLSearchParams(key), controller.signal)
-      .then((menu) => setResult({ req, menu, missing: false }))
+      // A cached answer can arrive after the abort, so check it here too.
+      .then((data) => {
+        if (controller.signal.aborted) return
+        setResult({ req, menu: data, missing: false })
+        setMenu(data)
+      })
       .catch((err: unknown) => {
         if (!controller.signal.aborted) setResult({ req, menu: null, missing: err instanceof ApiError && err.status === 404 })
       })
@@ -57,9 +65,10 @@ export function MenuScreen() {
     setBudgetOpen(false)
   }
 
+  // Derived in the same render as the URL change, so an old menu never looks final.
   const done = result?.req === req
-  const menu = done ? result.menu : null
-  const failed = done && !menu && !result.missing
+  const pending = !done
+  const failed = done && !result.menu && !result.missing
   const missing = done && result.missing
 
   return (
@@ -88,61 +97,67 @@ export function MenuScreen() {
         </div>
       )}
 
-      {!done && (
-        <div aria-busy="true">
-          <div className="skeleton menu-skel" style={{ height: 100 }} />
-          {[0, 1, 2, 3].map((n) => (
-            <div key={n} className="skeleton menu-skel" style={{ height: 64 }} />
-          ))}
-        </div>
-      )}
-
-      {menu && (
-        <>
-          <FoodTile kind={menu.restaurant.heroPhoto} size="hero" />
-          <h1 className="menu-name">{menu.restaurant.name}</h1>
-          <p className="menu-meta">
-            {menu.restaurant.rating.toFixed(1)} ★ ({formatCount(menu.restaurant.ratingCount)}) ·{' '}
-            {formatMiles(menu.restaurant.distanceMi)} · {menu.restaurant.etaMin} min
-          </p>
-
-          {menu.budgetCents !== null && (
-            <div className="menu-budget-bar" data-testid="menu-budget-bar">
-              <span>
-                Your budget: <b>up to {formatDollars(menu.budgetCents / 100)}</b> est. all-in
-              </span>
-              <button className="menu-change" onClick={() => setBudgetOpen(true)}>
-                Change
-              </button>
-            </div>
-          )}
-
-          {menu.budgetCents === null && (
-            <Section rows={menu.fits.concat(menu.over)} tag={null} onPrice={setPriced} />
-          )}
-          {menu.budgetCents !== null && (
+      {!failed && !missing && (
+        <section data-testid="menu-results" aria-busy={pending ? 'true' : 'false'}>
+          {/* Skeletons only on the first load, when there is nothing to show yet. */}
+          {pending && !menu && (
             <>
-              <Section
-                testId="menu-fits"
-                title={
-                  menu.fits.length > 0
-                    ? `Under your budget (${menu.fits.length})`
-                    : `Nothing here fits ${formatDollars(menu.budgetCents / 100)}. Closest:`
-                }
-                rows={menu.fits}
-                tag="fits"
-                onPrice={setPriced}
-              />
-              <Section
-                testId="menu-over"
-                title={`Over your budget (${menu.over.length})`}
-                rows={menu.over}
-                tag="over"
-                onPrice={setPriced}
-              />
+              <div className="skeleton menu-skel" style={{ height: 100 }} />
+              {[0, 1, 2, 3].map((n) => (
+                <div key={n} className="skeleton menu-skel" style={{ height: 64 }} />
+              ))}
             </>
           )}
-        </>
+          {pending && menu && <LoadingBar />}
+
+          {menu && (
+            <div className={pending ? 'dim' : undefined}>
+              <FoodTile kind={menu.restaurant.heroPhoto} size="hero" />
+              <h1 className="menu-name">{menu.restaurant.name}</h1>
+              <p className="menu-meta">
+                {menu.restaurant.rating.toFixed(1)} ★ ({formatCount(menu.restaurant.ratingCount)}) ·{' '}
+                {formatMiles(menu.restaurant.distanceMi)} · {menu.restaurant.etaMin} min
+              </p>
+
+              {menu.budgetCents !== null && (
+                <div className="menu-budget-bar" data-testid="menu-budget-bar">
+                  <span>
+                    Your budget: <b>up to {formatDollars(menu.budgetCents / 100)}</b> est. all-in
+                  </span>
+                  <button className="menu-change" onClick={() => setBudgetOpen(true)}>
+                    Change
+                  </button>
+                </div>
+              )}
+
+              {menu.budgetCents === null && (
+                <Section rows={menu.fits.concat(menu.over)} tag={null} onPrice={setPriced} />
+              )}
+              {menu.budgetCents !== null && (
+                <>
+                  <Section
+                    testId="menu-fits"
+                    title={
+                      menu.fits.length > 0
+                        ? `Under your budget (${menu.fits.length})`
+                        : `Nothing here fits ${formatDollars(menu.budgetCents / 100)}. Closest:`
+                    }
+                    rows={menu.fits}
+                    tag="fits"
+                    onPrice={setPriced}
+                  />
+                  <Section
+                    testId="menu-over"
+                    title={`Over your budget (${menu.over.length})`}
+                    rows={menu.over}
+                    tag="over"
+                    onPrice={setPriced}
+                  />
+                </>
+              )}
+            </div>
+          )}
+        </section>
       )}
 
       {budgetOpen && (
