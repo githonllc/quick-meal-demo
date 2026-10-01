@@ -20,6 +20,10 @@ Live demo: https://quick-meal-demo.ioenv.workers.dev
 
 See [docs/design.html](docs/design.html).
 
+## How we built this
+
+How we built this with AI: [docs/how-we-built-this.md](docs/how-we-built-this.md)
+
 ## Validation
 
 See [docs/validation.md](docs/validation.md) for the acceptance test results on the live demo and the screenshots.
