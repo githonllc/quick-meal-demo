@@ -37,3 +37,6 @@ playwright-report/
 
 # Keep the mock data even if a global ignore rule has data/
 !worker/data/
+
+# Generated at build time from docs/design.html
+public/design.html
