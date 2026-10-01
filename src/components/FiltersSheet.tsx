@@ -29,17 +29,19 @@ export function FiltersSheet({
   return (
     <Sheet title="Filters" testId="sheet-filters" onClose={onClose}>
       <div className="grp">
-        <h3>Budget per meal</h3>
-        <p className="grp-help">Estimated all-in: food, fees, tax and tip</p>
-        <BudgetSlider value={draft.budget} onChange={(budget) => set({ budget })} />
-      </div>
-      <div className="grp">
-        <h3>Delivery time</h3>
+        <h3>How much time do you have?</h3>
+        <p className="grp-help">Estimated arrival within this window. Not guaranteed.</p>
         <Steps name="time" steps={TIME_STEPS} value={draft.time} onPick={(time) => set({ time })} />
       </div>
       <div className="grp">
         <h3>Distance</h3>
+        <p className="grp-help">For pickup</p>
         <Steps name="distance" steps={DISTANCE_STEPS} value={draft.distance} onPick={(distance) => set({ distance })} />
+      </div>
+      <div className="grp">
+        <h3>Budget per meal</h3>
+        <p className="grp-help">Estimated all-in: food, fees, tax and tip</p>
+        <BudgetSlider value={draft.budget} onChange={(budget) => set({ budget })} />
       </div>
       <div className="grp">
         <h3>Sort by</h3>

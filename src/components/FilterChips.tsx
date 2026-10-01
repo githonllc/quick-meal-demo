@@ -1,8 +1,8 @@
-import { formatDollars, formatMiles } from '../../shared/format'
+import { formatDollars } from '../../shared/format'
 import { activeCount } from '../state/filters'
 import type { UiFilters } from '../state/filters'
 
-export type SheetKind = 'filters' | 'budget' | 'time' | 'distance'
+export type SheetKind = 'filters' | 'budget' | 'time'
 
 function SmallSliders() {
   return (
@@ -21,7 +21,7 @@ function Chip({ id, on, label, onClick }: { id: string; on: boolean; label: stri
 }
 
 export function FilterChips({ filters, onOpen }: { filters: UiFilters; onOpen: (kind: SheetKind) => void }) {
-  const { budget, time, distance } = filters
+  const { budget, time } = filters
   const count = activeCount(filters)
   return (
     <div className="fchips">
@@ -35,22 +35,16 @@ export function FilterChips({ filters, onOpen }: { filters: UiFilters; onOpen: (
         )}
       </button>
       <Chip
-        id="chip-budget"
-        on={budget !== null}
-        label={budget === null ? 'Budget' : `Up to ${formatDollars(budget)}`}
-        onClick={() => onOpen('budget')}
-      />
-      <Chip
         id="chip-time"
         on={time !== null}
         label={time === null ? 'Time' : `${time} min`}
         onClick={() => onOpen('time')}
       />
       <Chip
-        id="chip-distance"
-        on={distance !== null}
-        label={distance === null ? 'Distance' : formatMiles(distance)}
-        onClick={() => onOpen('distance')}
+        id="chip-budget"
+        on={budget !== null}
+        label={budget === null ? 'Budget' : `Up to ${formatDollars(budget)}`}
+        onClick={() => onOpen('budget')}
       />
     </div>
   )

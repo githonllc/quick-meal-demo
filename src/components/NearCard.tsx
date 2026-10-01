@@ -1,4 +1,4 @@
-import { formatCents, formatMiles } from '../../shared/format'
+import { formatCents, formatEtaRange, formatMiles } from '../../shared/format'
 import type { NearCard as Near } from '../../shared/types'
 import { FoodTile } from './FoodTile'
 
@@ -10,18 +10,19 @@ export function NearCard({ card, onOpen, onPrice }: { card: Near; onOpen: () => 
       <FoodTile kind={item.photo} size="thumb" />
       <div className="near-body">
         <button className="meal-name">{item.name}</button>
-        <div className="near-line">
-          {r.name} · {r.etaMin} min · {formatMiles(r.distanceMi)}
+        <div className="near-line">{r.name}</div>
+        <div className="near-line near-est">
+          Est. {formatEtaRange(r.etaMin)} · {formatMiles(r.distanceMi)} ·{' '}
+          <button
+            className="meal-price"
+            onClick={(e) => {
+              e.stopPropagation()
+              onPrice()
+            }}
+          >
+            {formatCents(price.totalCents)} all-in
+          </button>
         </div>
-        <button
-          className="meal-price"
-          onClick={(e) => {
-            e.stopPropagation()
-            onPrice()
-          }}
-        >
-          Est. <b>{formatCents(price.totalCents)}</b> all-in
-        </button>
         <span className="miss-tag" data-testid="miss-tag">
           {miss.map((m) => m.label).join(' · ')}
         </span>

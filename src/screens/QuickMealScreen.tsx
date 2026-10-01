@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { DISTANCE_STEPS, SORTS, TIME_STEPS } from '../../shared/constants'
+import { SORTS, TIME_STEPS } from '../../shared/constants'
 import { pluralize } from '../../shared/format'
 import type { DistanceStep, MealCard as Meal, Relax, SearchResponse, TimeStep } from '../../shared/types'
 import { searchMeals } from '../api'
@@ -183,19 +183,9 @@ export function QuickMealScreen() {
       )}
       {open === 'time' && (
         <StepSheet
-          kind="time"
           steps={TIME_STEPS}
           value={filters.time}
           onPick={(time) => apply({ ...filters, time })}
-          onClose={close}
-        />
-      )}
-      {open === 'distance' && (
-        <StepSheet
-          kind="distance"
-          steps={DISTANCE_STEPS}
-          value={filters.distance}
-          onPick={(distance) => apply({ ...filters, distance })}
           onClose={close}
         />
       )}

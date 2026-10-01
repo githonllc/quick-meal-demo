@@ -12,6 +12,11 @@ export function formatMiles(m: number): string {
   return `${Number(m.toFixed(1))} mi`
 }
 
+// A display range. The high end is etaMin, the value the time filter compares.
+export function formatEtaRange(etaMin: number): string {
+  return `${Math.max(1, etaMin - 5)}–${etaMin} min`
+}
+
 export function formatPercentBps(bps: number): string {
   return `${Number((bps / 100).toFixed(2))}%`
 }

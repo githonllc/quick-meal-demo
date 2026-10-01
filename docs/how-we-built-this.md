@@ -4,7 +4,7 @@ This page is for students who want to build a prototype or MVP with an AI coding
 
 ## What we built
 
-Quick Meal is a concept feature for a food delivery app. A student sets a budget, a time and a distance, and sees one meal per place whose estimated all-in price fits.
+Quick Meal is a concept feature for a food delivery app. It helps a busy student decide fast. The student says how much time they have, can add a budget, and sees one meal per place that fits, with an estimated time and an estimated all-in price.
 
 Live demo: https://quick-meal-demo.ioenv.workers.dev
 
@@ -134,6 +134,17 @@ All acceptance criteria passed. Then the PM used the live demo on a phone and fo
 Two of these undid design decisions. The live count was in the design from the first draft and in AC-03. It looked right in a mockup and felt wrong on a phone. The design page was updated to version 29 to match ([#37](https://github.com/githonllc/quick-meal-demo/issues/37)).
 
 Installing the demo on an iPhone Home Screen ([#42](https://github.com/githonllc/quick-meal-demo/issues/42)) showed one more thing. The white status bar faded into Home's red header. The current DoorDash Home has a white top, so we matched it instead of patching the status bar ([#44](https://github.com/githonllc/quick-meal-demo/issues/44)). The design page went to version 30.
+
+### A third round: the team checks the concept
+
+Then the team compared the demo with our concept slides and worksheet. Two problems came out.
+
+- **An outdated concept name.** The design page said the demo served "Budget-First Ordering". That name came from an early draft. The team's final concept is Busy Mode, aimed at value, predictability and lower decision effort. The AI had built on the old draft, and a teammate caught it by checking the team's own slides.
+- **Two ideas of time.** We had drifted between decision time (how fast a student picks a meal) and delivery time (when the food arrives). Our TA had asked how we could guarantee a delivery time and what happens when an order is late. There is no simple answer. The team settled it in a chat thread: decision time is the north star, and delivery time is an estimate and a guardrail, not a promise.
+
+The design changed to match (version 34, [#47](https://github.com/githonllc/quick-meal-demo/issues/47)). Time comes first. Every time shows as a range like "Est. 9–14 min", so it reads as an estimate. Nothing on the card is bold, because a bold time would read like a promise. Distance moved into the Filters sheet, labeled for pickup, since only the student knows whether they will walk, bike or drive.
+
+The lesson: an AI keeps every earlier choice in the page, including outdated ones. Check its premises against the team's latest documents.
 
 The lesson: a mockup catches what is missing, and a real phone catches how it feels. You need both.
 

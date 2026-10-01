@@ -14,9 +14,12 @@ const ROWS = ['item', 'delivery', 'small', 'service', 'tax', 'tip']
 test('AC-01: Home opens Quick Meal with chips, tabs and meal cards', async ({ page }) => {
   await page.goto('/')
   await page.getByTestId('quick-meal-entry').click()
-  for (const id of ['chip-filters', 'chip-budget', 'chip-time', 'chip-distance']) {
-    await expect(page.getByTestId(id)).toBeVisible()
-  }
+  const chips = page.locator('[data-testid^="chip-"]:not([data-testid="chip-filters-badge"])')
+  await expect(chips).toHaveCount(3)
+  await expect(chips.nth(0)).toHaveAttribute('data-testid', 'chip-filters')
+  await expect(chips.nth(1)).toHaveAttribute('data-testid', 'chip-time')
+  await expect(chips.nth(2)).toHaveAttribute('data-testid', 'chip-budget')
+  await expect(page.getByTestId('chip-distance')).toHaveCount(0)
   await expect(page.getByTestId('cuisine-tab-all')).toHaveAttribute('aria-selected', 'true')
   await expect(page.getByTestId('meal-card').first()).toBeVisible()
   await expect(page.getByRole('tab', { name: 'Restaurant' })).toHaveCount(0)
@@ -60,7 +63,6 @@ test('AC-04: a cuisine tab splits the filtered meals and keeps the chips', async
   await expect(page).toHaveURL(/cuisine=chinese/)
   await expect(page.getByTestId('chip-budget')).toHaveText('Up to $20 ▾')
   await expect(page.getByTestId('chip-time')).toHaveText('20 min ▾')
-  await expect(page.getByTestId('chip-distance')).toHaveText('1 mi ▾')
   await expect(page.getByTestId('chip-filters-badge')).toHaveText('3')
 })
 
@@ -69,10 +71,26 @@ test('the Paseo card shows its lead meal, all-in price and other fitting meals',
   await expect(page.getByTestId('count-line')).toHaveText('6 places have a meal that fits · Best match')
   const card = page.getByTestId('meal-card').filter({ hasText: 'Paseo Rice Bowl' })
   await expect(card).toContainText('Chicken Rice Bowl')
-  await expect(card.getByTestId('meal-price')).toHaveText('Est. $18.73 all-in')
+  await expect(card.getByTestId('meal-price')).toHaveText('$18.73 all-in')
+  await expect(card).toContainText('Est. 13–18 min · 0.4 mi · $18.73 all-in')
   await expect(card.getByTestId('meal-more')).toContainText('+2 more under $20: Tofu Rice Bowl, Spam Musubi Plate')
   await card.getByTestId('meal-more').click()
   await expect(page).toHaveURL(/\/quick-meal\/restaurants\/paseo-rice-bowl\?budget=20$/)
+})
+
+test('AC-08: times are estimated ranges', async ({ page }) => {
+  await page.goto('/quick-meal?budget=20&time=30')
+  await waitForResults(page)
+  const cards = page.getByTestId('meal-card')
+  await expect(cards.first()).toBeVisible()
+  for (const card of await cards.all()) {
+    const m = /Est\. \d+–(\d+) min · [\d.]+ mi · \$\d+\.\d\d all-in/.exec(await card.innerText())
+    if (!m) throw new Error(`No time range in "${await card.innerText()}"`)
+    expect(Number(m[1])).toBeLessThanOrEqual(30)
+  }
+  await expect(page.getByTestId('meal-price').locator('b')).toHaveCount(0)
+  await page.getByTestId('chip-filters').click()
+  await expect(page.getByTestId('sheet-filters')).toContainText('Not guaranteed.')
 })
 
 test('error state offers a retry', async ({ page }) => {

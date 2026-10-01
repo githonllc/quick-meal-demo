@@ -30,24 +30,23 @@ export function Steps<T extends number>({
   )
 }
 
-// Sheet behind the Time or Distance chip. A tap applies at once, so there is no button.
+// Sheet behind the Time chip. A tap applies at once, so there is no button.
 export function StepSheet<T extends number>({
-  kind,
   steps,
   value,
   onPick,
   onClose,
 }: {
-  kind: 'time' | 'distance'
   steps: readonly T[]
   value: T | null
   onPick: (v: T | null) => void
   onClose: () => void
 }) {
   return (
-    <Sheet title={kind === 'time' ? 'Delivery time' : 'Distance'} testId={`sheet-${kind}`} onClose={onClose}>
+    <Sheet title="How much time do you have?" testId="sheet-time" onClose={onClose}>
       <div className="grp">
-        <Steps name={kind} steps={steps} value={value} onPick={onPick} />
+        <p className="grp-help">Estimated arrival within this window. Not guaranteed.</p>
+        <Steps name="time" steps={steps} value={value} onPick={onPick} />
       </div>
     </Sheet>
   )

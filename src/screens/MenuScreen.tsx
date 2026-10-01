@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { formatCount, formatDollars, formatMiles } from '../../shared/format'
+import { formatCount, formatDollars, formatEtaRange, formatMiles } from '../../shared/format'
 import type { MenuRow as Row, MenuView } from '../../shared/types'
 import { ApiError, getMenu } from '../api'
 import { BackIcon } from '../components/TopBar'
@@ -116,7 +116,7 @@ export function MenuScreen() {
               <h1 className="menu-name">{menu.restaurant.name}</h1>
               <p className="menu-meta">
                 {menu.restaurant.rating.toFixed(1)} ★ ({formatCount(menu.restaurant.ratingCount)}) ·{' '}
-                {formatMiles(menu.restaurant.distanceMi)} · {menu.restaurant.etaMin} min
+                Est. {formatEtaRange(menu.restaurant.etaMin)} · {formatMiles(menu.restaurant.distanceMi)}
               </p>
 
               {menu.budgetCents !== null && (
