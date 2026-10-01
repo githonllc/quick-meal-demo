@@ -40,7 +40,7 @@ test('3: Filters sheet open', async ({ page }) => {
   await page.goto('/quick-meal?budget=20&time=30')
   await expect(page.getByTestId('meal-card')).toHaveCount(6)
   await page.getByTestId('chip-filters').click()
-  await expect(page.getByTestId('sheet-apply')).toHaveText('Show 6 results')
+  await expect(page.getByTestId('sheet-apply')).toHaveText('Show results')
   await shot(page, '3-filters.png')
 })
 

@@ -8,13 +8,13 @@ test.beforeEach(async ({ page }) => {
   await page.evaluate(() => localStorage.clear())
 })
 
-// Opens the Filters sheet, sets budget $20 and time 30 min, and waits for the live count.
+// Opens the Filters sheet, sets budget $20 and time 30 min, and and checks the button label.
 async function pickBudget20Time30(page: Page) {
   const sheet = page.getByTestId('sheet-filters')
   await expect(sheet).toBeVisible()
   await sheet.getByTestId('budget-slider').fill('20')
   await sheet.getByTestId('step-time-30').click()
-  await expect(sheet.getByTestId('sheet-apply')).toHaveText('Show 6 results')
+  await expect(sheet.getByTestId('sheet-apply')).toHaveText('Show results')
 }
 
 async function expectBudget20Time30(page: Page) {
@@ -73,12 +73,14 @@ test('closing the sheet without applying keeps the list', async ({ page }) => {
   await page.getByTestId('chip-filters').click()
   await page.getByTestId('budget-slider').fill('12')
   await page.getByTestId('step-time-30').click()
-  await expect(page.getByTestId('sheet-apply')).not.toHaveText('Show 6 results')
   // Tap the dimmed page above the sheet.
   await page.locator('.sheet-backdrop').click({ position: { x: 10, y: 10 } })
   await expect(page.getByTestId('sheet-filters')).toHaveCount(0)
   await expect(page).toHaveURL(/\/quick-meal\?budget=20&time=30$/)
   await expectBudget20Time30(page)
+  await expect(page.getByTestId('meal-card')).toHaveCount(6)
+  await expect(page.getByTestId('chip-budget')).toHaveText('Up to $20 ▾')
+  await expect(page.getByTestId('chip-time')).toHaveText('30 min ▾')
 
   // The sheet opens again from the applied filters, not the dropped draft.
   await page.getByTestId('chip-filters').click()
@@ -91,7 +93,7 @@ test('Clear all then apply removes every filter', async ({ page }) => {
   await expectBudget20Time30(page)
   await page.getByTestId('chip-filters').click()
   await page.getByTestId('sheet-clear').click()
-  await expect(page.getByTestId('sheet-apply')).toHaveText('Show 28 results')
+  await expect(page.getByTestId('sheet-apply')).toHaveText('Show results')
   // Clear all only changes the draft.
   await expect(page.getByTestId('chip-filters-badge')).toHaveText('2')
   await page.getByTestId('sheet-apply').click()
@@ -106,7 +108,7 @@ test('the "Saved" toast shows on the first apply only', async ({ page }) => {
   await page.goto('/quick-meal')
   await page.getByTestId('chip-budget').click()
   await page.getByTestId('budget-slider').fill('20')
-  await expect(page.getByTestId('sheet-apply')).toHaveText('Show 10 results')
+  await expect(page.getByTestId('sheet-apply')).toHaveText('Show results')
   await page.getByTestId('sheet-apply').click()
   await expect(toast).toHaveText('Saved. Quick Meal will open with these filters.')
   await expect(toast).toHaveCount(0)
@@ -116,4 +118,22 @@ test('the "Saved" toast shows on the first apply only', async ({ page }) => {
   await expectBudget20Time30(page)
   // The toast would show in the same click that applied the filters.
   expect(await toast.count()).toBe(0)
+})
+
+test('no search request leaves the Filters sheet until the user applies', async ({ page }) => {
+  await page.goto('/quick-meal')
+  await waitForResults(page)
+  await page.getByTestId('chip-filters').click()
+  const requests: string[] = []
+  page.on('request', (req) => {
+    if (req.url().includes('/api/quick-meal/search')) requests.push(req.url())
+  })
+  await page.getByTestId('budget-slider').fill('15')
+  await page.getByTestId('step-time-30').click()
+  // Wait longer than any debounce a live count would have used.
+  await page.waitForTimeout(500)
+  expect(requests).toHaveLength(0)
+  await page.getByTestId('sheet-apply').click()
+  await waitForResults(page)
+  expect(requests.length).toBeGreaterThan(0)
 })

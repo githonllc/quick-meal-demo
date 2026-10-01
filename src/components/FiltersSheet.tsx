@@ -1,56 +1,29 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { DISTANCE_STEPS, SORTS, TIME_STEPS } from '../../shared/constants'
-import { pluralize } from '../../shared/format'
-import { searchMeals } from '../api'
-import { toQuery } from '../state/filters'
 import type { UiFilters } from '../state/filters'
 import { BudgetSlider } from './BudgetSlider'
 import { Sheet } from './Sheet'
 import { Steps } from './StepSheet'
 
-// The result count for a draft, so "Show N results" matches the cards the user will see.
-// Waits 150 ms after the last change and aborts older requests.
-// Keeps the last number while a request is pending or when it fails.
-export function useLiveCount(draft: UiFilters, seed: number | null): number | null {
-  const [count, setCount] = useState(seed)
-  const key = toQuery(draft)
-  useEffect(() => {
-    const controller = new AbortController()
-    const timer = window.setTimeout(() => {
-      searchMeals(new URLSearchParams(key), controller.signal)
-        .then((res) => setCount(res.total))
-        .catch(() => {})
-    }, 150)
-    return () => {
-      window.clearTimeout(timer)
-      controller.abort()
-    }
-  }, [key])
-  return count
-}
-
-export function ApplyButton({ count, onClick }: { count: number | null; onClick: () => void }) {
+export function ApplyButton({ onClick, text = 'Show results' }: { onClick: () => void; text?: string }) {
   return (
     <button className="sheet-go" data-testid="sheet-apply" onClick={onClick}>
-      {count === null ? 'Show results' : `Show ${pluralize(count, 'result', 'results')}`}
+      {text}
     </button>
   )
 }
 
-// The full sheet. It edits a draft; nothing changes on the list until "Show N results".
+// The full sheet. It edits a draft; nothing changes on the list until "Show results".
 export function FiltersSheet({
   filters,
-  total,
   onApply,
   onClose,
 }: {
   filters: UiFilters
-  total: number | null
   onApply: (f: UiFilters) => void
   onClose: () => void
 }) {
   const [draft, setDraft] = useState(filters)
-  const count = useLiveCount(draft, total)
   const set = (patch: Partial<UiFilters>) => setDraft((d) => ({ ...d, ...patch }))
 
   return (
@@ -92,7 +65,7 @@ export function FiltersSheet({
         >
           Clear all
         </button>
-        <ApplyButton count={count} onClick={() => onApply(draft)} />
+        <ApplyButton onClick={() => onApply(draft)} />
       </div>
     </Sheet>
   )

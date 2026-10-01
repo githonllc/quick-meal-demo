@@ -104,8 +104,6 @@ export function QuickMealScreen() {
   const done = result?.req === req
   const pending = !done
   const failed = done && result.data === null
-  // The answer for the current filters only (the sheets seed their count from it).
-  const data = done ? result.data : null
 
   return (
     <>
@@ -178,10 +176,10 @@ export function QuickMealScreen() {
       )}
 
       {open === 'filters' && (
-        <FiltersSheet filters={filters} total={data?.total ?? null} onApply={apply} onClose={close} />
+        <FiltersSheet filters={filters} onApply={apply} onClose={close} />
       )}
       {open === 'budget' && (
-        <BudgetSheet filters={filters} total={data?.total ?? null} onApply={apply} onClose={close} />
+        <BudgetSheet filters={filters} onApply={apply} onClose={close} />
       )}
       {open === 'time' && (
         <StepSheet
