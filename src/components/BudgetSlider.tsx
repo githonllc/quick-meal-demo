@@ -27,7 +27,7 @@ export function BudgetSlider({ value, onChange }: { value: number | null; onChan
         aria-label="Budget per meal"
         aria-valuetext={text}
         data-testid="budget-slider"
-        style={{ '--fill': fill } as CSSProperties}
+        style={{ '--fill': fill, touchAction: 'pan-x' } as CSSProperties}
         onChange={(e) => {
           const n = Number(e.target.value)
           onChange(n >= BUDGET_MAX ? null : n)
