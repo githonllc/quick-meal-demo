@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import type { PhotoKind } from '../../shared/types'
 
-// Two warm colors per kind. #12 swaps these for photos.
+// Two warm colors per kind. They show while a photo loads, or if it fails.
 const COLORS: Record<PhotoKind, [string, string]> = {
   bowl: ['#d9822b', '#f2b45e'],
   noodles: ['#c8561f', '#eba04a'],
@@ -22,6 +23,8 @@ const COLORS: Record<PhotoKind, [string, string]> = {
 
 export function FoodTile({ kind, size }: { kind: PhotoKind; size: 'card' | 'thumb' | 'hero' }) {
   const [a, b] = COLORS[kind]
+  const [loaded, setLoaded] = useState(false)
+  const [failed, setFailed] = useState(false)
   return (
     <div
       className={`tile tile-${size}`}
@@ -29,7 +32,16 @@ export function FoodTile({ kind, size }: { kind: PhotoKind; size: 'card' | 'thum
       aria-label={kind}
       style={{ background: `linear-gradient(135deg, ${a}, ${b})` }}
     >
-      <span aria-hidden="true">{kind}</span>
+      {!failed && (
+        <img
+          src={`/img/${kind}.webp`}
+          alt=""
+          loading="lazy"
+          onLoad={() => setLoaded(true)}
+          onError={() => setFailed(true)}
+        />
+      )}
+      {!loaded && <span aria-hidden="true">{kind}</span>}
     </div>
   )
 }
