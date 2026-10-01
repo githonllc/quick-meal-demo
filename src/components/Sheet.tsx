@@ -27,6 +27,20 @@ export function Sheet({
     return () => before?.focus()
   }, [])
 
+  // Lock page scroll while open; restore the previous inline values on close.
+  useEffect(() => {
+    const html = document.documentElement.style
+    const body = document.body.style
+    const savedHtml = html.overflow
+    const savedBody = body.overflow
+    html.overflow = 'hidden'
+    body.overflow = 'hidden'
+    return () => {
+      html.overflow = savedHtml
+      body.overflow = savedBody
+    }
+  }, [])
+
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
