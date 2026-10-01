@@ -163,7 +163,6 @@ export function MenuScreen() {
       {budgetOpen && (
         <BudgetSheet
           filters={{ ...filters, time: null, distance: null, cuisine: null }}
-          total={null}
           applyText="Apply"
           onApply={applyBudget}
           onClose={() => setBudgetOpen(false)}
