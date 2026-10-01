@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { DISTANCE_STEPS, SORTS, TIME_STEPS } from '../../shared/constants'
 import { pluralize } from '../../shared/format'
-import type { MealCard as Meal, SearchResponse } from '../../shared/types'
+import type { DistanceStep, MealCard as Meal, Relax, SearchResponse, TimeStep } from '../../shared/types'
 import { searchMeals } from '../api'
 import { BreakdownSheet } from '../components/BreakdownSheet'
 import { BudgetSheet } from '../components/BudgetSheet'
@@ -10,6 +10,7 @@ import { FilterChips } from '../components/FilterChips'
 import { FiltersSheet } from '../components/FiltersSheet'
 import type { SheetKind } from '../components/FilterChips'
 import { MealCard } from '../components/MealCard'
+import { NoMatch } from '../components/NoMatch'
 import { Skeleton } from '../components/Skeleton'
 import { StepSheet } from '../components/StepSheet'
 import { useToast } from '../components/Toast'
@@ -75,6 +76,22 @@ export function QuickMealScreen() {
     close()
   }
 
+  // A relax chip changes this view only. It does not save a new default.
+  const relaxTo = (r: Relax) => {
+    if (r.filter === 'cuisine') setFilters({ ...filters, cuisine: null })
+    else if (r.filter === 'budget') setFilters({ ...filters, budget: r.to })
+    else if (r.filter === 'time') setFilters({ ...filters, time: r.to as TimeStep | null })
+    else setFilters({ ...filters, distance: r.to as DistanceStep | null })
+  }
+
+  const openMenu = (id: string) =>
+    navigate(
+      withQuery(
+        `/quick-meal/restaurants/${id}`,
+        toQuery({ ...filters, time: null, distance: null, cuisine: null }),
+      ),
+    )
+
   // Until the current request answers, show skeletons (not the old list).
   const done = result?.req === req
   const failed = done && result.data === null
@@ -111,7 +128,16 @@ export function QuickMealScreen() {
         </div>
       )}
 
-      {!failed && data && data.exact.length === 0 && <div data-testid="no-match">No exact matches</div>}
+      {!failed && data && data.exact.length === 0 && (
+        <NoMatch
+          filters={filters}
+          near={data.near}
+          relax={data.relax}
+          onRelax={relaxTo}
+          onOpen={(card) => openMenu(card.restaurant.id)}
+          onPrice={setPriced}
+        />
+      )}
 
       {!failed && data && data.exact.length > 0 && (
         <>
@@ -124,14 +150,7 @@ export function QuickMealScreen() {
               key={card.restaurant.id}
               card={card}
               budget={filters.budget}
-              onOpen={() =>
-                navigate(
-                  withQuery(
-                    `/quick-meal/restaurants/${card.restaurant.id}`,
-                    toQuery({ ...filters, time: null, distance: null, cuisine: null }),
-                  ),
-                )
-              }
+              onOpen={() => openMenu(card.restaurant.id)}
               onPrice={() => setPriced(card)}
             />
           ))}
