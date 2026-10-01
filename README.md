@@ -6,6 +6,8 @@ Concept demo for a CMU course. Not affiliated with DoorDash.
 
 Live demo: https://quick-meal-demo.ioenv.workers.dev
 
+Add it to your Home Screen to open it full screen like an app. iPhone: open it in Safari, tap Share, then Add to Home Screen. Android: open it in Chrome, tap the menu, then Add to Home screen (or Install app).
+
 ## Scripts
 
 - `npm run dev`: start the dev server
