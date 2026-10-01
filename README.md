@@ -18,7 +18,20 @@ Live demo: https://quick-meal-demo.ioenv.workers.dev
 
 ## Design
 
-See [docs/design.html](docs/design.html).
+See the [live design page](https://quick-meal-demo.ioenv.workers.dev/design.html) or [docs/design.html](docs/design.html).
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/design/1-home.png" width="240" alt="Home"><br>1 Home</td>
+    <td align="center"><img src="docs/design/2-meal-list.png" width="240" alt="Meal list"><br>2 Meal list</td>
+    <td align="center"><img src="docs/design/3-filters.png" width="240" alt="Filters sheet"><br>3 Filters sheet</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/design/4-no-match.png" width="240" alt="No match"><br>4 No match</td>
+    <td align="center"><img src="docs/design/5-menu.png" width="240" alt="Menu in budget view"><br>5 Menu in budget view</td>
+    <td align="center"><img src="docs/design/6-breakdown.png" width="240" alt="Price breakdown"><br>6 Price breakdown</td>
+  </tr>
+</table>
 
 ## How we built this
 
