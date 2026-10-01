@@ -59,8 +59,8 @@ section { margin-top: 56px; display: grid; gap: 16px; }
 section > p, section li { max-width: 68ch; }
 
 /* Phones */
-.strip { margin-top: 36px; overflow-x: auto; padding-bottom: 12px; }
-.strip-inner { display: flex; gap: 22px; width: max-content; padding-inline: max(20px, calc((100vw - 1180px) / 2)); }
+.strip { margin-top: 36px; padding-bottom: 12px; }
+.strip-inner { display: flex; flex-wrap: wrap; justify-content: center; gap: 32px 22px; max-width: 900px; margin: 0 auto; padding-inline: 20px; }
 .phone-col { display: grid; gap: 10px; width: 262px; }
 .phone-col .cap { font-size: 0.86rem; color: var(--muted); line-height: 1.4; }
 .phone-col .cap b { color: var(--fg); }
@@ -211,7 +211,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
     <span class="eyebrow">MSSM final assignment · Demo design</span>
     <h1>Quick Meal Demo Design</h1>
     <p class="muted" style="max-width:62ch">A mobile web demo of a DoorDash concept. Built for university students in the Bay Area and across the US. A student opens Quick Meal, sets a budget, time and distance, and sees which meals fit. If nothing fits, the app shows the closest meals and a one-tap way to loosen the search.</p>
-    <div class="meta"><span class="pill">Final design</span><span>Version 27</span><span>Sep 30, 2026</span><span>Concept mockups, not affiliated with DoorDash</span></div>
+    <div class="meta"><span class="pill">Final design</span><span>Version 29</span><span>Sep 30, 2026</span><span>Concept mockups, not affiliated with DoorDash</span></div>
   </header>
 
   <div class="summary">
@@ -255,7 +255,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
         <div class="ph-search"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#191919" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Search DoorDash</div>
         <div class="tap" style="left:14px; top:66px"></div>
       </div>
-      <p class="cap"><b>1 · Home.</b> Quick Meal is the first item in the category row, with a white tile and a NEW tag. A cuisine chip also opens Quick Meal with that cuisine tab selected.</p>
+      <p class="cap"><b>1 · Home.</b> Quick Meal is the first item in the category row, with a white tile and a NEW tag. Other Home items, cuisine chips and Near campus cards show "Not part of this demo."</p>
     </div>
 
     <!-- 2 Results -->
@@ -325,7 +325,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
               <div class="ph-opts" style="grid-template-columns: repeat(2, 1fr)"><span class="ph-o on">Best match</span><span class="ph-o">Lowest price</span><span class="ph-o">Fastest</span><span class="ph-o">Nearest</span></div>
             </div>
           </div>
-          <div class="ph-foot"><span class="clr">Clear all</span><span class="go">Show 6 results</span></div>
+          <div class="ph-foot"><span class="clr">Clear all</span><span class="go">Show results</span></div>
         </div>
       </div>
       <p class="cap"><b>3 · Filters sheet.</b> Opens from the top-right icon or the Filters chip. Budget slider, time and distance steps, and sort. Cuisine is not here; it lives in the tabs. The button count updates as you go.</p>
@@ -424,7 +424,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
     <div class="decision">
       <div class="head"><span class="id">P1</span><h3>Entry point</h3></div>
       <dl>
-        <dt>Decision</dt><dd>First item in the Home category row, left of Deals. White tile, red lightning icon, a NEW tag. A Home cuisine chip also opens Quick Meal with that cuisine tab selected.</dd>
+        <dt>Decision</dt><dd>First item in the Home category row, left of Deals. White tile, red lightning icon, a NEW tag. The banner also opens Quick Meal. Other Home items show "Not part of this demo.", because category and restaurant pages are out of scope.</dd>
         <dt>Why</dt><dd>The row scrolls sideways and only about five items fit on screen. First place is always visible, and a white tile stands out on red.</dd>
       </dl>
     </div>
@@ -438,10 +438,10 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
         <dt>Budget</dt><dd>Slider for the maximum all-in price per meal. Range $10 to $40, in $1 steps. The value shows above the thumb: "Up to $20". The far right end reads "$40+ (any)" and means no budget filter.</dd>
         <dt>Time</dt><dd>Steps: 15 · 20 · 30 · 45 min</dd>
         <dt>Distance</dt><dd>Steps depend on the user's location. A dense area like downtown San Jose gets 0.5 · 1 · 2 · 3 mi. A spread-out suburb gets 1 · 2 · 3 · 5 mi.</dd>
-        <dt>Cuisine</dt><dd>Tabs: All · Chinese · Indian · Mexican · Pizza · Burgers · Healthy · Fast Food · Sushi. One at a time; All means any cuisine. The row scrolls sideways. A place can carry several tags, since Healthy and Fast Food are tags rather than cuisines, so one place can appear under more than one tab. Tabs show no counts. The Filters badge does not count the tab, because the selected tab is already visible. The count on "Show N results" is for the current tab, the same list the user will see.</dd>
+        <dt>Cuisine</dt><dd>Tabs: All · Chinese · Indian · Mexican · Pizza · Burgers · Healthy · Fast Food · Sushi. One at a time; All means any cuisine. The row scrolls sideways. A place can carry several tags, since Healthy and Fast Food are tags rather than cuisines, so one place can appear under more than one tab. Tabs show no counts. The Filters badge does not count the tab, because the selected tab is already visible. Applying filters keeps the current tab.</dd>
         <dt>Sort</dt><dd>Best match · Lowest price · Fastest · Nearest. Only in the full sheet.</dd>
-        <dt>Chip tap</dt><dd>Each chip opens a small sheet for that one filter. Time and Distance apply at once when you pick a step. Budget shows a "Show N results" button, so a drag does not reload the list on every dollar. A tab applies at once.</dd>
-        <dt>Live count</dt><dd>While you drag, the count on the button updates after a 150 ms pause, and again when you let go.</dd>
+        <dt>Chip tap</dt><dd>Each chip opens a small sheet for that one filter. Time and Distance apply at once when you pick a step. Budget shows a "Show results" button, so a drag does not reload the list on every dollar. A tab applies at once.</dd>
+        <dt>No live count</dt><dd>The button reads "Show results" and the search runs only when the user applies. A live count needs a request on every change, and a slow answer can show a stale number (for example "Show 0 results" that then shows meals). The count line on the list shows the number after applying.</dd>
         <dt>Why</dt><dd>Budget is a number students already have in mind, often not a round one, so a slider fits it. Time and distance are rough choices, so a few steps are faster to tap. Cuisine answers "what am I in the mood for", which usually has one answer. A tab makes that one tap instead of three.</dd>
       </dl>
     </div>
@@ -514,7 +514,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
       <div class="head"><span class="id">P8</span><h3>Filters are saved as the default</h3></div>
       <dl>
         <dt>Decision</dt><dd>Quick Meal remembers the budget, time and distance you set and opens with them next time. A student sets "$20 · 30 min" once and does not set it again.</dd>
-        <dt>What saves</dt><dd>Only choices the user makes: "Show N results" in the Filters sheet, or a value picked in a chip sheet. "Clear all" plus apply saves "no filters".</dd>
+        <dt>What saves</dt><dd>Only choices the user makes: "Show results" in the Filters sheet, or a value picked in a chip sheet. "Clear all" plus apply saves "no filters".</dd>
         <dt>What does not</dt><dd>Relax chips on the no-match screen change the results for this visit only. The cuisine tab is never saved and goes back to All each visit.</dd>
         <dt>Why</dt><dd>A student's budget is a fixed number. A one-time "Budget up to $17" should not quietly raise it for good. Cuisine is the mood of one meal; a saved "Pizza" would hide everything else next time.</dd>
         <dt>Feedback</dt><dd>The first time filters are applied, a short toast says "Saved. Quick Meal will open with these filters." After that, the black chips are enough.</dd>
@@ -619,7 +619,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
           <tr><td>Sort change</td><td>The lead meal on a card can change. Lowest price shows each place's cheapest fitting meal, and the menu lists that meal first too.</td></tr>
           <tr><td>Slider at the ends</td><td>Far right "$40+ (any)" removes the budget filter and the Budget chip turns grey again. Far left "$10" is allowed. It usually gives no exact match, which leads to the no-match state.</td></tr>
           <tr><td>One filter only</td><td>Works like the rest. The other chips stay grey.</td></tr>
-          <tr><td>Clear all</td><td>In the sheet: resets choices, count goes back to the full total. Nothing applies until "Show N results".</td></tr>
+          <tr><td>Clear all</td><td>In the sheet: resets choices. Nothing applies until "Show results".</td></tr>
           <tr><td>Close sheet without applying</td><td>Swipe down or tap outside. The list keeps its old filters.</td></tr>
           <tr><td>Menu with nothing under budget</td><td>The "Under your budget" section reads "Nothing here fits $15. Closest:" and the over section starts with the smallest overage.</td></tr>
           <tr><td>Loading</td><td>Grey card skeletons. The mock API adds a 300 ms delay so this is visible in the demo.</td></tr>
@@ -641,7 +641,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
         <tbody>
           <tr><td class="mono">AC-01</td><td>Quick Meal entry</td><td>Given the Home screen, when the user taps Quick Meal in the category row, then the Quick Meal screen opens with the chip row (Filters, Budget, Time, Distance), the cuisine tabs below it (All selected) and a list of meal cards, with no Restaurant or Grocery tabs.</td><td>Walk it on a phone; screenshot</td></tr>
           <tr><td class="mono">AC-02</td><td>All-in budget</td><td>Given a budget of $20, when results load, then every card shows a meal with an estimated all-in price of $20.00 or less, and the breakdown behind any price (item, delivery fee, small-order fee, service fee, tax, tip) adds up to that price to the cent, and the small-order fee appears only when the item costs less than $12.</td><td>Walk it and tap 3 prices; screenshot. Automated test checks every meal.</td></tr>
-          <tr><td class="mono">AC-03</td><td>Filters sheet</td><td>Given the Filters sheet, opened from either the top-right icon or the Filters chip, when the user sets the budget to $20 and time to 30 min, then the button reads "Show 6 results" before applying, and after applying the list shows 6 meal cards from 6 different places, the chips read "Up to $20" and "30 min", and the Filters badge shows 2.</td><td>Walk it from both entry points; screenshot. Count matches the scenario test.</td></tr>
+          <tr><td class="mono">AC-03</td><td>Filters sheet</td><td>Given the Filters sheet, opened from either the top-right icon or the Filters chip, when the user sets the budget to $20 and time to 30 min, then the button reads "Show results", and after applying the list shows 6 meal cards from 6 different places, the chips read "Up to $20" and "30 min", and the Filters badge shows 2.</td><td>Walk it from both entry points; screenshot. Count matches the scenario test.</td></tr>
           <tr><td class="mono">AC-04</td><td>Combined filters</td><td>Given budget $20, time 20 min and distance 1 mi are on, when the user taps the Chinese tab, then every card is a Chinese place that passes all three filters, and the count (2) is lower than on the All tab (4).</td><td>Walk it; screenshot. Automated test.</td></tr>
           <tr><td class="mono">AC-05</td><td>No match and relax</td><td>Given budget $15, time 15 min and distance 0.5 mi, when results load, then the screen shows "No exact matches", up to 5 closest meals each labeled with how it misses (for example "$1.32 over budget"), and relax chips with result counts. When the user taps "Budget up to $17 · 1 result", the list shows exactly 1 meal and the slider moves to $17, while the saved default budget stays at $15.</td><td>Walk it, then reopen Quick Meal; screenshot both</td></tr>
           <tr><td class="mono">AC-06</td><td>Menu in budget view</td><td>Given a budget of $20, when the user taps "+2 more" on the Paseo Rice Bowl card, then the menu opens with "Under your budget (3)" listing the Chicken Rice Bowl first (the card's meal), then the Tofu Rice Bowl and Spam Musubi Plate, and the Veggie Bowl shows "$0.54 over".</td><td>Walk it; screenshot</td></tr>
@@ -661,7 +661,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
         <thead><tr><th>Route</th><th>Returns</th></tr></thead>
         <tbody>
           <tr><td><code>GET /api/home</code></td><td>Categories, banner, cuisine chips, "Near campus" row.</td></tr>
-          <tr><td><code>GET /api/quick-meal/search</code></td><td>Params <code>budget</code>, <code>time</code>, <code>distance</code>, <code>cuisine</code> (one value, empty for All), <code>sort</code>. Returns <code>exact</code> (one lead meal per place, with its other fitting meals), <code>near</code>, <code>relax</code>, and <code>total</code>. The sheet calls it on each change for the live count.</td></tr>
+          <tr><td><code>GET /api/quick-meal/search</code></td><td>Params <code>budget</code>, <code>time</code>, <code>distance</code>, <code>cuisine</code> (one value, empty for All), <code>sort</code>. Returns <code>exact</code> (one lead meal per place, with its other fitting meals), <code>near</code>, <code>relax</code>, and <code>total</code>. It runs when the user applies filters or taps a tab.</td></tr>
           <tr><td><code>GET /api/quick-meal/restaurants/:id?budget=</code></td><td>One restaurant and its full menu in budget view. Each item has its est. all-in price, the breakdown lines, and, when a budget is given, "fits" or how much it is over.</td></tr>
         </tbody>
       </table>
@@ -716,8 +716,8 @@ allIn = price + deliveryFee + (price &lt; 12 ? smallOrderFee : 0) + 15% service 
     <h2>Demo script, about 2 minutes</h2>
     <ol class="steps">
       <li>Home. Tap <b>Quick Meal</b>.</li>
-      <li>Tap <b>Budget ▾</b>. Slide to $25, then back to $20, and watch the count change. Show 10 places with a meal that fits.</li>
-      <li>Tap the top-right icon. Add 30 min. The button reads "Show 6 results". Apply.</li>
+      <li>Tap <b>Budget ▾</b>. Slide to $25 and apply: 18 places have a meal that fits. Open it again, slide to $20 and apply: 10 places.</li>
+      <li>Tap the top-right icon. Add 30 min and apply. 6 places.</li>
       <li>Scroll to the Paseo Rice Bowl card and tap "+2 more". The menu shows 3 bowls that fit and 2 that do not. The Tofu Rice Bowl is cheaper on the menu, but tap its price: the small-order fee makes it $19.48, more than the $18.73 Chicken Rice Bowl.</li>
       <li>Go back. Tighten to $15 · 15 min · 0.5 mi. Show the no-match state and how each meal misses. Tap "Budget up to $17 · 1 result". The slider moves to $17 and one meal shows.</li>
     </ol>
