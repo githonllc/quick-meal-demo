@@ -36,6 +36,11 @@ export function search(restaurants: Restaurant[], f: Filters): SearchResponse {
 
 // ---------- Exact ----------
 
+// A distance filter means pickup: prices have no delivery fee (design P7).
+function isPickup(f: Filters): boolean {
+  return f.distanceMi !== null
+}
+
 // Time, distance and cuisine are about the place. Budget is about the meal.
 function passesPlace(r: Restaurant, f: Filters): boolean {
   return (
@@ -51,7 +56,7 @@ function exactCards(restaurants: Restaurant[], f: Filters): MealCard[] {
   for (const r of restaurants) {
     if (!passesPlace(r, f)) continue
     // The lead meal is the top meal of the menu page, so both screens agree.
-    const v = menuView(r, f.budgetCents, f.sort)
+    const v = menuView(r, f.budgetCents, f.sort, isPickup(f))
     if (v.fits.length === 0) continue
     cards.push({
       restaurant: v.restaurant,
@@ -70,7 +75,7 @@ function compareCards(sort: SortId) {
     const rb = b.restaurant
     const byId = compareIds(ra.id, rb.id)
     switch (sort) {
-      case 'best':
+      case 'liked':
         return (
           b.item.likePct - a.item.likePct ||
           rb.rating - ra.rating ||
@@ -128,7 +133,7 @@ function isCloser(a: NearCard, b: NearCard): boolean {
 }
 
 function nearCardFor(r: Restaurant, item: MenuItem, f: Filters): NearCard {
-  const price = priceItem(item, r)
+  const price = priceItem(item, r, isPickup(f))
   const miss = missesFor(r, price, f)
   return { restaurant: toSummary(r), item, price, moreCount: 0, moreNames: [], miss, score: scoreOf(miss) }
 }
@@ -184,7 +189,7 @@ function relaxBudget(restaurants: Restaurant[], f: Filters): Relax | null {
   let cheapest = Infinity
   for (const r of restaurants) {
     if (!passesPlace(r, f)) continue
-    for (const item of r.menu) cheapest = Math.min(cheapest, priceItem(item, r).totalCents)
+    for (const item of r.menu) cheapest = Math.min(cheapest, priceItem(item, r, isPickup(f)).totalCents)
   }
   if (cheapest === Infinity) return null
 

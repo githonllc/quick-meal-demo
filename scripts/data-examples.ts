@@ -16,9 +16,9 @@ function itemTotal(restaurantId: string, itemName: string): string {
 const res = search(RESTAURANTS, {
   budgetCents: 1500,
   timeMin: 15,
-  distanceMi: 0.5,
+  distanceMi: null,
   cuisine: null,
-  sort: 'best',
+  sort: 'fastest',
 })
 
 const lines: string[] = [
@@ -27,7 +27,7 @@ const lines: string[] = [
   'Real values computed from `worker/data/restaurants.ts`.',
   'Regenerate with `npx tsx scripts/data-examples.ts > docs/data-examples.md`.',
   '',
-  '## No-match scenario: budget $15, time 15 min, distance 0.5 mi',
+  '## No-match scenario: budget $15, time 15 min',
   '',
   `Exact results: ${res.total}. Near cards, in order:`,
   '',

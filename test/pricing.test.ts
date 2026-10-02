@@ -30,6 +30,18 @@ describe('priceItem', () => {
   })
 })
 
+describe('priceItem for pickup', () => {
+  it('drops the delivery fee and keeps the rest', () => {
+    // Chicken Rice Bowl 1873 for delivery; tofu keeps its small-order fee.
+    expect(priceItem({ priceCents: 1200 }, restaurant, true)).toMatchObject({ deliveryFeeCents: 0, totalCents: 1674 })
+    expect(priceItem({ priceCents: 1075 }, restaurant, true)).toMatchObject({
+      deliveryFeeCents: 0,
+      smallOrderFeeCents: 250,
+      totalCents: 1749,
+    })
+  })
+})
+
 describe('lineCents', () => {
   it('rounds half-cent ties up', () => {
     expect(lineCents(1150, 1500)).toBe(173)

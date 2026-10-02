@@ -45,7 +45,7 @@ test('3: Filters sheet open', async ({ page }) => {
 })
 
 test('4: no match with relax chips', async ({ page }) => {
-  await page.goto('/quick-meal?budget=15&time=15&distance=0.5')
+  await page.goto('/quick-meal?budget=15&time=15')
   await expect(page.getByTestId('no-match')).toBeVisible()
   await expect(page.getByTestId('near-card')).toHaveCount(5)
   await shot(page, '4-no-match.png')
@@ -57,4 +57,11 @@ test('5: Paseo menu with the Tofu Rice Bowl breakdown', async ({ page }) => {
   await tofu.getByTestId('menu-est').click()
   await expect(page.getByTestId('breakdown-total')).toContainText('$19.48')
   await shot(page, '5-menu-breakdown.png')
+})
+
+test('6: Pickup list at $20 and 1 mi', async ({ page }) => {
+  await page.goto('/quick-meal?budget=20&distance=1')
+  await expect(page.getByTestId('meal-card')).toHaveCount(7)
+  await expect(page.getByTestId('chip-time')).toHaveText('Pickup · 1 mi ▾')
+  await shot(page, '6-pickup.png')
 })

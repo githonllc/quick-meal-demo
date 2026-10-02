@@ -32,7 +32,7 @@ export function makeRestaurant(p: Partial<Restaurant> & Pick<Restaurant, 'id'>):
 }
 
 export function filters(p: Partial<Filters> = {}): Filters {
-  return { budgetCents: null, timeMin: null, distanceMi: null, cuisine: null, sort: 'best', ...p }
+  return { budgetCents: null, timeMin: null, distanceMi: null, cuisine: null, sort: 'fastest', ...p }
 }
 
 // Totals: chicken 1873, tofu 1948, musubi 1565, veggie 2054, salmon 2362 (see pricing.test.ts).

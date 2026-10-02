@@ -27,6 +27,6 @@ test('a filter change keeps the old list, dimmed, until the new one arrives', as
 
   await waitForResults(page)
   await expect(page.getByTestId('loading-bar')).toHaveCount(0)
-  await expect(page.getByTestId('count-line')).toHaveText('3 places have a meal that fits · Best match')
+  await expect(page.getByTestId('count-line')).toHaveText('3 places have a meal that fits · fastest first')
   await expect(page.getByTestId('meal-card')).toHaveCount(3)
 })

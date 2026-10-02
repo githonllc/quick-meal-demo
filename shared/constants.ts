@@ -1,3 +1,5 @@
+import type { SortId } from './types';
+
 export const BUDGET_MIN = 10; // dollars
 export const BUDGET_MAX = 40; // dollars; the slider's max means "any budget" (null)
 export const TIME_STEPS = [15, 20, 30, 45] as const;
@@ -19,12 +21,22 @@ export const CUISINES = [
   { id: 'fast-food', label: 'Fast Food' },
   { id: 'sushi', label: 'Sushi' },
 ] as const;
+// Every sort uses a number the card shows (design P2). This is the Delivery order.
 export const SORTS = [
-  { id: 'best', label: 'Best match' },
-  { id: 'price', label: 'Lowest price' },
   { id: 'fastest', label: 'Fastest' },
+  { id: 'price', label: 'Lowest price' },
+  { id: 'liked', label: 'Most liked' },
   { id: 'nearest', label: 'Nearest' },
 ] as const;
+// Pickup cards show no time, so Pickup has no Fastest. The first sort of each side is its default.
+export const PICKUP_SORT_IDS = ['nearest', 'price', 'liked'] as const;
+
+// The asked sort if the side has it, otherwise the side's default.
+// So an old sort=best link, or Fastest after a switch to Pickup, gets a sort the side shows.
+export function sortFor(raw: string | null | undefined, pickup: boolean): SortId {
+  const ids: readonly SortId[] = pickup ? PICKUP_SORT_IDS : SORTS.map((s) => s.id);
+  return ids.find((id) => id === raw) ?? ids[0];
+}
 export const PHOTO_KINDS = [
   'bowl',
   'noodles',

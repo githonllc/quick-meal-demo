@@ -9,11 +9,14 @@ import {
   farBurger,
   filters,
   greenLeaf,
+  item,
+  makeRestaurant,
   paseo,
   restaurants,
   sakuraClosed,
   sliceHouse,
   sortList,
+  tacoLoco,
 } from './fixtures'
 
 const ids = (cards: { restaurant: { id: string } }[]) => cards.map((c) => c.restaurant.id)
@@ -47,7 +50,7 @@ describe('search: exact', () => {
   })
 
   it('never shows a closed place', () => {
-    const res = search(restaurants, filters())
+    const res = search(restaurants, filters({ sort: 'liked' }))
     // Lead likes: paseo 91, far 90, curry 87, taco 86, slice 84, green 83.
     expect(ids(res.exact)).toEqual([
       'paseo-rice-bowl',
@@ -76,21 +79,33 @@ describe('search: exact', () => {
     )
   })
 
-  it('takes the lead meal from menuView fits[0] for every card', () => {
-    for (const budgetCents of [1500, 2000, null]) {
-      for (const sort of sorts) {
-        const res = search(restaurants, filters({ budgetCents, sort }))
-        for (const r of restaurants) {
-          const v = menuView(r, budgetCents, sort)
-          const card = res.exact.find((c) => c.restaurant.id === r.id)
-          if (!r.isOpen || v.fits.length === 0) {
-            expect(card).toBeUndefined()
-            continue
+  it('prices pickup without the delivery fee', () => {
+    // Paseo is 0.4 mi away. Pickup: chicken 1873 - 199 = 1674.
+    const res = search(restaurants, filters({ budgetCents: 2000, distanceMi: 1 }))
+    const card = res.exact.find((c) => c.restaurant.id === 'paseo-rice-bowl')
+    expect(card?.price).toEqual(priceItem(paseo.menu[0], paseo, true))
+    expect(card?.price.totalCents).toBe(1674)
+  })
+
+  it('takes the lead meal from menuView fits[0] for every card, delivery and pickup', () => {
+    // Pickup at 1 mi leaves out Slice House (2.5 mi); 3 mi keeps every place but Far Burger.
+    for (const distanceMi of [null, 1, 3] as const) {
+      for (const budgetCents of [1500, 2000, null]) {
+        for (const sort of sorts) {
+          const res = search(restaurants, filters({ budgetCents, distanceMi, sort }))
+          for (const r of restaurants) {
+            const v = menuView(r, budgetCents, sort, distanceMi !== null)
+            const card = res.exact.find((c) => c.restaurant.id === r.id)
+            const inRange = distanceMi === null || r.distanceMi <= distanceMi
+            if (!r.isOpen || !inRange || v.fits.length === 0) {
+              expect(card).toBeUndefined()
+              continue
+            }
+            expect(card?.item).toEqual(v.fits[0].item)
+            expect(card?.price).toEqual(v.fits[0].price)
+            expect(card?.moreCount).toBe(v.fits.length - 1)
+            expect(card?.moreNames).toEqual(v.fits.slice(1).map((x) => x.item.name))
           }
-          expect(card?.item).toEqual(v.fits[0].item)
-          expect(card?.price).toEqual(v.fits[0].price)
-          expect(card?.moreCount).toBe(v.fits.length - 1)
-          expect(card?.moreNames).toEqual(v.fits.slice(1).map((x) => x.item.name))
         }
       }
     }
@@ -99,9 +114,9 @@ describe('search: exact', () => {
 
 describe('search: card sort', () => {
   // See sortList in fixtures. Every tie pair is listed in reverse id order.
-  it('best: likes, then rating, then eta, then id', () => {
+  it('liked: likes, then rating, then eta, then id', () => {
     // a 90 likes; b 4.8 rating; d and e eta 15 tie on id; c eta 20.
-    expect(ids(search(sortList, filters({ sort: 'best' })).exact)).toEqual([
+    expect(ids(search(sortList, filters({ sort: 'liked' })).exact)).toEqual([
       'r-a',
       'r-b',
       'r-d',
@@ -145,17 +160,21 @@ describe('search: card sort', () => {
 })
 
 describe('search: near', () => {
-  it('scores misses and labels them for a hand-computed case', () => {
-    const res = search(
-      restaurants,
-      filters({ budgetCents: 1500, timeMin: 15, distanceMi: 0.5, cuisine: 'healthy' }),
-    )
+  it('scores misses and labels them for a hand-computed delivery case', () => {
+    const res = search(restaurants, filters({ budgetCents: 1500, timeMin: 15, cuisine: 'healthy' }))
     expect(res.exact).toEqual([])
     expect(res.total).toBe(0)
     // Taco Loco would fit every limit but is Mexican, so it is not near.
-    expect(ids(res.near)).toEqual(['paseo-rice-bowl', 'green-leaf'])
+    expect(ids(res.near)).toEqual(['green-leaf', 'paseo-rice-bowl'])
 
-    const [p, g] = res.near
+    const [g, p] = res.near
+    // Green Leaf: kale 1430 fits. eta 19 - 15 = 4 min, score 4 / 10 = 0.4.
+    // Grain bowl would add 190 / 500, so kale wins.
+    expect(g.item.id).toBe('kale-salad')
+    expect(g.price).toEqual(priceItem(greenLeaf.menu[0], greenLeaf))
+    expect(g.miss).toEqual([{ filter: 'time', over: 4, label: '4 min slower' }])
+    expect(g.score).toBeCloseTo(0.4, 10)
+
     // Paseo: musubi 1565 - 1500 = 65 cents, eta 18 - 15 = 3 min.
     // Score 65 / 500 + 3 / 10 = 0.13 + 0.3 = 0.43.
     expect(p.restaurant).toEqual(toSummary(paseo))
@@ -168,16 +187,27 @@ describe('search: near', () => {
       { filter: 'time', over: 3, label: '3 min slower' },
     ])
     expect(p.score).toBeCloseTo(0.43, 10)
+  })
 
-    // Green Leaf: kale 1430 fits. eta 19 - 15 = 4 min, 0.9 - 0.5 = 0.4 mi.
-    // Score 4 / 10 + 0.4 / 1 = 0.8. Grain bowl would add 190 / 500, so kale wins.
+  it('scores pickup misses at pickup prices', () => {
+    const res = search(restaurants, filters({ budgetCents: 1300, distanceMi: 0.5, cuisine: 'healthy' }))
+    expect(res.exact).toEqual([])
+    expect(ids(res.near)).toEqual(['paseo-rice-bowl', 'green-leaf'])
+
+    const [p, g] = res.near
+    // Paseo pickup: musubi 1565 - 199 = 1366, 66 over. Score 66 / 500 = 0.132.
+    expect(p.item.id).toBe('musubi-plate')
+    expect(p.price).toEqual(priceItem(paseo.menu[2], paseo, true))
+    expect(p.miss).toEqual([{ filter: 'budget', over: 66, label: '$0.66 over budget' }])
+    expect(p.score).toBeCloseTo(0.132, 10)
+
+    // Green Leaf: kale 1430, 130 over, and 0.9 - 0.5 = 0.4 mi. Score 0.26 + 0.4 = 0.66.
     expect(g.item.id).toBe('kale-salad')
-    expect(g.price).toEqual(priceItem(greenLeaf.menu[0], greenLeaf))
     expect(g.miss).toEqual([
-      { filter: 'time', over: 4, label: '4 min slower' },
+      { filter: 'budget', over: 130, label: '$1.30 over budget' },
       { filter: 'distance', over: 0.4, label: '0.4 mi farther' },
     ])
-    expect(g.score).toBeCloseTo(0.8, 10)
+    expect(g.score).toBeCloseTo(0.66, 10)
   })
 
   it('caps near at 5, best score first, and skips closed places', () => {
@@ -287,25 +317,25 @@ describe('search: relax', () => {
     ])
   })
 
-  it('lists relax options in order budget, time, distance', () => {
-    // Paseo is in range but musubi 1565 -> $16. Green Leaf 0.9 mi fits at 1 mi.
-    const res = search(
-      restaurants,
-      filters({ budgetCents: 1500, distanceMi: 0.5, cuisine: 'healthy' }),
-    )
-    expect(res.exact).toEqual([])
-    expect(res.relax).toEqual([
-      { filter: 'budget', to: 16, count: 1, label: 'Budget up to $16 · 1 result' },
-      { filter: 'distance', to: 1, count: 1, label: 'Distance up to 1 mi · 1 result' },
+  it('lists the budget option first, then time or distance', () => {
+    // Taco Loco (0.3 mi, eta 12) is 1040, over $10. The cheap place (910) is slow and far.
+    const cheap = makeRestaurant({ id: 'cheap', etaMin: 25, distanceMi: 1.5, menu: [item('rice', 'Rice', 700, 70)] })
+    const delivery = search([tacoLoco, cheap], filters({ budgetCents: 1000, timeMin: 15 }))
+    expect(delivery.relax).toEqual([
+      { filter: 'budget', to: 11, count: 1, label: 'Budget up to $11 · 1 result' },
+      { filter: 'time', to: 30, count: 1, label: 'Time up to 30 min · 1 result' },
+    ])
+    const pickup = search([tacoLoco, cheap], filters({ budgetCents: 1000, distanceMi: 0.5 }))
+    expect(pickup.relax).toEqual([
+      { filter: 'budget', to: 11, count: 1, label: 'Budget up to $11 · 1 result' },
+      { filter: 'distance', to: 2, count: 1, label: 'Distance up to 2 mi · 1 result' },
     ])
   })
 
   it('drops options whose count is 0', () => {
-    // Every step still fails another held filter.
-    const res = search(
-      restaurants,
-      filters({ budgetCents: 1500, timeMin: 15, distanceMi: 0.5, cuisine: 'healthy' }),
-    )
+    // No healthy place is that fast, and no step brings a healthy meal under $10.
+    const res = search(restaurants, filters({ budgetCents: 1000, timeMin: 15, cuisine: 'healthy' }))
+    expect(res.near.length).toBeGreaterThan(0)
     expect(res.relax).toEqual([])
   })
 

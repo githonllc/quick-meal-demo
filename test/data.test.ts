@@ -113,7 +113,7 @@ describe('pinned restaurants', () => {
     expect(r.distanceMi).toBe(0.3)
     expect(r.etaMin).toBe(19)
     // Dan Dan Noodles is the most liked item that fits $20.
-    const lead = menuView(r, 2000, 'best').fits[0]
+    const lead = menuView(r, 2000, 'liked').fits[0]
     expect(lead.item.name).toBe('Dan Dan Noodles')
     expect(lead.item.likePct).toBe(91)
     expect(lead.item.likeCount).toBe(240)

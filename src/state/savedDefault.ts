@@ -1,4 +1,4 @@
-import { BUDGET_MAX, BUDGET_MIN, DISTANCE_STEPS, SORTS, TIME_STEPS } from '../../shared/constants'
+import { BUDGET_MAX, BUDGET_MIN, DISTANCE_STEPS, TIME_STEPS, sortFor } from '../../shared/constants'
 import type { UiFilters } from './filters'
 
 // The saved default lives in local storage (design D5). Cuisine is never saved (P8).
@@ -40,11 +40,14 @@ export function loadDefault(store = browserStorage()): Partial<UiFilters> | null
     const v: unknown = JSON.parse(raw)
     if (typeof v !== 'object' || v === null || Array.isArray(v)) return null
     const saved = v as Record<string, unknown>
+    // Delivery or pickup, never both: a saved time wins over a saved distance (P7).
+    const time = nearest(saved.time, TIME_STEPS)
+    const distance = time === null ? nearest(saved.distance, DISTANCE_STEPS) : null
     return {
       budget: budget(saved.budget),
-      time: nearest(saved.time, TIME_STEPS),
-      distance: nearest(saved.distance, DISTANCE_STEPS),
-      sort: SORTS.find((s) => s.id === saved.sort)?.id ?? 'best',
+      time,
+      distance,
+      sort: sortFor(typeof saved.sort === 'string' ? saved.sort : null, distance !== null),
     }
   } catch {
     return null
@@ -53,7 +56,8 @@ export function loadDefault(store = browserStorage()): Partial<UiFilters> | null
 
 export function saveDefault(f: UiFilters, store = browserStorage()): void {
   try {
-    const { budget, time, distance, sort } = f
+    const { budget, time, sort } = f
+    const distance = time === null ? f.distance : null
     store?.setItem(KEY, JSON.stringify({ budget, time, distance, sort }))
   } catch {
     // No storage: the filters still apply, they are just not remembered.

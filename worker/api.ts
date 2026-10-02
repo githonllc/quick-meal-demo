@@ -1,4 +1,4 @@
-import { BUDGET_MAX, BUDGET_MIN, CUISINES, DISTANCE_STEPS, SORTS, TIME_STEPS } from '../shared/constants'
+import { BUDGET_MAX, BUDGET_MIN, CUISINES, DISTANCE_STEPS, SORTS, TIME_STEPS, sortFor } from '../shared/constants'
 import { menuView } from '../shared/menu'
 import { search } from '../shared/search'
 import type { Filters } from '../shared/types'
@@ -36,16 +36,21 @@ export function parseFilters(params: URLSearchParams): Filters | { error: string
   const timeMin = parseStep(params.get('time'), TIME_STEPS)
   if (timeMin === undefined) return { error: 'Invalid time' }
 
-  const distanceMi = parseStep(params.get('distance'), DISTANCE_STEPS)
-  if (distanceMi === undefined) return { error: 'Invalid distance' }
+  const distanceRaw = parseStep(params.get('distance'), DISTANCE_STEPS)
+  if (distanceRaw === undefined) return { error: 'Invalid distance' }
+  // Delivery or pickup, never both. An old link with both keeps the time (design P7).
+  const distanceMi = timeMin === null ? distanceRaw : null
 
   const cuisineRaw = params.get('cuisine') || null
   const cuisine = cuisineRaw === null ? null : (CUISINES.find((c) => c.id === cuisineRaw)?.id ?? undefined)
   if (cuisine === undefined) return { error: 'Invalid cuisine' }
 
-  const sortRaw = params.get('sort') ?? 'best'
-  const sort = SORTS.find((s) => s.id === sortRaw)?.id
-  if (sort === undefined) return { error: 'Invalid sort' }
+  // A missing sort, Fastest in pickup, or the removed sort=best becomes the side's default.
+  const sortRaw = params.get('sort')
+  if (sortRaw !== null && sortRaw !== 'best' && !SORTS.some((s) => s.id === sortRaw)) {
+    return { error: 'Invalid sort' }
+  }
+  const sort = sortFor(sortRaw, distanceMi !== null)
 
   return { budgetCents, timeMin, distanceMi, cuisine, sort }
 }
@@ -71,10 +76,11 @@ export async function handleApi(request: Request, opts: { delayMs: number }): Pr
 
   const match = MENU_PATH.exec(path)
   if (match) {
-    // The menu page only uses budget and sort. Other params are ignored.
+    // The menu page only uses budget, distance (pickup prices) and sort. Other params are ignored.
+    // Time is read too, so a link with both time and distance keeps delivery prices, as in search.
     const { searchParams } = url
     const only = new URLSearchParams()
-    for (const key of ['budget', 'sort']) {
+    for (const key of ['budget', 'time', 'distance', 'sort']) {
       const value = searchParams.get(key)
       if (value !== null) only.set(key, value)
     }
@@ -82,7 +88,7 @@ export async function handleApi(request: Request, opts: { delayMs: number }): Pr
     if (hasError(filters)) return json(filters, 400)
     const restaurant = RESTAURANTS.find((r) => r.id === match[1])
     if (!restaurant) return json({ error: 'Restaurant not found' }, 404)
-    return json(menuView(restaurant, filters.budgetCents, filters.sort))
+    return json(menuView(restaurant, filters.budgetCents, filters.sort, filters.distanceMi !== null))
   }
 
   return json({ error: 'Not found' }, 404)

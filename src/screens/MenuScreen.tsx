@@ -21,7 +21,8 @@ type Result = { req: string; menu: MenuView | null; missing: boolean }
 export function MenuScreen() {
   const { params, query } = useRoute()
   const filters = parseUrl(query.toString())
-  const key = toQuery({ ...filters, time: null, distance: null, cuisine: null })
+  // Distance stays: it means pickup prices (design P6).
+  const key = toQuery({ ...filters, time: null, cuisine: null })
   const path = `/quick-meal/restaurants/${params.id}`
 
   const [attempt, setAttempt] = useState(0)
@@ -116,7 +117,9 @@ export function MenuScreen() {
               <h1 className="menu-name">{menu.restaurant.name}</h1>
               <p className="menu-meta">
                 {menu.restaurant.rating.toFixed(1)} ★ ({formatCount(menu.restaurant.ratingCount)}) ·{' '}
-                Est. {formatEtaRange(menu.restaurant.etaMin)} · {formatMiles(menu.restaurant.distanceMi)}
+                {/* Pickup shows no time: it is a delivery time. */}
+                {!menu.pickup && `Est. ${formatEtaRange(menu.restaurant.etaMin)} · `}
+                {formatMiles(menu.restaurant.distanceMi)}
               </p>
 
               {menu.budgetCents !== null && (
@@ -174,6 +177,7 @@ export function MenuScreen() {
           item={priced.item}
           restaurantName={menu.restaurant.name}
           price={priced.price}
+          pickup={menu.pickup}
           onClose={() => setPriced(null)}
         />
       )}

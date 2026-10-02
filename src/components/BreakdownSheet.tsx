@@ -4,15 +4,18 @@ import { Sheet } from './Sheet'
 import { useToast } from './Toast'
 
 // Shows how the estimated all-in price adds up, line by line.
+// Pickup has no delivery fee, so it has no delivery fee line (design P4).
 export function BreakdownSheet({
   item,
   restaurantName,
   price,
+  pickup,
   onClose,
 }: {
   item: MenuItem
   restaurantName: string
   price: PriceBreakdown
+  pickup: boolean
   onClose: () => void
 }) {
   const { show } = useToast()
@@ -23,7 +26,7 @@ export function BreakdownSheet({
     { id: 'service', label: 'Service fee (15%)', cents: price.serviceFeeCents },
     { id: 'tax', label: `Tax (${formatPercentBps(price.taxRateBps)})`, cents: price.taxCents },
     { id: 'tip', label: 'Tip (15%)', cents: price.tipCents },
-  ]
+  ].filter((row) => !(pickup && row.id === 'delivery'))
 
   return (
     <Sheet title={item.name} subtitle={restaurantName} testId="breakdown-sheet" onClose={onClose}>

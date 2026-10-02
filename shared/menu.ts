@@ -20,12 +20,13 @@ function compareItems(sort: SortId) {
   }
 }
 
-export function menuView(r: Restaurant, budgetCents: number | null, sort: SortId): MenuView {
-  const rows: MenuRow[] = r.menu.map((item) => ({ item, price: priceItem(item, r), overCents: 0 }))
+// pickup prices every row without the delivery fee.
+export function menuView(r: Restaurant, budgetCents: number | null, sort: SortId, pickup = false): MenuView {
+  const rows: MenuRow[] = r.menu.map((item) => ({ item, price: priceItem(item, r, pickup), overCents: 0 }))
   rows.sort(compareItems(sort))
 
   if (budgetCents === null) {
-    return { restaurant: toSummary(r), budgetCents, sort, fits: rows, over: [] }
+    return { restaurant: toSummary(r), budgetCents, sort, pickup, fits: rows, over: [] }
   }
 
   // A meal fits when its total is at or under the budget.
@@ -35,5 +36,5 @@ export function menuView(r: Restaurant, budgetCents: number | null, sort: SortId
     .map((row) => ({ ...row, overCents: row.price.totalCents - budgetCents }))
     .sort((a, b) => a.overCents - b.overCents || byId(a, b))
 
-  return { restaurant: toSummary(r), budgetCents, sort, fits, over }
+  return { restaurant: toSummary(r), budgetCents, sort, pickup, fits, over }
 }

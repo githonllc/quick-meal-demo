@@ -88,6 +88,7 @@ export interface MenuView {
   restaurant: RestaurantSummary
   budgetCents: number | null
   sort: SortId
+  pickup: boolean
   fits: MenuRow[]
   over: MenuRow[]
 }

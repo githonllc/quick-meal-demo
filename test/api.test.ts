@@ -34,11 +34,36 @@ describe('handleApi', () => {
   })
 
   it('search with no exact result returns near and relax', async () => {
-    const { res, body } = await get('/api/quick-meal/search?budget=15&time=15&distance=0.5')
+    const { res, body } = await get('/api/quick-meal/search?budget=15&time=15')
     expect(res.status).toBe(200)
+    expect(body.filters.sort).toBe('fastest')
     expect(body.exact).toHaveLength(0)
     expect(body.near).toHaveLength(5)
-    expect(body.relax).toHaveLength(2)
+    expect(body.relax.map((r: { label: string }) => r.label)).toEqual([
+      'Budget up to $17 · 1 result',
+      'Time up to 20 min · 2 results',
+    ])
+  })
+
+  it('search with time and distance keeps the time and drops the distance', async () => {
+    const { res, body } = await get('/api/quick-meal/search?budget=15&time=15&distance=0.5')
+    expect(res.status).toBe(200)
+    expect(body.filters.timeMin).toBe(15)
+    expect(body.filters.distanceMi).toBeNull()
+    expect(body.total).toBe(0)
+  })
+
+  it('search with distance is pickup: no delivery fee, Nearest by default', async () => {
+    const { res, body } = await get('/api/quick-meal/search?budget=20&distance=1')
+    expect(res.status).toBe(200)
+    expect(body.total).toBe(7)
+    expect(body.filters.sort).toBe('nearest')
+    const paseo = body.exact.find((c: { restaurant: { id: string } }) => c.restaurant.id === 'paseo-rice-bowl')
+    expect(paseo.price.deliveryFeeCents).toBe(0)
+    expect(paseo.price.totalCents).toBe(1674)
+    // Pickup has no Fastest.
+    const fastest = await get('/api/quick-meal/search?distance=1&sort=fastest')
+    expect(fastest.body.filters.sort).toBe('nearest')
   })
 
   it.each([
@@ -59,6 +84,32 @@ describe('handleApi', () => {
     expect(res.status).toBe(200)
     expect(body.fits).toHaveLength(3)
     expect(body.over).toHaveLength(2)
+  })
+
+  it('menu view with distance uses pickup prices', async () => {
+    const { res, body } = await get('/api/quick-meal/restaurants/paseo-rice-bowl?budget=20&distance=1')
+    expect(res.status).toBe(200)
+    expect(body.pickup).toBe(true)
+    expect(body.fits[0].item.id).toBe('chicken-bowl')
+    expect(body.fits[0].price.totalCents).toBe(1674)
+    expect(body.fits).toHaveLength(4)
+    expect(body.over).toHaveLength(1)
+  })
+
+  it('menu view with time and distance keeps delivery prices, like search', async () => {
+    const { res, body } = await get('/api/quick-meal/restaurants/paseo-rice-bowl?budget=20&time=20&distance=1')
+    expect(res.status).toBe(200)
+    expect(body.pickup).toBe(false)
+    expect(body.fits[0].price.totalCents).toBe(1873)
+  })
+
+  it("search?sort=best opens with the side's default sort", async () => {
+    const delivery = await get('/api/quick-meal/search?sort=best')
+    expect(delivery.res.status).toBe(200)
+    expect(delivery.body.filters.sort).toBe('fastest')
+    const pickup = await get('/api/quick-meal/search?distance=1&sort=best')
+    expect(pickup.res.status).toBe(200)
+    expect(pickup.body.filters.sort).toBe('nearest')
   })
 
   it('menu view of unknown restaurant is 404', async () => {

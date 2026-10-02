@@ -1,8 +1,9 @@
-import { BUDGET_MAX, BUDGET_MIN, CUISINES, DISTANCE_STEPS, SORTS, TIME_STEPS } from '../../shared/constants'
+import { BUDGET_MAX, BUDGET_MIN, CUISINES, DISTANCE_STEPS, TIME_STEPS, sortFor } from '../../shared/constants'
 import type { CuisineId, DistanceStep, SortId, TimeStep } from '../../shared/types'
 import { browserStorage, loadDefault } from './savedDefault'
 
 // What the Quick Meal page shows. Budget is in whole dollars, null means "any".
+// At most one of time and distance is set: distance means Pickup, anything else Delivery (design P7).
 export interface UiFilters {
   budget: number | null
   time: TimeStep | null
@@ -24,25 +25,34 @@ function parseStep<T extends number>(raw: string | null, steps: readonly T[]): T
   return steps.find((s) => s === Number(raw)) ?? null
 }
 
+// An old link with both time and distance keeps the time and drops the distance.
 export function parseUrl(search: string): UiFilters {
   const q = new URLSearchParams(search)
+  const time = parseStep(q.get('time'), TIME_STEPS)
+  const distance = time === null ? parseStep(q.get('distance'), DISTANCE_STEPS) : null
   return {
     budget: parseBudget(q.get('budget')),
-    time: parseStep(q.get('time'), TIME_STEPS),
-    distance: parseStep(q.get('distance'), DISTANCE_STEPS),
+    time,
+    distance,
     cuisine: CUISINES.find((c) => c.id === q.get('cuisine'))?.id ?? null,
-    sort: SORTS.find((s) => s.id === q.get('sort'))?.id ?? 'best',
+    sort: sortFor(q.get('sort'), distance !== null),
   }
 }
 
-// Leaves out empty filters and the default sort, so URLs stay short.
+// Picks one side and clears the other side's value. Pickup has no Fastest, so it becomes Nearest.
+export function toSide(f: UiFilters, pickup: boolean): UiFilters {
+  if (pickup) return { ...f, time: null, sort: sortFor(f.sort, true) }
+  return { ...f, distance: null }
+}
+
+// Leaves out empty filters and the side's default sort, so URLs stay short.
 export function toQuery(f: UiFilters): string {
   const q = new URLSearchParams()
   if (f.budget !== null) q.set('budget', String(f.budget))
   if (f.time !== null) q.set('time', String(f.time))
   if (f.distance !== null) q.set('distance', String(f.distance))
   if (f.cuisine !== null) q.set('cuisine', f.cuisine)
-  if (f.sort !== 'best') q.set('sort', f.sort)
+  if (f.sort !== sortFor(null, f.distance !== null)) q.set('sort', f.sort)
   return q.toString()
 }
 
@@ -56,9 +66,9 @@ export function initialFilters(search: string, store = browserStorage()): UiFilt
   return { ...url, ...loadDefault(store), cuisine: url.cuisine }
 }
 
-// The Filters badge counts budget, time and distance. Tab and sort do not count.
+// The Filters badge counts budget, and time or distance as one. Tab and sort do not count.
 export function activeCount(f: UiFilters): number {
-  return [f.budget, f.time, f.distance].filter((v) => v !== null).length
+  return [f.budget, f.time ?? f.distance].filter((v) => v !== null).length
 }
 
 export function withQuery(path: string, query: string): string {

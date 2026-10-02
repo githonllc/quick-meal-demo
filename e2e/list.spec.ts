@@ -54,7 +54,7 @@ test('AC-02: every price fits the budget and each breakdown adds up', async ({ p
 })
 
 test('AC-04: a cuisine tab splits the filtered meals and keeps the chips', async ({ page }) => {
-  await page.goto('/quick-meal?budget=20&time=20&distance=1')
+  await page.goto('/quick-meal?budget=20&time=20')
   await expect(page.getByTestId('meal-card')).toHaveCount(4)
   await page.getByTestId('cuisine-tab-chinese').click()
   await waitForResults(page)
@@ -63,12 +63,19 @@ test('AC-04: a cuisine tab splits the filtered meals and keeps the chips', async
   await expect(page).toHaveURL(/cuisine=chinese/)
   await expect(page.getByTestId('chip-budget')).toHaveText('Up to $20 ▾')
   await expect(page.getByTestId('chip-time')).toHaveText('20 min ▾')
-  await expect(page.getByTestId('chip-filters-badge')).toHaveText('3')
+  await expect(page.getByTestId('chip-filters-badge')).toHaveText('2')
 })
 
 test('the Paseo card shows its lead meal, all-in price and other fitting meals', async ({ page }) => {
   await page.goto('/quick-meal?budget=20&time=30')
-  await expect(page.getByTestId('count-line')).toHaveText('6 places have a meal that fits · Best match')
+  await expect(page.getByTestId('count-line')).toHaveText('6 places have a meal that fits · fastest first')
+  // Fastest first: Taylor St. Dumplings, then Santa Clara Taco Co.
+  const first = page.getByTestId('meal-card').nth(0)
+  await expect(first).toContainText('Soup Dumplings (8)')
+  await expect(first).toContainText('Taylor St. Dumplings')
+  await expect(first).toContainText('Est. 9–14 min · 0.4 mi · $18.44 all-in')
+  await expect(page.getByTestId('meal-card').nth(1)).toContainText('Carne Asada Burrito')
+  await expect(page.getByTestId('meal-card').nth(1)).toContainText('$19.05 all-in')
   const card = page.getByTestId('meal-card').filter({ hasText: 'Paseo Rice Bowl' })
   await expect(card).toContainText('Chicken Rice Bowl')
   await expect(card.getByTestId('meal-price')).toHaveText('$18.73 all-in')

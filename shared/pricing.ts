@@ -9,9 +9,10 @@ export function lineCents(baseCents: number, bps: number): number {
 export function priceItem(
   item: Pick<MenuItem, 'priceCents'>,
   r: Pick<Restaurant, 'deliveryFeeCents' | 'smallOrderFeeCents' | 'taxRateBps'>,
+  pickup = false, // pickup has no delivery fee (design P4)
 ): PriceBreakdown {
   const itemCents = item.priceCents
-  const deliveryFeeCents = r.deliveryFeeCents
+  const deliveryFeeCents = pickup ? 0 : r.deliveryFeeCents
   const smallOrderFeeCents = itemCents < SMALL_ORDER_THRESHOLD_CENTS ? r.smallOrderFeeCents : 0
   const serviceFeeCents = lineCents(itemCents, SERVICE_FEE_BPS)
   const taxCents = lineCents(itemCents, r.taxRateBps)

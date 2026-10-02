@@ -1,4 +1,4 @@
-import { formatDollars } from '../../shared/format'
+import { formatDollars, formatMiles } from '../../shared/format'
 import { activeCount } from '../state/filters'
 import type { UiFilters } from '../state/filters'
 
@@ -20,8 +20,15 @@ function Chip({ id, on, label, onClick }: { id: string; on: boolean; label: stri
   )
 }
 
+// The Time chip covers delivery time and pickup distance: "30 min" or "Pickup · 1 mi" (design P7).
+function timeLabel({ time, distance }: UiFilters): string {
+  if (time !== null) return `${time} min`
+  if (distance !== null) return `Pickup · ${formatMiles(distance)}`
+  return 'Time'
+}
+
 export function FilterChips({ filters, onOpen }: { filters: UiFilters; onOpen: (kind: SheetKind) => void }) {
-  const { budget, time } = filters
+  const { budget, time, distance } = filters
   const count = activeCount(filters)
   return (
     <div className="fchips">
@@ -36,8 +43,8 @@ export function FilterChips({ filters, onOpen }: { filters: UiFilters; onOpen: (
       </button>
       <Chip
         id="chip-time"
-        on={time !== null}
-        label={time === null ? 'Time' : `${time} min`}
+        on={time !== null || distance !== null}
+        label={timeLabel(filters)}
         onClick={() => onOpen('time')}
       />
       <Chip

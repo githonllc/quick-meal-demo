@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import type { Page } from '@playwright/test'
+import type { Page, Route } from '@playwright/test'
 import { waitForResults } from './helpers'
 
 // Start every test with no saved default and no "Saved" toast flag.
@@ -19,6 +19,7 @@ async function pickBudget20Time30(page: Page) {
 
 async function expectBudget20Time30(page: Page) {
   await waitForResults(page)
+  await expect(page.locator('.qm-hint')).toHaveCount(0)
   await expect(page.getByTestId('meal-card')).toHaveCount(6)
   await expect(page.getByTestId('chip-budget')).toHaveText('Up to $20 ▾')
   await expect(page.getByTestId('chip-time')).toHaveText('30 min ▾')
@@ -32,7 +33,10 @@ test('AC-03: the Filters sheet opens from the chip and the top-right icon', asyn
     await page.goto('/quick-meal')
     await expect(page.getByTestId('meal-card')).toHaveCount(28)
     await opener.click()
-    await expect(page.getByTestId('sheet-filters').locator('.grp h3').first()).toHaveText('How much time do you have?')
+    // The first group is Delivery | Pickup, on Delivery, asking for time.
+    await expect(page.getByTestId('sheet-filters').locator('.grp h3').first()).toHaveText('Get it by')
+    await expect(page.getByTestId('side-delivery')).toHaveAttribute('aria-checked', 'true')
+    await expect(page.getByTestId('sheet-filters').locator('.grp-q')).toHaveText('How much time do you have?')
     await pickBudget20Time30(page)
     await page.getByTestId('sheet-apply').click()
     await expect(page.getByTestId('sheet-filters')).toHaveCount(0)
@@ -99,7 +103,8 @@ test('Clear all then apply removes every filter', async ({ page }) => {
   await expect(page.getByTestId('chip-filters-badge')).toHaveText('2')
   await page.getByTestId('sheet-apply').click()
   await waitForResults(page)
-  await expect(page.getByTestId('count-line')).toHaveText('28 places open now · Best match')
+  await expect(page.getByTestId('count-line')).toHaveText('28 places open now · fastest first')
+  await expect(page.locator('.qm-hint')).toHaveText('Short on time? Pick a time and a budget to see meals that fit.')
   await expect(page.getByTestId('chip-filters-badge')).toHaveCount(0)
   await expect(page).toHaveURL(/\/quick-meal$/)
 })
@@ -137,4 +142,128 @@ test('no search request leaves the Filters sheet until the user applies', async 
   await page.getByTestId('sheet-apply').click()
   await waitForResults(page)
   expect(requests.length).toBeGreaterThan(0)
+})
+
+// "$16.74" -> 1674. Item names may hold digits, so read only the dollar amount.
+async function cents(el: import('@playwright/test').Locator): Promise<number> {
+  const m = /\$(\d+)\.(\d\d)/.exec(await el.innerText())
+  if (!m) throw new Error(`No price in "${await el.innerText()}"`)
+  return Number(m[1]) * 100 + Number(m[2])
+}
+
+test('AC-09: Pickup swaps time for distance and drops the delivery fee', async ({ page }) => {
+  await page.goto('/quick-meal?budget=20&time=30')
+  await expectBudget20Time30(page)
+  await page.getByTestId('chip-filters').click()
+  const sheet = page.getByTestId('sheet-filters')
+  await sheet.getByTestId('side-pickup').click()
+  await expect(sheet.getByTestId('side-pickup')).toHaveAttribute('aria-checked', 'true')
+  await expect(sheet.getByTestId('side-delivery')).toHaveAttribute('aria-checked', 'false')
+
+  // The time steps are replaced by 0.5 · 1 · 2 · 3 mi, none picked.
+  await expect(sheet.locator('[data-testid^="step-time-"]')).toHaveCount(0)
+  const steps = sheet.locator('[data-testid^="step-distance-"]')
+  await expect(steps).toHaveText(['0.5 mi', '1 mi', '2 mi', '3 mi'])
+  for (const step of await steps.all()) await expect(step).toHaveAttribute('aria-pressed', 'false')
+  await expect(sheet).toContainText('How far can you go?')
+  await expect(page.getByText('For pickup')).toHaveCount(0)
+  // Pickup has no Fastest.
+  await expect(sheet.getByTestId('sort-fastest')).toHaveCount(0)
+  await expect(sheet.getByTestId('sort-nearest')).toHaveAttribute('aria-pressed', 'true')
+
+  await sheet.getByTestId('step-distance-1').click()
+  await sheet.getByTestId('sheet-apply').click()
+  await waitForResults(page)
+  await expect(page.getByTestId('chip-time')).toHaveText('Pickup · 1 mi ▾')
+  await expect(page).toHaveURL(/\/quick-meal\?budget=20&distance=1$/)
+  await expect(page.getByTestId('chip-filters-badge')).toHaveText('2')
+  await expect(page.getByTestId('count-line')).toHaveText('7 places have a meal that fits · nearest first')
+  const cards = page.getByTestId('meal-card')
+  await expect(cards).toHaveCount(7)
+  for (const card of await cards.all()) {
+    const text = await card.innerText()
+    expect(text).toMatch(/[\d.]+ mi · Est\. \$\d+\.\d\d all-in/)
+    expect(text).not.toMatch(/min/)
+  }
+
+  // The Paseo breakdown has no delivery fee line and adds up to $16.74.
+  const paseo = cards.filter({ hasText: 'Paseo Rice Bowl' })
+  await expect(paseo).toContainText('0.4 mi · Est. $16.74 all-in')
+  await paseo.getByTestId('meal-price').click()
+  const breakdown = page.getByTestId('breakdown-sheet')
+  await expect(breakdown).toBeVisible()
+  await expect(breakdown.getByTestId('breakdown-row-delivery')).toHaveCount(0)
+  let sum = 0
+  for (const row of ['item', 'small', 'service', 'tax', 'tip']) sum += await cents(breakdown.getByTestId(`breakdown-row-${row}`))
+  expect(sum).toBe(1674)
+  await expect(breakdown.getByTestId('breakdown-total')).toContainText('$16.74')
+})
+
+test('the Time chip sheet has the same switch and applies a step at once', async ({ page }) => {
+  await page.goto('/quick-meal?budget=20&time=30')
+  await expectBudget20Time30(page)
+  await page.getByTestId('chip-time').click()
+  const sheet = page.getByTestId('sheet-time')
+  await sheet.getByTestId('side-pickup').click()
+  await sheet.getByTestId('step-distance-1').click()
+  await expect(sheet).toHaveCount(0)
+  await waitForResults(page)
+  await expect(page).toHaveURL(/\/quick-meal\?budget=20&distance=1$/)
+  await expect(page.getByTestId('chip-time')).toHaveText('Pickup · 1 mi ▾')
+  await expect(page.getByTestId('meal-card')).toHaveCount(7)
+
+  // Back to delivery: the distance is cleared and Nearest stays.
+  await page.getByTestId('chip-time').click()
+  await expect(sheet.getByTestId('side-pickup')).toHaveAttribute('aria-checked', 'true')
+  await sheet.getByTestId('side-delivery').click()
+  await sheet.getByTestId('step-time-30').click()
+  await waitForResults(page)
+  await expect(page).toHaveURL(/\/quick-meal\?budget=20&time=30&sort=nearest$/)
+  await expect(page.getByTestId('chip-time')).toHaveText('30 min ▾')
+})
+
+test('after a switch in the Time chip sheet no step is picked', async ({ page }) => {
+  await page.goto('/quick-meal?budget=20&time=30')
+  await expectBudget20Time30(page)
+  await page.getByTestId('chip-time').click()
+  const sheet = page.getByTestId('sheet-time')
+  await expect(sheet.getByTestId('step-time-30')).toHaveAttribute('aria-pressed', 'true')
+  await sheet.getByTestId('side-pickup').click()
+  await sheet.getByTestId('side-delivery').click()
+  await expect(sheet.getByTestId('step-time-30')).toHaveAttribute('aria-pressed', 'false')
+  // Picking a step applies that value instead of clearing it.
+  await sheet.getByTestId('step-time-30').click()
+  await expect(sheet).toHaveCount(0)
+  await waitForResults(page)
+  await expect(page).toHaveURL(/[?&]time=30(&|$)/)
+  await expect(page.getByTestId('chip-time')).toHaveText('30 min ▾')
+})
+
+test('a breakdown opened while pickup loads keeps the prices of the tapped card', async ({ page }) => {
+  await page.goto('/quick-meal?budget=20&time=30')
+  await expectBudget20Time30(page)
+  // Hold the pickup answer so the delivery cards stay on screen, dimmed.
+  const held: Route[] = []
+  await page.route('**/api/quick-meal/search?*distance=1*', (route) => {
+    held.push(route)
+  })
+  await page.getByTestId('chip-time').click()
+  await page.getByTestId('sheet-time').getByTestId('side-pickup').click()
+  await page.getByTestId('step-distance-1').click()
+  await expect(page.locator('[data-testid="results"][aria-busy="true"]')).toBeVisible()
+
+  const paseo = page.getByTestId('meal-card').filter({ hasText: 'Paseo Rice Bowl' })
+  await paseo.getByTestId('meal-price').click()
+  const breakdown = page.getByTestId('breakdown-sheet')
+  await expect(breakdown.getByTestId('breakdown-row-delivery')).toHaveCount(1)
+  await expect(breakdown.getByTestId('breakdown-total')).toContainText('$18.73')
+
+  await expect.poll(() => held.length).toBeGreaterThan(0)
+  await page.unroute('**/api/quick-meal/search?*distance=1*')
+  for (const route of held) await route.continue().catch(() => {})
+  await waitForResults(page)
+  await expect(page.getByTestId('chip-time')).toHaveText('Pickup · 1 mi ▾')
+  // The sheet still shows the delivery card it was opened for.
+  await expect(breakdown.getByTestId('breakdown-row-delivery')).toHaveCount(1)
+  await expect(breakdown.getByTestId('breakdown-total')).toContainText('$18.73')
 })

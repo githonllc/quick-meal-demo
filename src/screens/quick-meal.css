@@ -242,6 +242,31 @@
   color: var(--muted);
   font-size: 13px;
 }
+/* Delivery | Pickup: one control, one value. The steps under it belong to the selected side. */
+.seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--chip);
+}
+.seg-opt {
+  padding: 8px 0;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+.seg-opt.on {
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+.grp-q {
+  margin: 4px 0 0;
+  font-size: 14px;
+  font-weight: 700;
+}
 .opts {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

@@ -14,11 +14,13 @@ function ThumbsUp() {
 export function MealCard({
   card,
   budget,
+  pickup,
   onOpen,
   onPrice,
 }: {
   card: Meal
   budget: number | null
+  pickup: boolean
   onOpen: () => void
   onPrice: () => void
 }) {
@@ -46,8 +48,9 @@ export function MealCard({
         </span>
       </div>
       <div className="meal-row">
+        {/* Pickup drops the time: it is a delivery time (design P5). */}
         <span className="meal-meta">
-          Est. {formatEtaRange(r.etaMin)} · {formatMiles(r.distanceMi)} ·{' '}
+          {pickup ? `${formatMiles(r.distanceMi)} · Est.` : `Est. ${formatEtaRange(r.etaMin)} · ${formatMiles(r.distanceMi)} ·`}{' '}
           <button
             className="meal-price"
             data-testid="meal-price"

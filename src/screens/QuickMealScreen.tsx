@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { SORTS, TIME_STEPS } from '../../shared/constants'
+import { SORTS } from '../../shared/constants'
 import { pluralize } from '../../shared/format'
 import type { DistanceStep, MealCard as Meal, Relax, SearchResponse, TimeStep } from '../../shared/types'
 import { searchMeals } from '../api'
@@ -17,7 +17,7 @@ import { StepSheet } from '../components/StepSheet'
 import { useToast } from '../components/Toast'
 import { SlidersIcon, TopBar } from '../components/TopBar'
 import { navigate, useRoute } from '../router'
-import { initialFilters, parseUrl, toQuery, withQuery } from '../state/filters'
+import { activeCount, initialFilters, parseUrl, toQuery, withQuery } from '../state/filters'
 import type { UiFilters } from '../state/filters'
 import { firstSave, saveDefault } from '../state/savedDefault'
 import './quick-meal.css'
@@ -27,13 +27,14 @@ function setFilters(f: UiFilters) {
   navigate(withQuery('/quick-meal', toQuery(f)), { replace: true })
 }
 
+// "6 places have a meal that fits · fastest first"
 function countLine(res: SearchResponse, f: UiFilters): string {
-  const sort = SORTS.find((s) => s.id === f.sort)?.label
+  const sort = SORTS.find((s) => s.id === f.sort)?.label.toLowerCase()
   const places =
     f.budget === null
       ? `${pluralize(res.total, 'place', 'places')} open now`
       : `${pluralize(res.total, 'place has', 'places have')} a meal that fits`
-  return `${places} · ${sort}`
+  return `${places} · ${sort} first`
 }
 
 export function QuickMealScreen() {
@@ -46,7 +47,8 @@ export function QuickMealScreen() {
   const [result, setResult] = useState<{ req: string; data: SearchResponse | null } | null>(null)
   // The last successful answer. It stays on screen while the next request loads.
   const [shown, setShown] = useState<SearchResponse | null>(null)
-  const [priced, setPriced] = useState<Meal | null>(null)
+  // The tapped card and whether it was priced for pickup, fixed at tap time.
+  const [priced, setPriced] = useState<{ card: Meal; pickup: boolean } | null>(null)
   const [open, setOpen] = useState<SheetKind | null>(null)
   const { show } = useToast()
 
@@ -92,18 +94,23 @@ export function QuickMealScreen() {
     else setFilters({ ...filters, distance: r.to as DistanceStep | null })
   }
 
-  const openMenu = (id: string) =>
-    navigate(
-      withQuery(
-        `/quick-meal/restaurants/${id}`,
-        toQuery({ ...filters, time: null, distance: null, cuisine: null }),
-      ),
-    )
+  // The menu keeps budget and sort, and distance for pickup prices (design P6).
+  // It uses the filters of the answer on screen, so a card tapped while the next answer loads
+  // opens the menu at the prices that card showed.
+  const openMenu = (id: string) => {
+    if (!shown) return
+    const { budgetCents, distanceMi, sort } = shown.filters
+    const budget = budgetCents === null ? null : budgetCents / 100
+    const query = toQuery({ budget, time: null, distance: distanceMi, cuisine: null, sort })
+    navigate(withQuery(`/quick-meal/restaurants/${id}`, query))
+  }
 
   // Derived in the same render as the URL change, so old results never look final.
   const done = result?.req === req
   const pending = !done
   const failed = done && result.data === null
+  // Cards follow the filters of the answer on screen, so old cards never show pickup prices as delivery.
+  const pickup = shown !== null && shown.filters.distanceMi !== null
 
   return (
     <>
@@ -145,11 +152,12 @@ export function QuickMealScreen() {
               {shown.exact.length === 0 && (
                 <NoMatch
                   filters={filters}
+                  pickup={pickup}
                   near={shown.near}
                   relax={shown.relax}
                   onRelax={relaxTo}
                   onOpen={(card) => openMenu(card.restaurant.id)}
-                  onPrice={setPriced}
+                  onPrice={(card) => setPriced({ card, pickup })}
                 />
               )}
 
@@ -158,14 +166,17 @@ export function QuickMealScreen() {
                   <p className="count-line" data-testid="count-line">
                     {countLine(shown, filters)}
                   </p>
-                  {filters.budget === null && <p className="qm-hint">Set a budget to see what fits.</p>}
+                  {activeCount(filters) === 0 && (
+                    <p className="qm-hint">Short on time? Pick a time and a budget to see meals that fit.</p>
+                  )}
                   {shown.exact.map((card) => (
                     <MealCard
                       key={card.restaurant.id}
                       card={card}
                       budget={filters.budget}
+                      pickup={pickup}
                       onOpen={() => openMenu(card.restaurant.id)}
-                      onPrice={() => setPriced(card)}
+                      onPrice={() => setPriced({ card, pickup })}
                     />
                   ))}
                 </>
@@ -181,20 +192,14 @@ export function QuickMealScreen() {
       {open === 'budget' && (
         <BudgetSheet filters={filters} onApply={apply} onClose={close} />
       )}
-      {open === 'time' && (
-        <StepSheet
-          steps={TIME_STEPS}
-          value={filters.time}
-          onPick={(time) => apply({ ...filters, time })}
-          onClose={close}
-        />
-      )}
+      {open === 'time' && <StepSheet filters={filters} onApply={apply} onClose={close} />}
 
       {priced && (
         <BreakdownSheet
-          item={priced.item}
-          restaurantName={priced.restaurant.name}
-          price={priced.price}
+          item={priced.card.item}
+          restaurantName={priced.card.restaurant.name}
+          price={priced.card.price}
+          pickup={priced.pickup}
           onClose={() => setPriced(null)}
         />
       )}

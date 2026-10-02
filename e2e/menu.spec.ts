@@ -67,3 +67,18 @@ test('Change sets a new budget and saves it as the default', async ({ page }) =>
   await page.getByTestId('quick-meal-entry').click()
   await expect(page.getByTestId('chip-budget')).toHaveText('Up to $25 ▾')
 })
+
+test('a pickup card opens the menu at pickup prices with no time', async ({ page }) => {
+  await page.goto('/quick-meal?budget=20&distance=1')
+  const card = page.getByTestId('meal-card').filter({ hasText: 'Paseo Rice Bowl' })
+  await card.getByTestId('meal-more').click()
+  await expect(page).toHaveURL(new RegExp(`${MENU}\\?budget=20&distance=1$`))
+  await waitForResults(page, 'menu-results')
+  await expect(page.locator('.menu-meta')).toHaveText('4.6 ★ (800+) · 0.4 mi')
+  const first = page.getByTestId('menu-fits').getByTestId('menu-row').first()
+  await expect(first).toContainText('Chicken Rice Bowl')
+  await expect(first.getByTestId('menu-est')).toHaveText('Est. $16.74')
+  await first.getByTestId('menu-est').click()
+  await expect(page.getByTestId('breakdown-row-delivery')).toHaveCount(0)
+  await expect(page.getByTestId('breakdown-total')).toContainText('$16.74')
+})
