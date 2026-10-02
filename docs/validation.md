@@ -4,8 +4,8 @@ This branch (`restaurant-cards`) is the restaurant-cards variant, design version
 
 - Date: 2026-10-02
 - Live URL: https://quick-meal-demo-cards.ioenv.workers.dev
-- Deployed commit: `403dd88`
-- Worker version: `79286579-58e9-4239-8d57-ba31e668f7b7`
+- Deployed commit: `e648236`
+- Worker version: `67c06a3c-904a-4551-856f-d72a490ad5b3`
 - Main demo (not changed): https://quick-meal-demo.ioenv.workers.dev, commit `b3d6374`
 
 Every acceptance criterion from the "Validation" section of [design.html](design.html) (version 37) was run as an automated Playwright test against the live variant URL.
@@ -37,6 +37,8 @@ After the follow-ups (`629eae8`: "Pickup near SJSU" and swapping Fastest and Nea
 After design version 36 (`b3d6374`: time and distance set with a slider, and a "Show results" button in the Time chip's sheet): 40 tests ran against the live URL and all passed, including AC-03, AC-07 and AC-09 with the slider. Shot 3 was saved again.
 
 Variant: restaurant cards (`7214fb9`, Worker `quick-meal-demo-cards`): 42 tests ran against the variant URL and all passed. The main demo was run again at the same time: 40 of 40 passed, so it did not change. The screenshots then showed that a long dish line pushed the card and its rating off screen. `403dd88` fixes this, and a new check in the card test failed on `7214fb9` and passes on `403dd88`. After that deploy, 42 tests ran against the variant URL and all passed. Shots 2, 3 and 6 were saved again.
+
+Design text fix (`e648236`: cards show no price, so the design points to the menu for prices): 42 tests ran against the variant URL and all passed. All 6 shots were taken again and came out the same, so they still match the variant.
 
 ## How to re-run
 
