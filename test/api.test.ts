@@ -121,6 +121,15 @@ describe('handleApi', () => {
     expect(pickup.body.filters.sort).toBe('nearest')
   })
 
+  it('search?sort=liked is the renamed Top rated sort', async () => {
+    const delivery = await get('/api/quick-meal/search?sort=liked')
+    expect(delivery.res.status).toBe(200)
+    expect(delivery.body.filters.sort).toBe('rated')
+    const pickup = await get('/api/quick-meal/search?distance=1&sort=liked')
+    expect(pickup.res.status).toBe(200)
+    expect(pickup.body.filters.sort).toBe('rated')
+  })
+
   it('menu view of unknown restaurant is 404', async () => {
     const { res, body } = await get('/api/quick-meal/restaurants/nope')
     expect(res.status).toBe(404)

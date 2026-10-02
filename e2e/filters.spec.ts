@@ -187,15 +187,18 @@ test('AC-09: Pickup swaps time for distance and drops the delivery fee', async (
   const cards = page.getByTestId('meal-card')
   await expect(cards).toHaveCount(7)
   for (const card of await cards.all()) {
-    const text = await card.innerText()
-    expect(text).toMatch(/[\d.]+ mi · Est\. \$\d+\.\d\d all-in/)
-    expect(text).not.toMatch(/min/)
+    await expect(card.getByTestId('meal-meta')).toHaveText(/^[\d.]+ mi$/)
+    expect(await card.innerText()).not.toMatch(/Est\.|all-in|\$\d+\.\d\d/)
   }
 
-  // The Paseo breakdown has no delivery fee line and adds up to $16.74.
+  // Paseo's menu, opened from its card: the Chicken Rice Bowl breakdown has no delivery fee line and adds up to $16.74.
   const paseo = cards.filter({ hasText: 'Paseo Rice Bowl' })
-  await expect(paseo).toContainText('0.4 mi · Est. $16.74 all-in')
-  await paseo.getByTestId('meal-price').click()
+  await expect(paseo.getByTestId('meal-meta')).toHaveText('0.4 mi')
+  await paseo.click()
+  await expect(page).toHaveURL(/\/quick-meal\/restaurants\/paseo-rice-bowl\?budget=20&distance=1$/)
+  await waitForResults(page, 'menu-results')
+  const chicken = page.getByTestId('menu-fits').getByTestId('menu-row').filter({ hasText: 'Chicken Rice Bowl' })
+  await chicken.getByTestId('menu-est').click()
   const breakdown = page.getByTestId('breakdown-sheet')
   await expect(breakdown).toBeVisible()
   await expect(breakdown.getByTestId('breakdown-row-delivery')).toHaveCount(0)
@@ -288,7 +291,7 @@ test('after a switch in the Time chip sheet the slider is at Any', async ({ page
   await expect(page.getByTestId('chip-time')).toHaveText('30 min ▾')
 })
 
-test('a breakdown opened while pickup loads keeps the prices of the tapped card', async ({ page }) => {
+test('a card tapped while pickup loads opens the menu at the prices it was shown with', async ({ page }) => {
   await page.goto('/quick-meal?budget=20&time=30')
   await expectBudget20Time30(page)
   // Hold the pickup answer so the delivery cards stay on screen, dimmed.
@@ -301,21 +304,20 @@ test('a breakdown opened while pickup loads keeps the prices of the tapped card'
   await setStop(page.getByTestId('distance-slider'), '1')
   await page.getByTestId('sheet-apply').click()
   await expect(page.locator('[data-testid="results"][aria-busy="true"]')).toBeVisible()
-
-  const paseo = page.getByTestId('meal-card').filter({ hasText: 'Paseo Rice Bowl' })
-  await paseo.getByTestId('meal-price').click()
-  const breakdown = page.getByTestId('breakdown-sheet')
-  await expect(breakdown.getByTestId('breakdown-row-delivery')).toHaveCount(1)
-  await expect(breakdown.getByTestId('breakdown-total')).toContainText('$18.73')
-
   await expect.poll(() => held.length).toBeGreaterThan(0)
+
+  // The menu opens with the delivery filters of the cards on screen, not the pickup ones still loading.
+  await page.getByTestId('meal-card').filter({ hasText: 'Paseo Rice Bowl' }).click()
+  await expect(page).toHaveURL(/\/quick-meal\/restaurants\/paseo-rice-bowl\?budget=20$/)
+  await waitForResults(page, 'menu-results')
+  const chicken = page.getByTestId('menu-fits').getByTestId('menu-row').filter({ hasText: 'Chicken Rice Bowl' })
+  await expect(chicken.getByTestId('menu-est')).toHaveText('Est. $18.73')
+  await chicken.getByTestId('menu-est').click()
+  await expect(page.getByTestId('breakdown-row-delivery')).toHaveCount(1)
+  await expect(page.getByTestId('breakdown-total')).toContainText('$18.73')
+
   await page.unroute('**/api/quick-meal/search?*distance=1*')
   for (const route of held) await route.continue().catch(() => {})
-  await waitForResults(page)
-  await expect(page.getByTestId('chip-time')).toHaveText('Pickup · 1 mi ▾')
-  // The sheet still shows the delivery card it was opened for.
-  await expect(breakdown.getByTestId('breakdown-row-delivery')).toHaveCount(1)
-  await expect(breakdown.getByTestId('breakdown-total')).toContainText('$18.73')
 })
 
 test('switching sides swaps Fastest and Nearest, and a step on the same side keeps the sort', async ({ page }) => {
@@ -342,9 +344,9 @@ test('switching sides swaps Fastest and Nearest, and a step on the same side kee
 
   // Delivery shows no Nearest option: each side shows exactly 3 sorts.
   await page.getByTestId('chip-filters').click()
-  await expect(sheet.locator('[data-testid^="sort-"]')).toHaveText(['Fastest', 'Lowest price', 'Most liked'])
+  await expect(sheet.locator('[data-testid^="sort-"]')).toHaveText(['Fastest', 'Lowest price', 'Top rated'])
   await sheet.getByTestId('side-pickup').click()
-  await expect(sheet.locator('[data-testid^="sort-"]')).toHaveText(['Nearest', 'Lowest price', 'Most liked'])
+  await expect(sheet.locator('[data-testid^="sort-"]')).toHaveText(['Nearest', 'Lowest price', 'Top rated'])
 
   // Lowest price survives switches, and a step on the same side keeps it.
   await page.goto('/quick-meal?time=30&sort=price')

@@ -25,19 +25,21 @@ export const CUISINES = [
 export const SORTS = [
   { id: 'fastest', label: 'Fastest' },
   { id: 'price', label: 'Lowest price' },
-  { id: 'liked', label: 'Most liked' },
+  { id: 'rated', label: 'Top rated' },
   { id: 'nearest', label: 'Nearest' },
 ] as const;
 // Each side shows 3 sorts. Delivery has no Nearest and Pickup has no Fastest.
 // The first sort of each side is its default.
-export const DELIVERY_SORT_IDS = ['fastest', 'price', 'liked'] as const;
-export const PICKUP_SORT_IDS = ['nearest', 'price', 'liked'] as const;
+export const DELIVERY_SORT_IDS = ['fastest', 'price', 'rated'] as const;
+export const PICKUP_SORT_IDS = ['nearest', 'price', 'rated'] as const;
 
 // The asked sort if the side has it, otherwise the side's default.
 // So an old sort=best link, or a sort from the other side, gets a sort the side shows.
+// Most liked was renamed Top rated, so an old sort=liked becomes rated.
 export function sortFor(raw: string | null | undefined, pickup: boolean): SortId {
   const ids: readonly SortId[] = pickup ? PICKUP_SORT_IDS : DELIVERY_SORT_IDS;
-  return ids.find((id) => id === raw) ?? ids[0];
+  const asked = raw === 'liked' ? 'rated' : raw;
+  return ids.find((id) => id === asked) ?? ids[0];
 }
 export const PHOTO_KINDS = [
   'bowl',

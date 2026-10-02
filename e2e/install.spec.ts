@@ -13,7 +13,7 @@ test('the app can be installed to the Home Screen', async ({ page, request }) =>
   expect(res.ok()).toBe(true)
   const manifest = await res.json()
   expect(manifest.display).toBe('standalone')
-  expect(manifest.short_name).toBe('Quick Meal')
+  expect(manifest.short_name).toBe('QM Cards')
   expect(manifest.start_url).toBe('/')
   expect(manifest.icons).toHaveLength(3)
   expect(manifest.icons.some((i: { purpose?: string }) => i.purpose === 'maskable')).toBe(true)

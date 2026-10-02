@@ -75,10 +75,10 @@ function compareCards(sort: SortId) {
     const rb = b.restaurant
     const byId = compareIds(ra.id, rb.id)
     switch (sort) {
-      case 'liked':
+      case 'rated':
         return (
-          b.item.likePct - a.item.likePct ||
           rb.rating - ra.rating ||
+          rb.ratingCount - ra.ratingCount ||
           ra.etaMin - rb.etaMin ||
           byId
         )

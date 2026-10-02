@@ -50,15 +50,15 @@ describe('search: exact', () => {
   })
 
   it('never shows a closed place', () => {
-    const res = search(restaurants, filters({ sort: 'liked' }))
-    // Lead likes: paseo 91, far 90, curry 87, taco 86, slice 84, green 83.
+    const res = search(restaurants, filters({ sort: 'rated' }))
+    // Ratings: paseo 4.6, green 4.4, taco 4.3, curry 4.2, slice 4.1, far 4.0.
     expect(ids(res.exact)).toEqual([
       'paseo-rice-bowl',
-      'far-burger',
-      'curry-house',
-      'taco-loco',
-      'slice-house',
       'green-leaf',
+      'taco-loco',
+      'curry-house',
+      'slice-house',
+      'far-burger',
     ])
     expect(res.total).toBe(6)
     // Sakura (780 total) would fit $10 if it were open.
@@ -114,14 +114,15 @@ describe('search: exact', () => {
 
 describe('search: card sort', () => {
   // See sortList in fixtures. Every tie pair is listed in reverse id order.
-  it('liked: likes, then rating, then eta, then id', () => {
-    // a 90 likes; b 4.8 rating; d and e eta 15 tie on id; c eta 20.
-    expect(ids(search(sortList, filters({ sort: 'liked' })).exact)).toEqual([
-      'r-a',
+  it('rated: rating, then rating count, then eta, then id', () => {
+    // b 4.8; the rest 4.5 but a 4.0; c has 200 ratings; d and e eta 15 tie on id. Dish likes do not count.
+    const list = sortList.map((r) => (r.id === 'r-c' ? { ...r, ratingCount: 200 } : r))
+    expect(ids(search(list, filters({ sort: 'rated' })).exact)).toEqual([
       'r-b',
+      'r-c',
       'r-d',
       'r-e',
-      'r-c',
+      'r-a',
     ])
   })
 

@@ -52,7 +52,7 @@ export function QuickMealScreen() {
   )
   // The last successful answer. It stays on screen while the next request loads.
   const [shown, setShown] = useState<SearchResponse | null>(cached)
-  // The tapped card and whether it was priced for pickup, fixed at tap time.
+  // The tapped near card and whether it was priced for pickup, fixed at tap time.
   const [priced, setPriced] = useState<{ card: Meal; pickup: boolean } | null>(null)
   const [open, setOpen] = useState<SheetKind | null>(null)
   const { show } = useToast()
@@ -181,7 +181,6 @@ export function QuickMealScreen() {
                       budget={filters.budget}
                       pickup={pickup}
                       onOpen={() => openMenu(card.restaurant.id)}
-                      onPrice={() => setPriced({ card, pickup })}
                     />
                   ))}
                 </>

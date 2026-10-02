@@ -4,7 +4,9 @@ Quick Meal is a demo of a fast meal ordering app for university students. It run
 
 Concept demo for a CMU course. Not affiliated with DoorDash.
 
-Live demo: https://quick-meal-demo.ioenv.workers.dev
+Live demo: https://quick-meal-demo-cards.ioenv.workers.dev
+
+**This branch (`restaurant-cards`) is a design variant.** Result cards show restaurants with the meals that fit, instead of one meal and its all-in price. It deploys to its own Worker, `quick-meal-demo-cards`. The main design and demo live on `main`: https://quick-meal-demo.ioenv.workers.dev. Do not merge this branch into `main` without changing the Worker name in `wrangler.jsonc` back.
 
 Add it to your Home Screen to open it full screen like an app. iPhone: open it in Safari, tap Share, then Add to Home Screen. Android: open it in Chrome, tap the menu, then Add to Home screen (or Install app).
 
@@ -22,7 +24,7 @@ Add it to your Home Screen to open it full screen like an app. iPhone: open it i
 
 The full design page has the screens, product decisions and acceptance criteria.
 
-- [Live design page](https://quick-meal-demo.ioenv.workers.dev/design): open it in a browser.
+- [Live design page](https://quick-meal-demo-cards.ioenv.workers.dev/design): open it in a browser.
 - [docs/design.png](docs/design.png): the whole page as one image. GitHub shows it directly.
 - [docs/design.html](docs/design.html): the source. GitHub shows it as code.
 

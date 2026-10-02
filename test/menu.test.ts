@@ -7,10 +7,10 @@ const ids = (rows: { item: { id: string } }[]) => rows.map((r) => r.item.id)
 
 describe('menuView', () => {
   it('splits Paseo at $20 by most liked', () => {
-    const v = menuView(paseo, 2000, 'liked')
+    const v = menuView(paseo, 2000, 'rated')
     expect(v.restaurant).toEqual(toSummary(paseo))
     expect(v.budgetCents).toBe(2000)
-    expect(v.sort).toBe('liked')
+    expect(v.sort).toBe('rated')
     // likePct 88, 82, 79
     expect(ids(v.fits)).toEqual(['chicken-bowl', 'tofu-bowl', 'musubi-plate'])
     expect(v.fits.map((r) => r.overCents)).toEqual([0, 0, 0])
@@ -20,7 +20,7 @@ describe('menuView', () => {
   })
 
   it('attaches the full price to each row', () => {
-    const v = menuView(paseo, 2000, 'liked')
+    const v = menuView(paseo, 2000, 'rated')
     for (const row of [...v.fits, ...v.over]) {
       expect(row.price).toEqual(priceItem(row.item, paseo))
     }
@@ -46,7 +46,7 @@ describe('menuView', () => {
   })
 
   it('puts every item in fits when there is no budget', () => {
-    const v = menuView(paseo, null, 'liked')
+    const v = menuView(paseo, null, 'rated')
     expect(v.budgetCents).toBeNull()
     // likePct 91, 88, 85, 82, 79
     expect(ids(v.fits)).toEqual([
@@ -77,9 +77,9 @@ describe('menuView', () => {
       id: 'twins',
       menu: [item('z-item', 'Z', 1000, 80), item('y-item', 'Y', 1000, 80)],
     })
-    expect(ids(menuView(r, null, 'liked').fits)).toEqual(['y-item', 'z-item'])
+    expect(ids(menuView(r, null, 'rated').fits)).toEqual(['y-item', 'z-item'])
     expect(ids(menuView(r, null, 'price').fits)).toEqual(['y-item', 'z-item'])
-    const v = menuView(r, 1000, 'liked')
+    const v = menuView(r, 1000, 'rated')
     expect(v.fits).toEqual([])
     expect(v.over.map((x) => [x.item.id, x.overCents])).toEqual([
       ['y-item', 300],

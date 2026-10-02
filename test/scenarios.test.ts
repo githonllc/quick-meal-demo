@@ -128,7 +128,7 @@ describe('budget 2000, pickup 1 mi', () => {
 
 describe('Paseo menu at $20', () => {
   it('matches the menu engine tests', () => {
-    const v = menuView(find('paseo-rice-bowl'), 2000, 'liked')
+    const v = menuView(find('paseo-rice-bowl'), 2000, 'rated')
     expect(v.fits.map((r) => r.item.id)).toEqual(['chicken-bowl', 'tofu-bowl', 'musubi-plate'])
     expect(v.over.map((r) => r.item.id)).toEqual(['veggie-bowl', 'salmon-poke'])
     expect(v.over.map((r) => r.overCents)).toEqual([54, 362])

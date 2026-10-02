@@ -82,6 +82,8 @@ describe('saved default', () => {
   it("turns an unknown sort into the side's default", () => {
     expect(loadDefault(stored({ sort: 'cheap' }))?.sort).toBe('fastest')
     expect(loadDefault(stored({ sort: 'best' }))?.sort).toBe('fastest')
+    expect(loadDefault(stored({ sort: 'liked' }))?.sort).toBe('rated')
+    expect(loadDefault(stored({ distance: 1, sort: 'liked' }))?.sort).toBe('rated')
     expect(loadDefault(stored({ distance: 1, sort: 'fastest' }))?.sort).toBe('nearest')
     expect(loadDefault(stored({ time: 30, sort: 'nearest' }))?.sort).toBe('fastest')
   })

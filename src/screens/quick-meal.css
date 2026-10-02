@@ -97,21 +97,14 @@
   font-size: 16px;
   text-align: left;
 }
-.meal-like {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+.meal-rating {
   color: var(--muted);
   font-size: 13px;
   white-space: nowrap;
 }
-.meal-rest {
-  font-size: 14px;
-  font-weight: 600;
-}
-.meal-rest span,
-/* Time, distance and price share one plain line, so none of them looks like a promise. */
+/* Time and distance share one plain line, so neither looks like a promise. */
 .meal-meta {
+  margin: 0;
   color: var(--ink);
   font-weight: 400;
   font-size: 14px;
@@ -126,11 +119,16 @@
   font-weight: 700;
   font-size: 14px;
 }
+/* The dish names are cut with an ellipsis; the arrow after them always shows. */
 .meal-more {
+  display: flex;
+  max-width: 100%;
   font-size: 14px;
   font-weight: 700;
   text-align: left;
   white-space: nowrap;
+}
+.meal-more span {
   overflow: hidden;
   text-overflow: ellipsis;
 }
