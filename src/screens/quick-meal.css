@@ -272,8 +272,8 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
 }
-.opts.two {
-  grid-template-columns: repeat(2, 1fr);
+.opts.three {
+  grid-template-columns: repeat(3, 1fr);
 }
 .opt {
   border: 1px solid var(--line);

@@ -45,7 +45,7 @@ export function parseFilters(params: URLSearchParams): Filters | { error: string
   const cuisine = cuisineRaw === null ? null : (CUISINES.find((c) => c.id === cuisineRaw)?.id ?? undefined)
   if (cuisine === undefined) return { error: 'Invalid cuisine' }
 
-  // A missing sort, Fastest in pickup, or the removed sort=best becomes the side's default.
+  // A missing sort, a sort the side does not have, or the removed sort=best becomes the side's default.
   const sortRaw = params.get('sort')
   if (sortRaw !== null && sortRaw !== 'best' && !SORTS.some((s) => s.id === sortRaw)) {
     return { error: 'Invalid sort' }

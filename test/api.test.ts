@@ -103,6 +103,15 @@ describe('handleApi', () => {
     expect(body.fits[0].price.totalCents).toBe(1873)
   })
 
+  it("a sort the side does not have gets the side's default sort", async () => {
+    const delivery = await get('/api/quick-meal/search?time=30&sort=nearest')
+    expect(delivery.res.status).toBe(200)
+    expect(delivery.body.filters.sort).toBe('fastest')
+    const noSide = await get('/api/quick-meal/search?sort=nearest')
+    expect(noSide.res.status).toBe(200)
+    expect(noSide.body.filters.sort).toBe('fastest')
+  })
+
   it("search?sort=best opens with the side's default sort", async () => {
     const delivery = await get('/api/quick-meal/search?sort=best')
     expect(delivery.res.status).toBe(200)

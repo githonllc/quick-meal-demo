@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { PhotoKind } from '../../shared/types'
 
-// Two warm colors per kind. They show while a photo loads, or if it fails.
+// Two warm colors and the kind's name. They show while a photo loads, or if it fails.
 const COLORS: Record<PhotoKind, [string, string]> = {
   bowl: ['#d9822b', '#f2b45e'],
   noodles: ['#c8561f', '#eba04a'],
@@ -23,7 +23,6 @@ const COLORS: Record<PhotoKind, [string, string]> = {
 
 export function FoodTile({ kind, size }: { kind: PhotoKind; size: 'card' | 'thumb' | 'hero' }) {
   const [a, b] = COLORS[kind]
-  const [loaded, setLoaded] = useState(false)
   const [failed, setFailed] = useState(false)
   return (
     <div
@@ -32,16 +31,10 @@ export function FoodTile({ kind, size }: { kind: PhotoKind; size: 'card' | 'thum
       aria-label={kind}
       style={{ background: `linear-gradient(135deg, ${a}, ${b})` }}
     >
-      {!failed && (
-        <img
-          src={`/img/${kind}.webp`}
-          alt=""
-          loading="lazy"
-          onLoad={() => setLoaded(true)}
-          onError={() => setFailed(true)}
-        />
-      )}
-      {!loaded && <span aria-hidden="true">{kind}</span>}
+      {/* The photo covers the name once it paints. A photo the browser already has paints in the
+          first frame, so a remounted tile never shows the name over it while it waits for onLoad. */}
+      <span aria-hidden="true">{kind}</span>
+      {!failed && <img src={`/img/${kind}.webp`} alt="" loading="lazy" onError={() => setFailed(true)} />}
     </div>
   )
 }

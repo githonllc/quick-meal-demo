@@ -83,6 +83,7 @@ describe('saved default', () => {
     expect(loadDefault(stored({ sort: 'cheap' }))?.sort).toBe('fastest')
     expect(loadDefault(stored({ sort: 'best' }))?.sort).toBe('fastest')
     expect(loadDefault(stored({ distance: 1, sort: 'fastest' }))?.sort).toBe('nearest')
+    expect(loadDefault(stored({ time: 30, sort: 'nearest' }))?.sort).toBe('fastest')
   })
 
   it('returns null for bad JSON or a value that is not an object', () => {

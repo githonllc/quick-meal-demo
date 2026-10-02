@@ -39,12 +39,10 @@ export function parseUrl(search: string): UiFilters {
   }
 }
 
-// Switches to the other side: clears this side's value and swaps the two defaults.
+// Switches to the other side: clears the other side's value and swaps the two defaults.
 // Fastest becomes Nearest in Pickup, and Nearest becomes Fastest in Delivery. Other sorts stay.
-// Call it only when the side changes. Picking a step on the current side leaves the sort alone.
 export function toSide(f: UiFilters, pickup: boolean): UiFilters {
-  if (pickup) return { ...f, time: null, sort: sortFor(f.sort, true) }
-  return { ...f, distance: null, sort: f.sort === 'nearest' ? 'fastest' : f.sort }
+  return { ...f, ...(pickup ? { time: null } : { distance: null }), sort: sortFor(f.sort, pickup) }
 }
 
 // Leaves out empty filters and the side's default sort, so URLs stay short.

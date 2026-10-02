@@ -21,20 +21,22 @@ export const CUISINES = [
   { id: 'fast-food', label: 'Fast Food' },
   { id: 'sushi', label: 'Sushi' },
 ] as const;
-// Every sort uses a number the card shows (design P2). This is the Delivery order.
+// Every sort uses a number the card shows (design P2). These are all the sorts the API knows.
 export const SORTS = [
   { id: 'fastest', label: 'Fastest' },
   { id: 'price', label: 'Lowest price' },
   { id: 'liked', label: 'Most liked' },
   { id: 'nearest', label: 'Nearest' },
 ] as const;
-// Pickup cards show no time, so Pickup has no Fastest. The first sort of each side is its default.
+// Each side shows 3 sorts. Delivery has no Nearest and Pickup has no Fastest.
+// The first sort of each side is its default.
+export const DELIVERY_SORT_IDS = ['fastest', 'price', 'liked'] as const;
 export const PICKUP_SORT_IDS = ['nearest', 'price', 'liked'] as const;
 
 // The asked sort if the side has it, otherwise the side's default.
-// So an old sort=best link, or Fastest after a switch to Pickup, gets a sort the side shows.
+// So an old sort=best link, or a sort from the other side, gets a sort the side shows.
 export function sortFor(raw: string | null | undefined, pickup: boolean): SortId {
-  const ids: readonly SortId[] = pickup ? PICKUP_SORT_IDS : SORTS.map((s) => s.id);
+  const ids: readonly SortId[] = pickup ? PICKUP_SORT_IDS : DELIVERY_SORT_IDS;
   return ids.find((id) => id === raw) ?? ids[0];
 }
 export const PHOTO_KINDS = [

@@ -1,13 +1,15 @@
 import { useState } from 'react'
-import { PICKUP_SORT_IDS, SORTS } from '../../shared/constants'
+import { DELIVERY_SORT_IDS, PICKUP_SORT_IDS, SORTS } from '../../shared/constants'
 import { toSide } from '../state/filters'
 import type { UiFilters } from '../state/filters'
 import { BudgetSlider } from './BudgetSlider'
 import { Sheet } from './Sheet'
 import { SpeedPicker } from './StepSheet'
 
-// Delivery shows every sort. Pickup cards show no time, so Pickup has no Fastest (design P2).
-const PICKUP_SORTS = PICKUP_SORT_IDS.map((id) => SORTS.find((s) => s.id === id)!)
+// Each side shows the 3 sorts its cards have numbers for (design P2).
+const sorts = (ids: readonly string[]) => ids.map((id) => SORTS.find((s) => s.id === id)!)
+const DELIVERY_SORTS = sorts(DELIVERY_SORT_IDS)
+const PICKUP_SORTS = sorts(PICKUP_SORT_IDS)
 
 export function ApplyButton({ onClick, text = 'Show results' }: { onClick: () => void; text?: string }) {
   return (
@@ -51,8 +53,8 @@ export function FiltersSheet({
       </div>
       <div className="grp">
         <h3>Sort by</h3>
-        <div className="opts two">
-          {(pickup ? PICKUP_SORTS : SORTS).map((s) => (
+        <div className="opts three">
+          {(pickup ? PICKUP_SORTS : DELIVERY_SORTS).map((s) => (
             <button
               key={s.id}
               className={s.id === draft.sort ? 'opt on' : 'opt'}

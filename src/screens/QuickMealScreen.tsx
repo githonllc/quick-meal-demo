@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { SORTS } from '../../shared/constants'
 import { pluralize } from '../../shared/format'
 import type { DistanceStep, MealCard as Meal, Relax, SearchResponse, TimeStep } from '../../shared/types'
-import { searchMeals } from '../api'
+import { cachedSearch, searchMeals } from '../api'
 import { BreakdownSheet } from '../components/BreakdownSheet'
 import { BudgetSheet } from '../components/BudgetSheet'
 import { CuisineTabs } from '../components/CuisineTabs'
@@ -43,10 +43,15 @@ export function QuickMealScreen() {
   const key = toQuery(filters)
 
   const [attempt, setAttempt] = useState(0)
+  // Going back from a menu mounts this screen again. If the answer for this URL is cached,
+  // the first render shows it: no skeletons, no loading bar, and the same cards as before.
+  const [cached] = useState(() => cachedSearch(new URLSearchParams(key)) ?? null)
   // The answer to one request. data is null when the request failed.
-  const [result, setResult] = useState<{ req: string; data: SearchResponse | null } | null>(null)
+  const [result, setResult] = useState<{ req: string; data: SearchResponse | null } | null>(
+    cached && { req: `${key}#0`, data: cached },
+  )
   // The last successful answer. It stays on screen while the next request loads.
-  const [shown, setShown] = useState<SearchResponse | null>(null)
+  const [shown, setShown] = useState<SearchResponse | null>(cached)
   // The tapped card and whether it was priced for pickup, fixed at tap time.
   const [priced, setPriced] = useState<{ card: Meal; pickup: boolean } | null>(null)
   const [open, setOpen] = useState<SheetKind | null>(null)

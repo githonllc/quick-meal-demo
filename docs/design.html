@@ -257,7 +257,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
       <li>Budget means the <b>estimated all-in price of one meal</b>: food, fees, tax and tip, so the total at checkout is no surprise.</li>
       <li>Results are <b>meals</b>, one per restaurant. Other meals that fit show as "+2 more under $20" and open the restaurant's menu.</li>
       <li><b>Delivery or pickup, not both</b>: one switch in the Filters sheet. Delivery filters by time, pickup filters by distance. Only one of the two is on at a time (P7). Pickup cards show the distance and no time, and the all-in price has no delivery fee.</li>
-      <li><b>Every sort is visible</b>: Fastest (the default), Lowest price, Most liked, Nearest. Each one sorts by a number on the card. There is no "Best match".</li>
+      <li><b>Every sort is visible</b>: Fastest (the default), Lowest price and Most liked for delivery; Nearest takes the place of Fastest for pickup. Each one sorts by a number on the card. There is no "Best match".</li>
       <li><b>Evidence</b>: each decision cites the team's press release, concept thesis and Worksheet 2. Those documents use the concept's earlier name, Busy Mode; Quick Meal is the current name.</li>
       <li><b>Cuisine tabs</b> across the top (All, Chinese, Indian …), one at a time. Chip row: Filters, then time (or distance for pickup), then a budget <b>slider</b>. Sort lives in the full Filters sheet.</li>
       <li>No match is a designed state. It shows the <b>closest meals</b>, says how each one misses, and offers chips like "Budget up to $17 · 1 result".</li>
@@ -426,7 +426,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
             </div>
             <div class="ph-grp">
               <span class="gt">Sort by</span>
-              <div class="ph-opts" style="grid-template-columns: repeat(2, 1fr)"><span class="ph-o on">Fastest</span><span class="ph-o">Lowest price</span><span class="ph-o">Most liked</span><span class="ph-o">Nearest</span></div>
+              <div class="ph-opts" style="grid-template-columns: repeat(3, 1fr)"><span class="ph-o on">Fastest</span><span class="ph-o">Lowest price</span><span class="ph-o">Most liked</span></div>
             </div>
           </div>
           <div class="ph-foot"><span class="clr">Clear all</span><span class="go">Show results</span></div>
@@ -545,7 +545,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
         <dt>Sizes</dt><dd>The budget slider takes more room than the time steps. A teammate asked for a bigger time control. We keep the sizes: time is already first in the sheet and in the chip row, a slider needs width to drag with a thumb, and four time steps fit in one row.</dd>
         <dt>Distance</dt><dd>The Pickup side of the switch (P7). It asks "How far can you go?". Steps depend on the user's location. A dense area like downtown San Jose gets 0.5 · 1 · 2 · 3 mi. A spread-out suburb gets 1 · 2 · 3 · 5 mi.</dd>
         <dt>Cuisine</dt><dd>Tabs: All · Chinese · Indian · Mexican · Pizza · Burgers · Healthy · Fast Food · Sushi. One at a time; All means any cuisine. The row scrolls sideways. A place can carry several tags, since Healthy and Fast Food are tags rather than cuisines, so one place can appear under more than one tab. Tabs show no counts. The Filters badge does not count the tab, because the selected tab is already visible. Applying filters keeps the current tab.</dd>
-        <dt>Sort</dt><dd>Delivery: Fastest · Lowest price · Most liked · Nearest. Pickup: Nearest · Lowest price · Most liked. The first one is the default. Only in the full sheet. Each sort uses one number the card shows: the time, the all-in price, the dish like rate or the distance. Pickup cards show no time, so Pickup has no Fastest. Switching sides swaps the two defaults: Fastest becomes Nearest in Pickup, and Nearest becomes Fastest in Delivery. Lowest price and Most liked stay. Picking a step on the side you are already on never changes the sort.</dd>
+        <dt>Sort</dt><dd>Delivery: Fastest · Lowest price · Most liked. Pickup: Nearest · Lowest price · Most liked. The first one is the default. Only in the full sheet. Each sort uses one number the card shows: the time, the all-in price, the dish like rate or the distance. Each side sorts by speed in its own unit: time for delivery, distance for pickup. Pickup cards show no time, so Pickup has no Fastest. For delivery the time already includes the trip (P7), so Delivery has no Nearest. Switching sides swaps Fastest and Nearest; Lowest price and Most liked stay.</dd>
         <dt>No "Best match"</dt><dd>Version 35 removed it. It mixed like rate, stars and time in a way the student could not see, so it looked like a pick made for them. A sort the student can read from the card keeps the order honest.</dd>
         <dt>Chip tap</dt><dd>Each chip opens a small sheet for that one filter. The Time chip reads "30 min" for delivery or "Pickup · 1 mi" for pickup, and its sheet has the same Delivery | Pickup switch. A step applies at once when you pick it. Budget shows a "Show results" button, so a drag does not reload the list on every dollar. A tab applies at once.</dd>
         <dt>No live count</dt><dd>The button reads "Show results" and the search runs only when the user applies. A live count needs a request on every change, and a slow answer can show a stale number (for example "Show 0 results" that then shows meals). The count line on the list shows the number after applying.</dd>
@@ -824,7 +824,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
           <tr><td>Slider at the ends</td><td>Far right "$40+ (any)" removes the budget filter and the Budget chip turns grey again. Far left "$10" is allowed. It usually gives no exact match, which leads to the no-match state.</td></tr>
           <tr><td>One filter only</td><td>Works like the rest. The other chips stay grey.</td></tr>
           <tr><td>Switch Delivery to Pickup</td><td>In the sheet, the time steps change to distance steps and the time step is cleared. Nothing applies until "Show results". Switching back shows the time steps with none picked.</td></tr>
-          <tr><td>Fastest, then Pickup</td><td>Pickup cards show no time, so Pickup has no Fastest. The sort becomes Nearest. Switching back to Delivery makes it Fastest again. A Nearest the student picked in Delivery stays while they change the time.</td></tr>
+          <tr><td>Fastest, then Pickup</td><td>Pickup has no Fastest, so the sort becomes Nearest. Switching back to Delivery makes it Fastest again. A link with a sort its side does not have, such as <code>?time=30&amp;sort=nearest</code>, opens with that side's default.</td></tr>
           <tr><td>Old <code>sort=best</code> link</td><td>Opens with the default sort for its side (Fastest or Nearest).</td></tr>
           <tr><td>Link with time and distance</td><td>An old link such as <code>?time=20&amp;distance=1</code> opens in Delivery with 20 min. The distance is dropped.</td></tr>
           <tr><td>Clear all</td><td>In the sheet: resets choices. Nothing applies until "Show results".</td></tr>

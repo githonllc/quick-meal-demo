@@ -31,7 +31,9 @@ describe('filters in the URL', () => {
   it('defaults the sort by side: Fastest for delivery, Nearest for pickup', () => {
     expect(parseUrl('?distance=1').sort).toBe('nearest')
     expect(parseUrl('?distance=1&sort=fastest').sort).toBe('nearest')
-    expect(parseUrl('?time=30&sort=nearest').sort).toBe('nearest')
+    // Each side has only its own speed sort: Delivery has no Nearest, Pickup has no Fastest.
+    expect(parseUrl('?time=30&sort=nearest').sort).toBe('fastest')
+    expect(parseUrl('?sort=nearest').sort).toBe('fastest')
     // An old sort=best link opens with the side's default.
     expect(parseUrl('?sort=best').sort).toBe('fastest')
     expect(parseUrl('?distance=1&sort=best').sort).toBe('nearest')
@@ -51,7 +53,7 @@ describe('filters in the URL', () => {
   it("toQuery leaves out empty fields and the side's default sort", () => {
     expect(toQuery(NONE)).toBe('')
     expect(toQuery({ ...NONE, budget: 20 })).toBe('budget=20')
-    expect(toQuery({ ...NONE, sort: 'nearest' })).toBe('sort=nearest')
+    expect(toQuery({ ...NONE, sort: 'price' })).toBe('sort=price')
     expect(toQuery({ ...NONE, distance: 1, sort: 'nearest' })).toBe('distance=1')
     expect(toQuery({ ...NONE, distance: 1, sort: 'price' })).toBe('distance=1&sort=price')
   })

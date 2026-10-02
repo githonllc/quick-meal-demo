@@ -291,11 +291,22 @@ test('switching sides swaps Fastest and Nearest, and a step on the same side kee
   await expect(page.getByTestId('count-line')).toContainText('fastest first')
   await expect(page).toHaveURL(/\/quick-meal\?time=30$/)
 
-  // Delivery + Nearest chosen on purpose keeps Nearest when another step is picked.
-  await page.goto('/quick-meal?time=30&sort=nearest')
+  // Delivery shows no Nearest option: each side shows exactly 3 sorts.
+  await page.getByTestId('chip-filters').click()
+  await expect(sheet.locator('[data-testid^="sort-"]')).toHaveText(['Fastest', 'Lowest price', 'Most liked'])
+  await sheet.getByTestId('side-pickup').click()
+  await expect(sheet.locator('[data-testid^="sort-"]')).toHaveText(['Nearest', 'Lowest price', 'Most liked'])
+
+  // Lowest price survives switches, and a step on the same side keeps it.
+  await page.goto('/quick-meal?time=30&sort=price')
   await waitForResults(page)
   await page.getByTestId('chip-time').click()
   await page.getByTestId('step-time-45').click()
   await waitForResults(page)
-  await expect(page).toHaveURL(/\/quick-meal\?time=45&sort=nearest$/)
+  await expect(page).toHaveURL(/\/quick-meal\?time=45&sort=price$/)
+  await page.getByTestId('chip-filters').click()
+  await sheet.getByTestId('side-pickup').click()
+  await expect(sheet.getByTestId('sort-price')).toHaveAttribute('aria-pressed', 'true')
+  await sheet.getByTestId('side-delivery').click()
+  await expect(sheet.getByTestId('sort-price')).toHaveAttribute('aria-pressed', 'true')
 })
