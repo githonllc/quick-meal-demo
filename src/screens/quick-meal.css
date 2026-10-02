@@ -346,6 +346,19 @@
   color: var(--muted);
   font-size: 13px;
 }
+/* Step slider ticks: each label is centred under its stop (the thumb is 24px wide). */
+.slider-ticks {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 13px;
+}
+.slider-ticks span {
+  width: 24px;
+  display: flex;
+  justify-content: center;
+  white-space: nowrap;
+}
 
 /* No-match state */
 .no-match {

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { waitForResults } from './helpers'
+import { setStop, waitForResults } from './helpers'
 
 // Start every test with no saved default.
 test.beforeEach(async ({ page }) => {
@@ -53,7 +53,7 @@ test('a relax chip does not change the saved default', async ({ page }) => {
   await page.getByTestId('chip-filters').click()
   const sheet = page.getByTestId('sheet-filters')
   await sheet.getByTestId('budget-slider').fill('15')
-  await sheet.getByTestId('step-time-15').click()
+  await setStop(sheet.getByTestId('time-slider'), '15')
   await sheet.getByTestId('sheet-apply').click()
   await waitForResults(page)
   await expect(page.getByTestId('no-match')).toBeVisible()

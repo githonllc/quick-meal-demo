@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import type { Page, Route } from '@playwright/test'
-import { waitForResults } from './helpers'
+import { setStop, waitForResults } from './helpers'
 
 // Start every test with no saved default and no "Saved" toast flag.
 test.beforeEach(async ({ page }) => {
@@ -13,7 +13,7 @@ async function pickBudget20Time30(page: Page) {
   const sheet = page.getByTestId('sheet-filters')
   await expect(sheet).toBeVisible()
   await sheet.getByTestId('budget-slider').fill('20')
-  await sheet.getByTestId('step-time-30').click()
+  await setStop(sheet.getByTestId('time-slider'), '30')
   await expect(sheet.getByTestId('sheet-apply')).toHaveText('Show results')
 }
 
@@ -77,7 +77,7 @@ test('closing the sheet without applying keeps the list', async ({ page }) => {
   await expectBudget20Time30(page)
   await page.getByTestId('chip-filters').click()
   await page.getByTestId('budget-slider').fill('12')
-  await page.getByTestId('step-time-30').click()
+  await setStop(page.getByTestId('time-slider'), '45')
   // Tap the dimmed page above the sheet.
   await page.locator('.sheet-backdrop').click({ position: { x: 10, y: 10 } })
   await expect(page.getByTestId('sheet-filters')).toHaveCount(0)
@@ -89,7 +89,7 @@ test('closing the sheet without applying keeps the list', async ({ page }) => {
 
   // The sheet opens again from the applied filters, not the dropped draft.
   await page.getByTestId('chip-filters').click()
-  await expect(page.getByTestId('step-time-30')).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByTestId('time-slider')).toHaveAttribute('aria-valuetext', '30 minutes')
   await expect(page.getByTestId('budget-slider')).toHaveValue('20')
 })
 
@@ -120,7 +120,8 @@ test('the "Saved" toast shows on the first apply only', async ({ page }) => {
   await expect(toast).toHaveCount(0)
 
   await page.getByTestId('chip-time').click()
-  await page.getByTestId('step-time-30').click()
+  await setStop(page.getByTestId('time-slider'), '30')
+  await page.getByTestId('sheet-apply').click()
   await expectBudget20Time30(page)
   // The toast would show in the same click that applied the filters.
   expect(await toast.count()).toBe(0)
@@ -135,7 +136,7 @@ test('no search request leaves the Filters sheet until the user applies', async 
     if (req.url().includes('/api/quick-meal/search')) requests.push(req.url())
   })
   await page.getByTestId('budget-slider').fill('15')
-  await page.getByTestId('step-time-30').click()
+  await setStop(page.getByTestId('time-slider'), '30')
   // Wait longer than any debounce a live count would have used.
   await page.waitForTimeout(500)
   expect(requests).toHaveLength(0)
@@ -161,18 +162,21 @@ test('AC-09: Pickup swaps time for distance and drops the delivery fee', async (
   await expect(sheet.getByTestId('side-pickup')).toHaveAttribute('aria-checked', 'true')
   await expect(sheet.getByTestId('side-delivery')).toHaveAttribute('aria-checked', 'false')
 
-  // The time steps are replaced by 0.5 · 1 · 2 · 3 mi, none picked.
-  await expect(sheet.locator('[data-testid^="step-time-"]')).toHaveCount(0)
-  const steps = sheet.locator('[data-testid^="step-distance-"]')
-  await expect(steps).toHaveText(['0.5 mi', '1 mi', '2 mi', '3 mi'])
-  for (const step of await steps.all()) await expect(step).toHaveAttribute('aria-pressed', 'false')
+  // The time slider is replaced by a distance slider over 0.5 · 1 · 2 · 3 mi, at Any.
+  await expect(sheet.getByTestId('time-slider')).toHaveCount(0)
+  const slider = sheet.getByTestId('distance-slider')
+  await expect(sheet.locator('.slider-ticks span')).toHaveText(['0.5', '1', '2', '3', 'Any'])
+  await expect(slider).toHaveAttribute('aria-valuetext', 'Any distance')
+  await expect(sheet.getByTestId('distance-slider-val')).toHaveText('Any distance')
   await expect(sheet).toContainText('How far can you go?')
   await expect(page.getByText('For pickup')).toHaveCount(0)
   // Pickup has no Fastest.
   await expect(sheet.getByTestId('sort-fastest')).toHaveCount(0)
   await expect(sheet.getByTestId('sort-nearest')).toHaveAttribute('aria-pressed', 'true')
 
-  await sheet.getByTestId('step-distance-1').click()
+  await setStop(slider, '1')
+  await expect(sheet.getByTestId('distance-slider-val')).toHaveText('Within 1 mi')
+  await expect(slider).toHaveAttribute('aria-valuetext', '1 mile')
   await sheet.getByTestId('sheet-apply').click()
   await waitForResults(page)
   await expect(page.getByTestId('chip-time')).toHaveText('Pickup · 1 mi ▾')
@@ -201,13 +205,41 @@ test('AC-09: Pickup swaps time for distance and drops the delivery fee', async (
   await expect(breakdown.getByTestId('breakdown-total')).toContainText('$16.74')
 })
 
-test('the Time chip sheet has the same switch and applies a step at once', async ({ page }) => {
+test('the Delivery slider shows the time above the track and ends at Any time', async ({ page }) => {
+  await page.goto('/quick-meal')
+  await page.getByTestId('chip-filters').click()
+  const sheet = page.getByTestId('sheet-filters')
+  const slider = sheet.getByTestId('time-slider')
+  const val = sheet.getByTestId('time-slider-val')
+  await expect(sheet.locator('.slider-ticks span')).toHaveText(['15', '20', '30', '45', 'Any'])
+  await expect(val).toHaveText('Any time')
+  await setStop(slider, '30')
+  await expect(val).toHaveText('Up to 30 min')
+  await expect(slider).toHaveAttribute('aria-valuetext', '30 minutes')
+  // The keyboard moves one stop at a time, and End is Any.
+  await slider.press('ArrowRight')
+  await expect(val).toHaveText('Up to 45 min')
+  await slider.press('End')
+  await expect(val).toHaveText('Any time')
+  await expect(slider).toHaveAttribute('aria-valuetext', 'Any time')
+  await slider.press('Home')
+  await expect(val).toHaveText('Up to 15 min')
+})
+
+test('the Time chip sheet has the same switch and applies on Show results', async ({ page }) => {
   await page.goto('/quick-meal?budget=20&time=30')
   await expectBudget20Time30(page)
   await page.getByTestId('chip-time').click()
   const sheet = page.getByTestId('sheet-time')
+  await expect(sheet.getByTestId('time-slider-val')).toHaveText('Up to 30 min')
   await sheet.getByTestId('side-pickup').click()
-  await sheet.getByTestId('step-distance-1').click()
+  await setStop(sheet.getByTestId('distance-slider'), '1')
+  // Moving the slider changes nothing until the button.
+  await page.waitForTimeout(300)
+  await expect(sheet).toBeVisible()
+  await expect(page).toHaveURL(/\/quick-meal\?budget=20&time=30$/)
+  await expect(page.getByTestId('chip-time')).toHaveText('30 min ▾')
+  await sheet.getByTestId('sheet-apply').click()
   await expect(sheet).toHaveCount(0)
   await waitForResults(page)
   await expect(page).toHaveURL(/\/quick-meal\?budget=20&distance=1$/)
@@ -218,23 +250,38 @@ test('the Time chip sheet has the same switch and applies a step at once', async
   await page.getByTestId('chip-time').click()
   await expect(sheet.getByTestId('side-pickup')).toHaveAttribute('aria-checked', 'true')
   await sheet.getByTestId('side-delivery').click()
-  await sheet.getByTestId('step-time-30').click()
+  await setStop(sheet.getByTestId('time-slider'), '30')
+  await sheet.getByTestId('sheet-apply').click()
   await waitForResults(page)
   await expect(page).toHaveURL(/\/quick-meal\?budget=20&time=30$/)
   await expect(page.getByTestId('chip-time')).toHaveText('30 min ▾')
 })
 
-test('after a switch in the Time chip sheet no step is picked', async ({ page }) => {
+test('closing the Time chip sheet without applying keeps the filters', async ({ page }) => {
   await page.goto('/quick-meal?budget=20&time=30')
   await expectBudget20Time30(page)
   await page.getByTestId('chip-time').click()
   const sheet = page.getByTestId('sheet-time')
-  await expect(sheet.getByTestId('step-time-30')).toHaveAttribute('aria-pressed', 'true')
+  await setStop(sheet.getByTestId('time-slider'), '15')
+  await page.locator('.sheet-backdrop').click({ position: { x: 10, y: 10 } })
+  await expect(sheet).toHaveCount(0)
+  await expect(page).toHaveURL(/\/quick-meal\?budget=20&time=30$/)
+  await expectBudget20Time30(page)
+})
+
+test('after a switch in the Time chip sheet the slider is at Any', async ({ page }) => {
+  await page.goto('/quick-meal?budget=20&time=30')
+  await expectBudget20Time30(page)
+  await page.getByTestId('chip-time').click()
+  const sheet = page.getByTestId('sheet-time')
+  const slider = sheet.getByTestId('time-slider')
+  await expect(slider).toHaveAttribute('aria-valuetext', '30 minutes')
   await sheet.getByTestId('side-pickup').click()
+  await expect(sheet.getByTestId('distance-slider')).toHaveAttribute('aria-valuetext', 'Any distance')
   await sheet.getByTestId('side-delivery').click()
-  await expect(sheet.getByTestId('step-time-30')).toHaveAttribute('aria-pressed', 'false')
-  // Picking a step applies that value instead of clearing it.
-  await sheet.getByTestId('step-time-30').click()
+  await expect(slider).toHaveAttribute('aria-valuetext', 'Any time')
+  await setStop(slider, '30')
+  await sheet.getByTestId('sheet-apply').click()
   await expect(sheet).toHaveCount(0)
   await waitForResults(page)
   await expect(page).toHaveURL(/[?&]time=30(&|$)/)
@@ -251,7 +298,8 @@ test('a breakdown opened while pickup loads keeps the prices of the tapped card'
   })
   await page.getByTestId('chip-time').click()
   await page.getByTestId('sheet-time').getByTestId('side-pickup').click()
-  await page.getByTestId('step-distance-1').click()
+  await setStop(page.getByTestId('distance-slider'), '1')
+  await page.getByTestId('sheet-apply').click()
   await expect(page.locator('[data-testid="results"][aria-busy="true"]')).toBeVisible()
 
   const paseo = page.getByTestId('meal-card').filter({ hasText: 'Paseo Rice Bowl' })
@@ -286,7 +334,8 @@ test('switching sides swaps Fastest and Nearest, and a step on the same side kee
   await waitForResults(page)
   await page.getByTestId('chip-time').click()
   await page.getByTestId('side-delivery').click()
-  await page.getByTestId('step-time-30').click()
+  await setStop(page.getByTestId('time-slider'), '30')
+  await page.getByTestId('sheet-apply').click()
   await waitForResults(page)
   await expect(page.getByTestId('count-line')).toContainText('fastest first')
   await expect(page).toHaveURL(/\/quick-meal\?time=30$/)
@@ -301,7 +350,8 @@ test('switching sides swaps Fastest and Nearest, and a step on the same side kee
   await page.goto('/quick-meal?time=30&sort=price')
   await waitForResults(page)
   await page.getByTestId('chip-time').click()
-  await page.getByTestId('step-time-45').click()
+  await setStop(page.getByTestId('time-slider'), '45')
+  await page.getByTestId('sheet-apply').click()
   await waitForResults(page)
   await expect(page).toHaveURL(/\/quick-meal\?time=45&sort=price$/)
   await page.getByTestId('chip-filters').click()
