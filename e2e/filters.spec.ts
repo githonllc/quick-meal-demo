@@ -156,6 +156,7 @@ test('AC-09: Pickup swaps time for distance and drops the delivery fee', async (
   await expectBudget20Time30(page)
   await page.getByTestId('chip-filters').click()
   const sheet = page.getByTestId('sheet-filters')
+  await expect(page.getByText('Deliver to SJSU · Now')).toBeVisible()
   await sheet.getByTestId('side-pickup').click()
   await expect(sheet.getByTestId('side-pickup')).toHaveAttribute('aria-checked', 'true')
   await expect(sheet.getByTestId('side-delivery')).toHaveAttribute('aria-checked', 'false')
@@ -175,6 +176,7 @@ test('AC-09: Pickup swaps time for distance and drops the delivery fee', async (
   await sheet.getByTestId('sheet-apply').click()
   await waitForResults(page)
   await expect(page.getByTestId('chip-time')).toHaveText('Pickup · 1 mi ▾')
+  await expect(page.getByText('Pickup near SJSU · Now')).toBeVisible()
   await expect(page).toHaveURL(/\/quick-meal\?budget=20&distance=1$/)
   await expect(page.getByTestId('chip-filters-badge')).toHaveText('2')
   await expect(page.getByTestId('count-line')).toHaveText('7 places have a meal that fits · nearest first')
@@ -212,13 +214,13 @@ test('the Time chip sheet has the same switch and applies a step at once', async
   await expect(page.getByTestId('chip-time')).toHaveText('Pickup · 1 mi ▾')
   await expect(page.getByTestId('meal-card')).toHaveCount(7)
 
-  // Back to delivery: the distance is cleared and Nearest stays.
+  // Back to delivery: the distance is cleared and Nearest becomes Fastest.
   await page.getByTestId('chip-time').click()
   await expect(sheet.getByTestId('side-pickup')).toHaveAttribute('aria-checked', 'true')
   await sheet.getByTestId('side-delivery').click()
   await sheet.getByTestId('step-time-30').click()
   await waitForResults(page)
-  await expect(page).toHaveURL(/\/quick-meal\?budget=20&time=30&sort=nearest$/)
+  await expect(page).toHaveURL(/\/quick-meal\?budget=20&time=30$/)
   await expect(page.getByTestId('chip-time')).toHaveText('30 min ▾')
 })
 
@@ -266,4 +268,34 @@ test('a breakdown opened while pickup loads keeps the prices of the tapped card'
   // The sheet still shows the delivery card it was opened for.
   await expect(breakdown.getByTestId('breakdown-row-delivery')).toHaveCount(1)
   await expect(breakdown.getByTestId('breakdown-total')).toContainText('$18.73')
+})
+
+test('switching sides swaps Fastest and Nearest, and a step on the same side keeps the sort', async ({ page }) => {
+  // Filters sheet: Delivery + Fastest, to Pickup and back, is Fastest again.
+  await page.goto('/quick-meal?time=30')
+  await waitForResults(page)
+  await page.getByTestId('chip-filters').click()
+  const sheet = page.getByTestId('sheet-filters')
+  await sheet.getByTestId('side-pickup').click()
+  await expect(sheet.getByTestId('sort-nearest')).toHaveAttribute('aria-pressed', 'true')
+  await sheet.getByTestId('side-delivery').click()
+  await expect(sheet.getByTestId('sort-fastest')).toHaveAttribute('aria-pressed', 'true')
+
+  // Time chip sheet: Pickup + Nearest, switch to Delivery and pick 30 min. Sort is Fastest, no sort in the URL.
+  await page.goto('/quick-meal?distance=1')
+  await waitForResults(page)
+  await page.getByTestId('chip-time').click()
+  await page.getByTestId('side-delivery').click()
+  await page.getByTestId('step-time-30').click()
+  await waitForResults(page)
+  await expect(page.getByTestId('count-line')).toContainText('fastest first')
+  await expect(page).toHaveURL(/\/quick-meal\?time=30$/)
+
+  // Delivery + Nearest chosen on purpose keeps Nearest when another step is picked.
+  await page.goto('/quick-meal?time=30&sort=nearest')
+  await waitForResults(page)
+  await page.getByTestId('chip-time').click()
+  await page.getByTestId('step-time-45').click()
+  await waitForResults(page)
+  await expect(page).toHaveURL(/\/quick-meal\?time=45&sort=nearest$/)
 })

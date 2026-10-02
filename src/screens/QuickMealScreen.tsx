@@ -122,7 +122,7 @@ export function QuickMealScreen() {
           </button>
         }
       />
-      <p className="qm-sub">Deliver to SJSU · Now</p>
+      <p className="qm-sub">{filters.distance !== null ? 'Pickup near SJSU · Now' : 'Deliver to SJSU · Now'}</p>
       <FilterChips filters={filters} onOpen={onOpen} />
       <CuisineTabs value={filters.cuisine} onChange={(cuisine) => setFilters({ ...filters, cuisine })} />
 

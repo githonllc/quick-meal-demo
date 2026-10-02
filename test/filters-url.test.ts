@@ -70,11 +70,20 @@ describe('filters in the URL', () => {
     expect(parseUrl(toQuery(NONE))).toEqual(NONE)
   })
 
-  it('toSide clears the other side, and Fastest becomes Nearest in pickup', () => {
+  it('toSide swaps the defaults: Fastest to Nearest in pickup, Nearest to Fastest in delivery', () => {
     expect(toSide({ ...NONE, time: 30 }, true)).toEqual({ ...NONE, sort: 'nearest' })
     expect(toSide({ ...NONE, time: 30, sort: 'price' }, true)).toEqual({ ...NONE, sort: 'price' })
-    // Back to delivery keeps Nearest.
-    expect(toSide({ ...NONE, distance: 1, sort: 'nearest' }, false)).toEqual({ ...NONE, sort: 'nearest' })
+    expect(toSide({ ...NONE, distance: 1, sort: 'nearest' }, false)).toEqual({ ...NONE, sort: 'fastest' })
+    // Delivery + Fastest, to Pickup and back, shows Fastest again.
+    expect(toSide(toSide({ ...NONE, time: 30 }, true), false).sort).toBe('fastest')
+  })
+
+  it('Lowest price and Most liked survive any number of side switches', () => {
+    for (const sort of ['price', 'liked'] as const) {
+      let f: UiFilters = { ...NONE, time: 30, sort }
+      for (const p of [true, false, true, false, true]) f = toSide(f, p)
+      expect(f.sort).toBe(sort)
+    }
   })
 
   it('counts budget, and time or distance as one', () => {

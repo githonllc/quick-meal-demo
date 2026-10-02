@@ -33,6 +33,7 @@ export function FiltersSheet({
   const set = (patch: Partial<UiFilters>) => setDraft((d) => ({ ...d, ...patch }))
   // Switching sides clears the other side's step in the draft.
   const switchSide = (p: boolean) => {
+    if (p === pickup) return
     setPickup(p)
     setDraft((d) => toSide(d, p))
   }

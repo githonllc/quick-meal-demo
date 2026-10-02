@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { DISTANCE_STEPS, TIME_STEPS } from '../../shared/constants'
+import { DISTANCE_STEPS, TIME_STEPS, sortFor } from '../../shared/constants'
 import { formatMiles } from '../../shared/format'
 import { toSide } from '../state/filters'
 import type { UiFilters } from '../state/filters'
@@ -74,7 +74,7 @@ export function SpeedPicker({
             name="distance"
             steps={DISTANCE_STEPS}
             value={filters.distance}
-            onPick={(distance) => onPick({ ...toSide(filters, true), distance })}
+            onPick={(distance) => onPick({ ...filters, time: null, sort: sortFor(filters.sort, true), distance })}
           />
         </>
       ) : (
@@ -85,7 +85,7 @@ export function SpeedPicker({
             name="time"
             steps={TIME_STEPS}
             value={filters.time}
-            onPick={(time) => onPick({ ...toSide(filters, false), time })}
+            onPick={(time) => onPick({ ...filters, distance: null, time })}
           />
         </>
       )}
@@ -108,6 +108,7 @@ export function StepSheet({
   const [pickup, setPickup] = useState(filters.distance !== null)
   const [draft, setDraft] = useState(filters)
   const switchSide = (p: boolean) => {
+    if (p === pickup) return
     setPickup(p)
     setDraft((d) => ({ ...toSide(d, p), time: null, distance: null }))
   }
