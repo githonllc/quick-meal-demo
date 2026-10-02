@@ -2,8 +2,8 @@
 
 - Date: 2026-10-02
 - Live URL: https://quick-meal-demo.ioenv.workers.dev
-- Deployed commit: `159875f`
-- Worker version: `f98f2e53-a681-4dad-ae9c-35750cc7c2ce`
+- Deployed commit: `b3d6374`
+- Worker version: `f24cd18d-50ff-44b9-bf0e-4aff3cfa9559`
 
 Every acceptance criterion from the "Validation" section of [design.html](design.html) was run as an automated Playwright test against the live URL.
 
@@ -30,6 +30,8 @@ After the time-first change (`0cdc1bc`): 30 tests ran against the live URL and a
 After design version 35 (`95ba02f`: Delivery | Pickup, pickup prices without the delivery fee, visible sorts): 36 tests ran against the live URL and all passed, including the new AC-09. The 6 screenshot tests are skipped in a normal run; they were then run on purpose and all 6 shots were saved.
 
 After the follow-ups (`629eae8`: "Pickup near SJSU" and swapping Fastest and Nearest; `159875f`: no Nearest in Delivery, and no flash when going back from a menu): 38 tests ran against the live URL and all passed. The new back-navigation test checks for no skeleton, no loading bar and no dish name over a photo. Shots 3 and 6 were saved again.
+
+After design version 36 (`b3d6374`: time and distance set with a slider, and a "Show results" button in the Time chip's sheet): 40 tests ran against the live URL and all passed, including AC-03, AC-07 and AC-09 with the slider. Shot 3 was saved again.
 
 ## How to re-run
 
