@@ -2,8 +2,8 @@
 
 - Date: 2026-10-02
 - Live URL: https://quick-meal-demo.ioenv.workers.dev
-- Deployed commit: `95ba02f`
-- Worker version: `f131aae3-bf70-4362-b60c-fb1f1f4a23b1`
+- Deployed commit: `159875f`
+- Worker version: `f98f2e53-a681-4dad-ae9c-35750cc7c2ce`
 
 Every acceptance criterion from the "Validation" section of [design.html](design.html) was run as an automated Playwright test against the live URL.
 
@@ -28,6 +28,8 @@ After the real-phone walkthrough fixes, the Home Screen install and the white Ho
 After the time-first change (`0cdc1bc`): 30 tests ran against the live URL and all passed, including AC-08. The 5 screenshot tests are skipped in a normal run.
 
 After design version 35 (`95ba02f`: Delivery | Pickup, pickup prices without the delivery fee, visible sorts): 36 tests ran against the live URL and all passed, including the new AC-09. The 6 screenshot tests are skipped in a normal run; they were then run on purpose and all 6 shots were saved.
+
+After the follow-ups (`629eae8`: "Pickup near SJSU" and swapping Fastest and Nearest; `159875f`: no Nearest in Delivery, and no flash when going back from a menu): 38 tests ran against the live URL and all passed. The new back-navigation test checks for no skeleton, no loading bar and no dish name over a photo. Shots 3 and 6 were saved again.
 
 ## How to re-run
 
