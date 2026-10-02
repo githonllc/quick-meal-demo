@@ -90,6 +90,8 @@ test('a card shows the place, its stars, time and distance, and the meals that f
   await expect(first.getByTestId('meal-meta')).toHaveText('Est. 9–14 min · 0.4 mi')
   await expect(first.getByTestId('meal-more')).toContainText('5 under $20: Soup Dumplings (8), Pork Dumplings (12)')
   await expect(first.locator('.tile')).toHaveAttribute('aria-label', 'dumplings')
+  // A long dish line is cut with an ellipsis. It does not push the card or the rating off screen.
+  await expect(first.locator('.meal-rating')).toBeInViewport({ ratio: 1 })
   const second = page.getByTestId('meal-card').nth(1)
   await expect(second.locator('.meal-name')).toHaveText('Santa Clara Taco Co.')
   await expect(second.getByTestId('meal-more')).toContainText('5 under $20: Carne Asada Burrito, Al Pastor Tacos (3)')

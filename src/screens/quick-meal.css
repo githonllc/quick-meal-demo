@@ -82,6 +82,8 @@
 }
 .meal {
   cursor: pointer;
+  /* One column that may shrink, so a long dish line cannot widen the card past the screen. */
+  grid-template-columns: minmax(0, 1fr);
 }
 .meal .tile {
   margin-bottom: 4px;
