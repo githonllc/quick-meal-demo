@@ -204,6 +204,39 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
 .ph-tabs { display: flex; gap: 13px; padding: 0 12px; border-bottom: 1px solid var(--p-line); overflow: hidden; font-size: 10.5px; font-weight: 600; color: var(--p-muted); }
 .ph-tabs span { flex: none; white-space: nowrap; padding: 5px 0 6px; }
 .ph-tabs .on { color: #191919; box-shadow: inset 0 -2px 0 #191919; }
+/* Delivery | Pickup switch: one control, one value. The steps under it belong to the selected side. */
+.ph-seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--p-chip); border-radius: 999px; padding: 2px; }
+.ph-seg span { text-align: center; padding: 4px 0; font-size: 9.5px; font-weight: 700; color: var(--p-muted); border-radius: 999px; }
+.ph-seg .on { background: #fff; color: #191919; box-shadow: 0 1px 3px rgba(0,0,0,0.18); }
+.ph-sub-q { font-weight: 700; font-size: 10px; margin-top: 2px; }
+
+/* Principle section */
+.principle { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 14px; padding: 22px 24px; display: grid; gap: 14px; margin-top: 20px; }
+.formula { font-family: var(--f-display); font-size: clamp(1.15rem, 3.4vw, 1.5rem); font-weight: 700; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.formula .term { background: var(--accent-soft); color: var(--accent); border-radius: 10px; padding: 3px 12px; }
+.formula .op { color: var(--muted); font-weight: 600; }
+.levers { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.lever { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 6px; align-content: start; }
+.lever h3 { font-size: 0.98rem; }
+.lever ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 0.9rem; }
+.lever.no { background: var(--warn-soft); border-color: transparent; }
+.lever.no h3 { color: var(--warn); }
+.principle .tbl td:first-child { white-space: nowrap; font-weight: 600; }
+
+/* Delivery | Pickup illustration in P7, outside the phone strip */
+.seg-demo { display: flex; flex-wrap: wrap; gap: 14px; }
+.seg-demo .card { flex: 1 1 220px; max-width: 280px; background: #fff; color: #191919; border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 6px; font-size: 12px; --p-chip: #f1f1f1; --p-muted: #6b6b6b; --p-line: #e6e6e6; }
+.seg-demo .card .lbl { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #6b6b6b; font-weight: 700; }
+.seg-demo .ph-seg span, .seg-demo .ph-o { font-size: 11px; }
+.seg-demo .ph-sub-q { font-size: 12px; }
+.seg-demo .ph-rc { font-size: 11.5px; }
+.seg-demo .ph-meta, .seg-demo .ph-fit { font-size: 11.5px; }
+
+/* Evidence from the team's documents */
+.src { display: inline-block; font-family: var(--f-mono); font-size: 0.72rem; font-weight: 500; color: var(--muted); background: var(--code-bg); border-radius: 4px; padding: 0 5px; margin-right: 4px; white-space: nowrap; }
+.ev { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 5px; }
+.ev q { font-style: italic; }
+.ev .gap { color: var(--warn); font-weight: 600; }
 </style>
 
 <div class="wrap">
@@ -211,21 +244,92 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
     <span class="eyebrow">MSSM final assignment · Demo design</span>
     <h1>Quick Meal Demo Design</h1>
     <p class="muted" style="max-width:62ch">A mobile web demo of a DoorDash concept. Built for university students in the Bay Area and across the US. A student opens Quick Meal, says how much time they have, can add a budget, and sees which meals fit. If nothing fits, the app shows the closest meals and a one-tap way to loosen the search.</p>
-    <div class="meta"><span class="pill">Final design</span><span>Version 34</span><span>Oct 1, 2026</span><span>Concept mockups, not affiliated with DoorDash</span></div>
+    <div class="meta"><span class="pill">Final design</span><span>Version 35</span><span>Oct 1, 2026</span><span>Concept mockups, not affiliated with DoorDash</span></div>
   </header>
 
   <div class="summary">
     <span class="eyebrow">Design in short</span>
     <ul>
+      <li><b>Principle</b>: decision time = decision steps × cost of each step. Quick Meal gives the student enough facts to make each step cheap, but it <b>does not decide for them</b>. See "Why Quick Meal informs and does not decide" below.</li>
       <li>Screens: a thin Home, the <b>Quick Meal</b> list, a <b>Filters</b> sheet, a restaurant <b>menu in budget view</b>, and a <b>price breakdown</b> sheet.</li>
       <li>Goal: help a busy student <b>decide fast</b>. A student with 20 minutes between study blocks needs to know which meals they can get in time. Success is a shorter <b>time to place an order</b>. Orders that arrive within the chosen window are the guardrail.</li>
       <li><b>Time comes first</b>: "How much time do you have?" It filters on the estimated delivery time, from order to door. Times are <b>estimates, not promises</b>, shown as a range like "Est. 9–14 min".</li>
       <li>Budget means the <b>estimated all-in price of one meal</b>: food, fees, tax and tip, so the total at checkout is no surprise.</li>
       <li>Results are <b>meals</b>, one per restaurant. Other meals that fit show as "+2 more under $20" and open the restaurant's menu.</li>
-      <li><b>Cuisine tabs</b> across the top (All, Chinese, Indian …), one at a time. Chip row: Filters, then time steps, then a budget <b>slider</b>. Distance (for pickup) and sort live in the full Filters sheet.</li>
+      <li><b>Delivery or pickup, not both</b>: one switch in the Filters sheet. Delivery filters by time, pickup filters by distance. Only one of the two is on at a time (P7). Pickup cards show the distance and no time, and the all-in price has no delivery fee.</li>
+      <li><b>Every sort is visible</b>: Fastest (the default), Lowest price, Most liked, Nearest. Each one sorts by a number on the card. There is no "Best match".</li>
+      <li><b>Evidence</b>: each decision cites the team's press release, concept thesis and Worksheet 2. Those documents use the concept's earlier name, Busy Mode; Quick Meal is the current name.</li>
+      <li><b>Cuisine tabs</b> across the top (All, Chinese, Indian …), one at a time. Chip row: Filters, then time (or distance for pickup), then a budget <b>slider</b>. Sort lives in the full Filters sheet.</li>
       <li>No match is a designed state. It shows the <b>closest meals</b>, says how each one misses, and offers chips like "Budget up to $17 · 1 result".</li>
     </ul>
   </div>
+
+  <section class="principle" aria-labelledby="principle-h">
+    <span class="eyebrow">Design principle</span>
+    <h2 id="principle-h">Why Quick Meal informs and does not decide</h2>
+    <div class="formula" aria-label="Decision time equals decision steps times cost of each step">
+      <span class="term">Decision time</span><span class="op">=</span><span class="term">Decision steps</span><span class="op">×</span><span class="term">Cost of each step</span>
+    </div>
+    <p>Our north star is time to place an order (P9). A student spends that time in steps: set the time, set the budget, pick a cuisine, pick a meal, check the price. Each step costs time and effort. Quick Meal makes the steps fewer and each one cheaper. It gives the student the facts they need at each step. It does not make the choice for them.</p>
+    <div class="levers">
+      <div class="lever">
+        <h3>Fewer steps</h3>
+        <ul>
+          <li>Saved default: set "30 min · $20" once (P8).</li>
+          <li>All-in price on every card: no trip to checkout to see the total (P4).</li>
+          <li>One-tap relax chips when nothing fits.</li>
+          <li>Delivery or pickup: one switch, so one question about speed, not two (P7).</li>
+        </ul>
+      </div>
+      <div class="lever">
+        <h3>Cheaper steps</h3>
+        <ul>
+          <li>Estimated all-in price, with a breakdown one tap away.</li>
+          <li>Time as a range, "Est. 9–14 min".</li>
+          <li>Dish like rate next to the dish, stars next to the place (P5).</li>
+          <li>Near meals say how they miss: "$1.32 over budget".</li>
+          <li>The menu shows what fits and what is just over (P6).</li>
+        </ul>
+      </div>
+      <div class="lever no">
+        <h3>What Quick Meal does not do</h3>
+        <ul>
+          <li>It does not pick a meal for the student.</li>
+          <li>It does not hide meals that are just over budget.</li>
+          <li>It does not loosen a filter without a tap.</li>
+          <li>No hidden ranking: every sort uses a number shown on the card.</li>
+          <li>Sort only orders the list. "+N more" and the full menu keep every option one tap away.</li>
+        </ul>
+      </div>
+    </div>
+    <p><b>Why not decide for the student?</b> Food is a very personal choice: taste, mood, diet and craving change from meal to meal. A guess that is right saves one step. A guess that is wrong adds steps: the student reads the pick, rejects it, then searches anyway, now with less trust in the app. In a 20-minute gap that is the worst case. A fact the student does not use costs nothing. A pick they must undo costs a step and some trust. So Quick Meal narrows the list with the student's own limits (time, budget, cuisine) and shows facts. The student makes the choice.</p>
+    <div>
+      <h3 style="margin-bottom:8px">Evidence from the team's documents</h3>
+      <p class="muted" style="font-size:0.88rem; margin-bottom:8px">Sources: <span class="src">PR</span> press release, <span class="src">Thesis</span> product concept thesis, <span class="src">WS2</span> Worksheet 2 with its part. They use the earlier name Busy Mode, shown here as [Quick Meal].</p>
+      <ul class="ev">
+        <li><span class="src">PR</span>Decision effort is the pain: <q>Choosing what to eat three times a day is actually so draining when you're busy.</q> (Junjia) <q>When I open the app, I'm bombarded with a lot of options…</q> (Marcus)</li>
+        <li><span class="src">PR</span>The goal is fewer and cheaper steps: <q>Instead of scrolling through restaurants and comparing menus, prices and delivery times…</q>; <q>cutting browsing and decision effort</q>.</li>
+        <li><span class="src">Thesis</span>The north star is decision time: <q>reduce time-to-order by 30%</q>. <span class="src">WS2 C·8</span>Continue if <q>time-to-order reduces 20%</q>.</li>
+        <li><span class="src">WS2 D</span>The team rated "how well a place matches the user's preference" (C5) as AI, which the worksheet defines as <q>a judgment call; no single right answer exists</q>. A guess about taste can be wrong, so Quick Meal does not make it for the student.</li>
+        <li><span class="src">WS2 E</span>Any score <q>should not override the time constraint nor the availability option</q>. In Quick Meal the time filter is a hard rule in code, applied before any order.</li>
+        <li><span class="src">WS2 F-03</span>Guardrail: uncertain places <q>shouldn't</q> be labeled <q>recommended/guaranteed</q>. Quick Meal labels nothing as recommended.</li>
+        <li><span class="gap">Tension.</span> <span class="src">Thesis</span> says [Quick Meal] <q>proactively recommends a small set of personalized meal choices</q>. This design reads "small set" as the list that fits the student's limits, and "personalized" as the student's own saved limits, not a pick made for them. The thesis wording should match.</li>
+      </ul>
+    </div>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Step</th><th>What the student decides</th><th>What Quick Meal shows to make it cheap</th></tr></thead>
+        <tbody>
+          <tr><td>1 Open</td><td>Use Quick Meal now</td><td>First tile on Home; on a return visit the saved filters are already on</td></tr>
+          <tr><td>2 Time</td><td>Delivery in how long, or pickup within how far</td><td>One switch, four steps, "Est." and "Not guaranteed"</td></tr>
+          <tr><td>3 Budget</td><td>The most to pay for one meal</td><td>A slider for the all-in price, the number they pay</td></tr>
+          <tr><td>4 Cuisine</td><td>What they feel like</td><td>One tab, one tap; All by default</td></tr>
+          <tr><td>5 Meal</td><td>Which meal</td><td>Dish, like rate, stars, time range, distance, all-in price, "+N more"</td></tr>
+          <tr><td>6 Price</td><td>Is this price OK</td><td>Fits or "$0.54 over"; tap for the breakdown</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 </div>
 
 <!-- Mockups -->
@@ -276,7 +380,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
           <span class="ph-f on">Up to $20 ▾</span>
         </div>
         <div class="ph-tabs"><span class="on">All</span><span>Chinese</span><span>Indian</span><span>Mexican</span><span>Pizza</span><span>Burgers</span><span>Healthy</span></div>
-        <div class="ph-count">6 places have a meal that fits · best match</div>
+        <div class="ph-count">6 places have a meal that fits · fastest first</div>
         <div class="ph-card">
           <div class="ph-img img3"></div>
           <div class="ph-dt"><span class="ph-name">Soup Dumplings (8)</span><span class="like"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21h4V9H2v12zm20-11a2 2 0 0 0-2-2h-6.3l1-4.6v-.3c0-.4-.2-.8-.4-1.1L13.2 1 6.6 7.6C6.2 8 6 8.5 6 9v10c0 1.1.9 2 2 2h9c.8 0 1.5-.5 1.8-1.2l3-7.1c.1-.2.2-.5.2-.7v-2z"/></svg>93% (220)</span></div>
@@ -285,14 +389,14 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
           <div class="ph-more">+4 more under $20: Pork Dumplings (12), Shrimp Dumplings (12), … ›</div>
         </div>
         <div class="ph-card">
-          <div class="ph-img img3"></div>
-          <div class="ph-dt"><span class="ph-name">Dan Dan Noodles</span><span class="like"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21h4V9H2v12zm20-11a2 2 0 0 0-2-2h-6.3l1-4.6v-.3c0-.4-.2-.8-.4-1.1L13.2 1 6.6 7.6C6.2 8 6 8.5 6 9v10c0 1.1.9 2 2 2h9c.8 0 1.5-.5 1.8-1.2l3-7.1c.1-.2.2-.5.2-.7v-2z"/></svg>91% (240)</span></div>
-          <div class="ph-rest-l">4th St. Noodle Bar <span>· 4.4 ★ (1k+)</span></div>
-          <div class="ph-fit"><span>Est. 14–19 min · 0.3 mi · $17.94 all-in</span><span class="ok">Fits</span></div>
-          <div class="ph-more">+3 more under $20: Wonton Soup, Spicy Wontons, … ›</div>
+          <div class="ph-img img4"></div>
+          <div class="ph-dt"><span class="ph-name">Carne Asada Burrito</span><span class="like"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21h4V9H2v12zm20-11a2 2 0 0 0-2-2h-6.3l1-4.6v-.3c0-.4-.2-.8-.4-1.1L13.2 1 6.6 7.6C6.2 8 6 8.5 6 9v10c0 1.1.9 2 2 2h9c.8 0 1.5-.5 1.8-1.2l3-7.1c.1-.2.2-.5.2-.7v-2z"/></svg>90% (170)</span></div>
+          <div class="ph-rest-l">Santa Clara Taco Co. <span>· 4.5 ★ (600+)</span></div>
+          <div class="ph-fit"><span>Est. 11–16 min · 0.9 mi · $19.05 all-in</span><span class="ok">Fits</span></div>
+          <div class="ph-more">+4 more under $20: Al Pastor Tacos (3), Chicken Tacos (2), … ›</div>
         </div>
       </div>
-      <p class="cap"><b>2 · Meal list.</b> Filter chips first (time, then budget), then cuisine tabs that split the filtered meals, starting at All. Each card is one meal: dish photo, dish name with its like rate, the restaurant with its stars, then one line: "Est. 9–14 min · 0.4 mi · $18.44 all-in". Nothing in that line is bold. One meal per place. "+N more" names the other meals that fit.</p>
+      <p class="cap"><b>2 · Meal list.</b> Filter chips first (time, then budget), then cuisine tabs that split the filtered meals, starting at All. Each card is one meal: dish photo, dish name with its like rate, the restaurant with its stars, then one line: "Est. 9–14 min · 0.4 mi · $18.44 all-in". Nothing in that line is bold. One meal per place. "+N more" names the other meals that fit. Sorted fastest first, the default.</p>
     </div>
 
     <!-- 3 Filters sheet -->
@@ -305,14 +409,11 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
           <h4>Filters</h4>
           <div class="ph-sheet-body">
             <div class="ph-grp">
-              <span class="gt">How much time do you have?</span>
+              <span class="gt">Get it by</span>
+              <div class="ph-seg" role="radiogroup" aria-label="Delivery or pickup"><span class="on">Delivery</span><span>Pickup</span></div>
+              <span class="ph-sub-q">How much time do you have?</span>
               <span class="gd">Estimated arrival within this window. Not guaranteed.</span>
               <div class="ph-opts"><span class="ph-o">15 min</span><span class="ph-o">20 min</span><span class="ph-o on">30 min</span><span class="ph-o">45 min</span></div>
-            </div>
-            <div class="ph-grp">
-              <span class="gt">Distance</span>
-              <span class="gd">For pickup</span>
-              <div class="ph-opts"><span class="ph-o">0.5 mi</span><span class="ph-o">1 mi</span><span class="ph-o">2 mi</span><span class="ph-o">3 mi</span></div>
             </div>
             <div class="ph-grp">
               <span class="gt">Budget per meal</span>
@@ -325,13 +426,13 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
             </div>
             <div class="ph-grp">
               <span class="gt">Sort by</span>
-              <div class="ph-opts" style="grid-template-columns: repeat(2, 1fr)"><span class="ph-o on">Best match</span><span class="ph-o">Lowest price</span><span class="ph-o">Fastest</span><span class="ph-o">Nearest</span></div>
+              <div class="ph-opts" style="grid-template-columns: repeat(2, 1fr)"><span class="ph-o on">Fastest</span><span class="ph-o">Lowest price</span><span class="ph-o">Most liked</span><span class="ph-o">Nearest</span></div>
             </div>
           </div>
           <div class="ph-foot"><span class="clr">Clear all</span><span class="go">Show results</span></div>
         </div>
       </div>
-      <p class="cap"><b>3 · Filters sheet.</b> Opens from the top-right icon or the Filters chip. Time first, asked as a question and marked as an estimate. Distance for pickup sits right under it, because both say how soon you can get the food. Then the budget slider and sort. Cuisine is not here; it lives in the tabs. Nothing changes until "Show results".</p>
+      <p class="cap"><b>3 · Filters sheet.</b> Opens from the top-right icon or the Filters chip. First a Delivery | Pickup switch. Delivery asks "How much time do you have?" and marks it as an estimate. Pickup swaps the time steps for distance steps, so only one of the two can be on (P7). Then the budget slider and sort. Cuisine is not here; it lives in the tabs. Nothing changes until "Show results".</p>
     </div>
 
     <!-- 4 No match -->
@@ -344,22 +445,22 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#191919" stroke-width="2.4"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
         </div>
         <div class="ph-filters">
-          <span class="ph-f">Filters <span class="badge">3</span></span>
+          <span class="ph-f">Filters <span class="badge">2</span></span>
           <span class="ph-f on">15 min ▾</span>
           <span class="ph-f on">Up to $15 ▾</span>
         </div>
         <div class="ph-tabs"><span class="on">All</span><span>Chinese</span><span>Indian</span><span>Mexican</span><span>Pizza</span><span>Burgers</span><span>Healthy</span></div>
         <div class="ph-empty">
           <b>No exact matches</b>
-          <span class="ph-meta" style="color:#555">Nothing fits a $15 budget, 15 min and 0.5 mi. Here are the closest meals.</span>
-          <div class="ph-relax"><span>Budget up to $17 · 1 result</span><span>Time up to 20 min · 1 result</span></div>
+          <span class="ph-meta" style="color:#555">Nothing fits a $15 budget and 15 min. Here are the closest meals.</span>
+          <div class="ph-relax"><span>Budget up to $17 · 1 result</span><span>Time up to 20 min · 2 results</span></div>
         </div>
         <div class="ph-near">Closest to your search</div>
+        <div class="ph-mini"><div class="ph-img img4"></div><div><div class="ph-name" style="margin:0">Chicken Tacos (2)</div><div class="ph-meta">Santa Clara Taco Co.</div><div class="ph-meta" style="color:var(--p-fg)">Est. 11–16 min · 0.9 mi · $12.86 all-in</div><div class="ph-fit"><span class="miss">1 min slower</span></div></div></div>
         <div class="ph-mini"><div class="ph-img img3"></div><div><div class="ph-name" style="margin:0">Pork Dumplings (12)</div><div class="ph-meta">Taylor St. Dumplings</div><div class="ph-meta" style="color:var(--p-fg)">Est. 9–14 min · 0.4 mi · $16.32 all-in</div><div class="ph-fit"><span class="miss">$1.32 over budget</span></div></div></div>
         <div class="ph-mini"><div class="ph-img img1"></div><div><div class="ph-name" style="margin:0">Wonton Soup</div><div class="ph-meta">4th St. Noodle Bar</div><div class="ph-meta" style="color:var(--p-fg)">Est. 14–19 min · 0.3 mi · $14.37 all-in</div><div class="ph-fit"><span class="miss">4 min slower</span></div></div></div>
-        <div class="ph-mini"><div class="ph-img img1"></div><div><div class="ph-name" style="margin:0">Spam Musubi Plate</div><div class="ph-meta">Paseo Rice Bowl</div><div class="ph-meta" style="color:var(--p-fg)">Est. 13–18 min · 0.4 mi · $15.65 all-in</div><div class="ph-fit"><span class="miss">$0.65 over budget · 3 min slower</span></div></div></div>
       </div>
-      <p class="cap"><b>4 · No match.</b> A short message, one-tap relax chips, and the closest meals. Each card says exactly how it misses. The 0.5 mi distance was set in the Filters sheet, so it counts in the badge but has no chip.</p>
+      <p class="cap"><b>4 · No match.</b> A short message, one-tap relax chips, and the closest meals. Each card says exactly how it misses, so the student can judge "1 min slower" for themselves. Quick Meal does not loosen the filter on its own.</p>
     </div>
 
     <!-- 5 Menu in budget view -->
@@ -428,23 +529,35 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
       <dl>
         <dt>Decision</dt><dd>First item in the Home category row, left of Deals. Red tile, white lightning icon, a NEW tag. The banner also opens Quick Meal. Other Home items show "Not part of this demo.", because category and restaurant pages are out of scope.</dd>
         <dt>Why</dt><dd>The row scrolls sideways and only about five items fit on screen. First place is always visible. The rest of Home is white with plain line icons, as in the current DoorDash app, so one red tile stands out. It also matches the app icon.</dd>
+        <dt>Evidence</dt><dd><ul class="ev"><li><span class="src">PR</span><q>they can switch on [Quick Meal] with one tap</q>. The tile is that one tap; saved filters (P8) do the rest.</li><li><span class="gap">No source</span> for the exact place on Home. That part follows the current DoorDash Home.</li></ul></dd>
       </dl>
     </div>
 
     <div class="decision">
       <div class="head"><span class="id">P2</span><h3>Filter controls</h3></div>
       <dl>
-        <dt>Layout</dt><dd>Two rows under the title. First the chip row: Filters · Time · Budget. Then the cuisine tabs, right above the list. Distance and sort are only in the full Filters sheet, which runs Time · Distance · Budget · Sort.</dd>
+        <dt>Layout</dt><dd>Two rows under the title. First the chip row: Filters · Time (or Distance, for pickup) · Budget. Then the cuisine tabs, right above the list. Sort is only in the full Filters sheet, which runs Delivery | Pickup with its steps · Budget · Sort.</dd>
         <dt>Why this order</dt><dd>Filters set the pool of meals that fit. A tab then shows one cuisine from that pool. Tabs sit next to the list they switch, the usual place for tabs. Changing a filter keeps the current tab.</dd>
         <dt>Not DoorDash's order</dt><dd>DoorDash puts store-type tabs above filters because the tab decides which filters apply. Here the filters decide which meals fit, and the cuisine tab only splits them, so filters go first. With filters under the tabs, they would look like they belong to one tab, and users would wonder whether switching tabs keeps or resets them. With filters on top, it is clear they stay the same across every tab.</dd>
         <dt>Budget</dt><dd>Slider for the maximum all-in price per meal. Range $10 to $40, in $1 steps. The value shows above the thumb: "Up to $20". The far right end reads "$40+ (any)" and means no budget filter.</dd>
-        <dt>Time</dt><dd>First in the chip row and in the sheet. The sheet asks "How much time do you have?" and says "Estimated arrival within this window. Not guaranteed." Steps: 15 · 20 · 30 · 45 min. It means the estimated time from order to door. Students subtract their own eating time. Whether students read the question this way is checked in a later user study.</dd>
-        <dt>Distance</dt><dd>In the full sheet only, labeled "For pickup" (P7). Steps depend on the user's location. A dense area like downtown San Jose gets 0.5 · 1 · 2 · 3 mi. A spread-out suburb gets 1 · 2 · 3 · 5 mi.</dd>
+        <dt>Time</dt><dd>The Delivery side of the switch, and the default. The sheet asks "How much time do you have?" and says "Estimated arrival within this window. Not guaranteed." Steps: 15 · 20 · 30 · 45 min. It means the estimated time from order to door. Students subtract their own eating time; the team agreed the window does not include it. Whether students read the question this way is checked in a later user study.</dd>
+        <dt>Minutes, not a clock time</dt><dd>Steps and cards use minutes ("Est. 9–14 min"), never a clock time ("by 6:24 PM"). The estimate starts when the order is placed, and the app cannot know how long the student will look before ordering. A clock time would slip while they look, and that browsing time is what we want to cut. Minutes stay true at any moment and use the same unit as the filter. A clock time fits after the order, when the estimate has a start.</dd>
+        <dt>Sizes</dt><dd>The budget slider takes more room than the time steps. A teammate asked for a bigger time control. We keep the sizes: time is already first in the sheet and in the chip row, a slider needs width to drag with a thumb, and four time steps fit in one row.</dd>
+        <dt>Distance</dt><dd>The Pickup side of the switch (P7). It asks "How far can you go?". Steps depend on the user's location. A dense area like downtown San Jose gets 0.5 · 1 · 2 · 3 mi. A spread-out suburb gets 1 · 2 · 3 · 5 mi.</dd>
         <dt>Cuisine</dt><dd>Tabs: All · Chinese · Indian · Mexican · Pizza · Burgers · Healthy · Fast Food · Sushi. One at a time; All means any cuisine. The row scrolls sideways. A place can carry several tags, since Healthy and Fast Food are tags rather than cuisines, so one place can appear under more than one tab. Tabs show no counts. The Filters badge does not count the tab, because the selected tab is already visible. Applying filters keeps the current tab.</dd>
-        <dt>Sort</dt><dd>Best match · Lowest price · Fastest · Nearest. Only in the full sheet.</dd>
-        <dt>Chip tap</dt><dd>Each chip opens a small sheet for that one filter. Time applies at once when you pick a step. Budget shows a "Show results" button, so a drag does not reload the list on every dollar. A tab applies at once.</dd>
+        <dt>Sort</dt><dd>Delivery: Fastest · Lowest price · Most liked · Nearest. Pickup: Nearest · Lowest price · Most liked. The first one is the default. Only in the full sheet. Each sort uses one number the card shows: the time, the all-in price, the dish like rate or the distance. Pickup cards show no time, so Pickup has no Fastest. If the sort is Fastest and the student switches to Pickup, it becomes Nearest.</dd>
+        <dt>No "Best match"</dt><dd>Version 35 removed it. It mixed like rate, stars and time in a way the student could not see, so it looked like a pick made for them. A sort the student can read from the card keeps the order honest.</dd>
+        <dt>Chip tap</dt><dd>Each chip opens a small sheet for that one filter. The Time chip reads "30 min" for delivery or "Pickup · 1 mi" for pickup, and its sheet has the same Delivery | Pickup switch. A step applies at once when you pick it. Budget shows a "Show results" button, so a drag does not reload the list on every dollar. A tab applies at once.</dd>
         <dt>No live count</dt><dd>The button reads "Show results" and the search runs only when the user applies. A live count needs a request on every change, and a slow answer can show a stale number (for example "Show 0 results" that then shows meals). The count line on the list shows the number after applying.</dd>
-        <dt>Why</dt><dd>Time comes first because the job is fitting a meal into a gap in the day. Budget is a number students already have in mind, often not a round one, so a slider fits it. Time and distance are rough choices, so a few steps are faster to tap. Distance mostly helps pickup, so it stays in the sheet and the chip row stays short. Cuisine answers "what am I in the mood for", which usually has one answer. A tab makes that one tap instead of three.</dd>
+        <dt>Why</dt><dd>Time comes first because the job is fitting a meal into a gap in the day. Budget is a number students already have in mind, often not a round one, so a slider fits it. Time and distance are rough choices, so a few steps are faster to tap. Delivery and pickup share one chip, so the chip row stays short. Cuisine answers "what am I in the mood for", which usually has one answer. A tab makes that one tap instead of three.</dd>
+        <dt>Principle</dt><dd>Filters use only the student's own limits. Quick Meal never adds a limit the student did not set, such as a guessed cuisine.</dd>
+        <dt>Evidence</dt><dd><ul class="ev">
+          <li><span class="src">PR</span>Time first: <q>students just tell [Quick Meal] how much time they have</q>; <q>a restaurant would only appear if it can make the time window</q>.</li>
+          <li><span class="src">WS2 B</span>The job: <q>have dinner in the 20 minutes between study blocks</q>. <span class="src">WS2 D</span>C1 <q>Capture user selected available meal time</q>, C4 <q>Filter the restaurants that can fit within the user's time window</q>.</li>
+          <li><span class="src">PR</span>The other limits: <q>time, distance, delivery or pickup, and a budget cap</q>. <span class="src">Thesis</span><q>based on users' time constraints, budget, and preferences</q>. Cuisine is the preference the student states with one tab.</li>
+          <li><span class="src">WS2 D</span>C6 ranks by <q>preference fit, price, timing</q>. The sorts keep price and timing. Ranking by personal preference needs a user profile in the backend (C5), so it is out of the demo's scope (D1). Here the student states a preference with the cuisine tab and can sort by the like rate.</li>
+          <li><span class="gap">No source</span> for the tabs-below-chips layout or the slider. Those are design calls, argued above.</li>
+        </ul></dd>
       </dl>
     </div>
 
@@ -453,6 +566,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
       <dl>
         <dt>Decision</dt><dd>The first chip shows a sliders icon plus "Filters", with a badge for the active count. It opens the full Filters sheet, the same as the top-right icon.</dd>
         <dt>Why</dt><dd>On most apps "All" means "no filter", so a chip named "All" that opens a sheet would surprise people. "Filters 2" also shows at a glance how many filters are on.</dd>
+        <dt>Evidence</dt><dd><span class="gap">No source</span> in the team's documents. This follows common app patterns.</dd>
       </dl>
     </div>
 
@@ -462,7 +576,14 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
         <dt>Decision</dt><dd>Budget is the all-in price of one meal: the item, delivery fee, small-order fee, service fee, tax and tip. Every card and menu row shows it. Tap a price to see the breakdown (screen 6). Tax follows the restaurant's address. The tip is 15% by default.</dd>
         <dt>Small-order fee</dt><dd>Some places charge a fee when the food costs less than a minimum. A single cheap meal often hits it, so it is part of the all-in price. It can make a cheaper menu item cost more: the $10.75 Tofu Rice Bowl comes to $19.48, more than the $12.00 Chicken Rice Bowl at $18.73.</dd>
         <dt>Why</dt><dd>Our research's must-fix pain point is the surprise total at checkout. Every student holds a personal price limit, and fees at checkout make them drop full carts. One interviewee put it as "the total jumped from like $13 to $24". An all-in price lets a student decide once, on the real number. This serves Value and Predictability, and it cuts decision effort: no trip to checkout to find the total. A menu-price filter would repeat the surprise.</dd>
-        <dt>Label</dt><dd>Cards say "Est. 9–14 min · 0.4 mi · $18.44 all-in": one "Est." covers the time and the price. Menu rows say "Est. $18.73". The slider header says "Estimated all-in: food, fees, tax and tip". The breakdown is titled "Estimated all-in price". "Out-the-door price" is longer and comes from car buying.</dd>
+        <dt>Pickup</dt><dd>No delivery fee. For pickup the all-in price is the item, small-order fee, service fee, tax and tip, and the breakdown has no delivery fee line. The Tofu Rice Bowl is $19.48 for delivery and $17.49 for pickup.</dd>
+        <dt>Principle</dt><dd>Removes a step (the trip to checkout to see the total) and makes the price step cheap: one number to compare with the budget.</dd>
+        <dt>Evidence</dt><dd><ul class="ev">
+          <li><span class="src">WS2 A</span>Need found in research: <q>fees at checkout drive cart abandonment</q>.</li>
+          <li><span class="src">PR</span>Students compare <q>menus, prices and delivery times</q>, and set <q>a budget cap</q>. <span class="src">WS2 D</span>C2 retrieves <q>menu, price, and fee details</q>.</li>
+          <li><span class="gap">Not in these documents:</span> the interview quote "the total jumped from like $13 to $24". It comes from the team's earlier interviews.</li>
+        </ul></dd>
+        <dt>Label</dt><dd>Cards say "Est. 9–14 min · 0.4 mi · $18.44 all-in": one "Est." covers the time and the price. Pickup cards say "0.4 mi · Est. $16.74 all-in". Menu rows say "Est. $18.73". The slider header says "Estimated all-in: food, fees, tax and tip". The breakdown is titled "Estimated all-in price". "Out-the-door price" is longer and comes from car buying.</dd>
         <dt>Why "Est."</dt><dd>The price cannot be exact before checkout. The tip is the user's choice, the delivery and service fees can vary, and tax is estimated. "Est." keeps the number honest. It still shows cents, so it compares cleanly with the budget.</dd>
       </dl>
       <div class="receipt" aria-label="Example estimated all-in price breakdown">
@@ -483,13 +604,19 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
       <div class="head"><span class="id">P5</span><h3>Results are meals, one per place</h3></div>
       <dl>
         <dt>Decision</dt><dd>Each result card is one meal. Dish photo on top. Then the dish name with its like rate, the restaurant with its star rating, then one line with the estimated time range, distance and all-in price, and "Fits".</dd>
-        <dt>Hierarchy</dt><dd>One line in this order: time as a range, distance, price ("Est. 9–14 min · 0.4 mi · $18.44 all-in"). Time and distance sit together because both say how soon the food can reach you. Neither time nor price is bold. A bold time would read like a promise (P9), and the price only needs a quick check against the budget.</dd>
+        <dt>Hierarchy</dt><dd>One line in this order: time as a range, distance, price ("Est. 9–14 min · 0.4 mi · $18.44 all-in"). Time and distance sit together because both say how soon the food can reach you. Neither time nor price is bold. A bold time would read like a promise (P9), and the price only needs a quick check against the budget. In Pickup the line drops the time: "0.4 mi · Est. $16.74 all-in". The time is a delivery time, so it would mislead a student who picks up.</dd>
         <dt>Why meals</dt><dd>The budget is per meal, so the meal is what the student is choosing. An all-in price belongs to a dish, not to a place.</dd>
         <dt>One per place</dt><dd>Each restaurant shows one lead meal. Its other meals that fit are named under it: "+2 more under $20: Tofu Rice Bowl, Spam Musubi Plate ›". The count reads "6 places have a meal that fits".</dd>
         <dt>Why one</dt><dd>If every fitting meal were listed, one cheap place could fill the screen with five bowls. One per place keeps the list varied and quick to scan.</dd>
-        <dt>Lead meal</dt><dd>The card shows the first meal of that restaurant's menu in budget view (P6). One ordering rule serves both places. With Best match, Fastest or Nearest: most-liked first. With Lowest price: lowest est. all-in price first. With no budget set, the line reads "+4 more on the menu".</dd>
+        <dt>Lead meal</dt><dd>The card shows the first meal of that restaurant's menu in budget view (P6). One ordering rule serves both places. With Fastest, Most liked or Nearest: most-liked first. With Lowest price: lowest est. all-in price first. With no budget set, the line reads "+4 more on the menu".</dd>
         <dt>Other meals</dt><dd>Two ways, both one step. Read the names in the "+N more" line without leaving the list. Or tap the line or the card to open that restaurant's menu in budget view (P6).</dd>
         <dt>Ratings</dt><dd>Two kinds, shown apart. The dish gets a thumbs-up rate and count, "88% (120)", next to its name. The restaurant gets stars, "4.6 ★ (800+)", next to its name. Different icon, different line, so they do not mix. The like rate helps pick the meal; the stars help trust the place.</dd>
+        <dt>Principle</dt><dd>The card has every fact needed to pick a meal, so picking is one look, not a visit to each menu. The lead meal is only the first in the sort order, not a pick made for the student. "+N more" names the others.</dd>
+        <dt>Evidence</dt><dd><ul class="ev">
+          <li><span class="src">WS2 B</span>The failure is not knowing <q>which meals he can get</q>: meals, not places.</li>
+          <li><span class="src">WS2 A</span><q>students can't judge portion or quality from a photo</q>; item-level reviews are <q>stronger as data for [Quick Meal]</q>. That is the dish like rate.</li>
+          <li><span class="src">PR</span><q>bombarded with a lot of options</q> (Marcus). One meal per place keeps the list short.</li>
+        </ul></dd>
       </dl>
     </div>
 
@@ -500,26 +627,67 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
         <dt>Layout</dt><dd>A budget bar on top: "Your budget: up to $20 est. all-in · Change". Change opens the budget sheet. Then "Under your budget (3)", in the current sort order: most-liked first, or cheapest first with Lowest price. Then "Over your budget (2)", smallest overage first, each tagged like "$0.54 over". Every row shows the dish, its like rate, the menu price and the est. all-in price.</dd>
         <dt>Why one page</dt><dd>The student sees what fits and also what is just over. A $0.54 overage may be worth it, and a separate "fits only" list would hide it. It also keeps the restaurant's real menu as the single place to browse dishes.</dd>
         <dt>No budget</dt><dd>The full menu in one list, in the same sort order, with an est. all-in price on every row and no sections.</dd>
+        <dt>Pickup</dt><dd>The header shows "4.6 ★ (800+) · 0.4 mi" with no time, and every price is the pickup price (P4).</dd>
         <dt>Example</dt><dd>At Paseo Rice Bowl, the $11.50 Veggie Bowl is over a $20 budget while the $12.00 Chicken Rice Bowl fits. The small-order fee explains the gap, and tapping the price shows it.</dd>
+        <dt>Principle</dt><dd>Quick Meal shows what is just over the budget and by how much. The student decides if $0.54 is worth it. A hidden meal is a choice the app made for them.</dd>
+        <dt>Evidence</dt><dd><ul class="ev"><li><span class="src">PR</span>Students compare <q>menus, prices</q>; this view does the comparing for one place. <span class="src">WS2 A</span>Fees drive abandonment (P4).</li><li><span class="gap">No source</span> for showing over-budget meals. It follows from the principle.</li></ul></dd>
       </dl>
     </div>
 
     <div class="decision">
-      <div class="head"><span class="id">P7</span><h3>Time is for delivery, distance is for pickup</h3></div>
+      <div class="head"><span class="id">P7</span><h3>Delivery or pickup: time or distance, never both</h3></div>
       <dl>
-        <dt>Decision</dt><dd>Time filters on the estimated delivery time, from order to door. Distance is a separate filter in the full sheet, for students who pick up the food. You can set one, both or neither. A place must pass every filter that is on. Setting one never clears the other.</dd>
-        <dt>Why</dt><dd>For delivery, the time already includes the trip, so the student does not need distance. For pickup, only the student knows whether they will walk, bike or drive, so the app cannot turn distance into a time. The student judges it from the distance. A close place can be slow and a farther one fast, so neither filter replaces the other. Making them exclusive would quietly clear one filter when you set the other, and add a special rule to the page, the URL and the API.</dd>
-        <dt>Empty results</dt><dd>When both together are too tight, the no-match state shows the closest meals and one-tap relax chips.</dd>
+        <dt>Decision</dt><dd>One switch at the top of the Filters sheet: <b>Delivery | Pickup</b>. Delivery shows the time steps and filters on the estimated delivery time, from order to door. Pickup shows the distance steps and filters on distance. Only one of the two filters can be on. Delivery is the default.</dd>
+        <dt>How it looks</dt><dd>
+          <div class="seg-demo" aria-label="The switch in its two states">
+            <div class="card">
+              <span class="lbl">Delivery</span>
+              <div class="ph-seg"><span class="on">Delivery</span><span>Pickup</span></div>
+              <span class="ph-sub-q">How much time do you have?</span>
+              <div class="ph-opts"><span class="ph-o">15 min</span><span class="ph-o">20 min</span><span class="ph-o on">30 min</span><span class="ph-o">45 min</span></div>
+            </div>
+            <div class="card">
+              <span class="lbl">Pickup</span>
+              <div class="ph-seg"><span>Delivery</span><span class="on">Pickup</span></div>
+              <span class="ph-sub-q">How far can you go?</span>
+              <div class="ph-opts"><span class="ph-o">0.5 mi</span><span class="ph-o on">1 mi</span><span class="ph-o">2 mi</span><span class="ph-o">3 mi</span></div>
+            </div>
+            <div class="card">
+              <span class="lbl">Pickup card and price</span>
+              <div class="ph-name" style="margin:0">Chicken Rice Bowl</div>
+              <div class="ph-meta">Paseo Rice Bowl · 4.6 ★ (800+)</div>
+              <div class="ph-fit"><span>0.4 mi · Est. $16.74 all-in</span><span class="ok">Fits</span></div>
+              <div class="ph-rc">
+                <div><span>Chicken Rice Bowl</span><span>$12.00</span></div>
+                <div><span>Service fee (15%)</span><span>$1.80</span></div>
+                <div><span>Tax (9.5%)</span><span>$1.14</span></div>
+                <div><span>Tip (15%)</span><span>$1.80</span></div>
+                <div class="tt"><span>Est. all-in</span><span>$16.74</span></div>
+              </div>
+            </div>
+          </div>
+        </dd>
+        <dt>Why one</dt><dd>Both filters answer one question: how soon can I get the food? For delivery, the time already includes the trip, so distance adds nothing. For pickup, the delivery time means nothing, and only the student knows if they walk, bike or drive, so they judge by distance. Two filters for one question make the student combine two numbers, and the two can conflict. That is an extra step with no new fact.</dd>
+        <dt>Why a switch</dt><dd>The switch shows that the choice is one or the other. The student flips it on purpose and sees the time steps change to distance steps. Version 34 kept both filters because making them exclusive would "quietly clear" one. With a switch the change is not quiet: it is the student's own tap, in plain view. Nothing changes on the list until "Show results".</dd>
+        <dt>Rules</dt><dd>Switching sides clears the other side's step in the sheet. The chip reads "30 min" or "Pickup · 1 mi". The Filters badge counts it as one filter. A link that has both <code>time</code> and <code>distance</code> keeps the time and drops the distance, so old links still open. The saved default (P8) keeps the side and its one value. Pickup with no distance picked is the same as no speed filter, so the sheet opens on Delivery next time.</dd>
+        <dt>Pickup results</dt><dd>Cards, near meals and the menu show the distance and no time: the time we have is a delivery time. The all-in price and its breakdown drop the delivery fee and keep the tip (P4). The same bowl is $18.73 for delivery and $16.74 for pickup.</dd>
+        <dt>Evidence</dt><dd><ul class="ev">
+          <li><span class="src">PR</span>The student's set-up includes <q>time, distance, delivery or pickup</q>.</li>
+          <li><span class="src">WS2 C·8</span>Pickup is a case the team tracks: pivot <q>If it only works for pickup orders or merchants located very close to campus</q>.</li>
+          <li><span class="src">WS2 C·4</span>The time is an ETA for <q>food preparation and delivery</q>, so it does not fit pickup.</li>
+        </ul></dd>
       </dl>
     </div>
 
     <div class="decision">
       <div class="head"><span class="id">P8</span><h3>Filters are saved as the default</h3></div>
       <dl>
-        <dt>Decision</dt><dd>Quick Meal remembers the time, budget and distance you set and opens with them next time. A student sets "30 min · $20" once and does not set it again.</dd>
+        <dt>Decision</dt><dd>Quick Meal remembers delivery or pickup, its time or distance, and the budget, and opens with them next time. A student sets "30 min · $20" once and does not set it again.</dd>
         <dt>What saves</dt><dd>Only choices the user makes: "Show results" in the Filters sheet, or a value picked in a chip sheet. "Clear all" plus apply saves "no filters".</dd>
         <dt>What does not</dt><dd>Relax chips on the no-match screen change the results for this visit only. The cuisine tab is never saved and goes back to All each visit.</dd>
         <dt>Why</dt><dd>A student's budget is a fixed number. A one-time "Budget up to $17" should not quietly raise it for good. Cuisine is the mood of one meal; a saved "Pizza" would hide everything else next time.</dd>
+        <dt>Principle</dt><dd>The biggest cut in steps: a return visit starts with the student's own limits already on. It saves only what the student chose, never a guess.</dd>
+        <dt>Evidence</dt><dd><ul class="ev"><li><span class="src">PR</span><q>Students can set it up with their own preferences… After that, they can switch on [Quick Meal] with one tap</q>; <q>toggle their constraints with unparalleled ease</q>.</li><li><span class="gap">No source</span> for keeping relax chips and the cuisine tab out of the default. That follows from the principle.</li></ul></dd>
         <dt>Feedback</dt><dd>The first time filters are applied, a short toast says "Saved. Quick Meal will open with these filters." After that, the black chips are enough.</dd>
         <dt>Edge cases</dt><dd>A link with filters in the URL wins over the saved default. A saved value outside the current range is moved to the nearest valid value.</dd>
       </dl>
@@ -530,7 +698,23 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
       <dl>
         <dt>Decision</dt><dd>Every time shows as an estimated range, "Est. 9–14 min", on cards, near meals and the menu. The time sheet says "Not guaranteed." A place fits only if the slow end of its range fits the window.</dd>
         <dt>Why</dt><dd>Our TA asked how we could guarantee a delivery time and what happens when an order is late. There is no simple answer, so Quick Meal does not promise. Its job is to save decision time. On-time delivery is a guardrail we measure, not a promise we make. Using the slow end keeps the filter on the safe side.</dd>
-        <dt>Metrics</dt><dd>North star: time to place an order (decision time). Guardrail: share of orders that arrive within the window the student picked. Real ranges would come from DoorDash's prep-time and Dasher data.</dd>
+        <dt>Metrics</dt><dd>North star: time to place an order (decision time = steps × cost of each step). Guardrail: share of orders that arrive within the window the student picked. Real ranges would come from DoorDash's prep-time and Dasher data.</dd>
+        <dt>Targets</dt><dd>From the team's documents: time to order 30% lower, order completion 10% higher (thesis). Continue if at least 80% of orders arrive in the window and time to order drops 20% or orders grow 5%. Kill if under 70% arrive on time, time to order drops less than 5%, or NPS drops (Worksheet 2, Part C, field 8).</dd>
+        <dt>Evidence</dt><dd><ul class="ev">
+          <li><span class="src">WS2 C·4</span><q>The time shown on the filtered option would be just an estimate, not guarantee or promise</q>.</li>
+          <li><span class="src">WS2 F-03</span>Guardrail: do not label uncertain places <q>recommended/guaranteed</q>.</li>
+          <li><span class="src">WS2 C·5</span>The question to learn: <q>Will users trust the estimated time filter</q>. <span class="src">WS2 G</span>The risk if wrong: <q>losing the user's trust in the estimated delivery time</q>.</li>
+          <li><span class="gap">Tension.</span> <span class="src">WS2 G</span> says the beachhead will <q>validate a promised time window</q>. It should say "estimated".</li>
+        </ul></dd>
+      </dl>
+    </div>
+
+    <div class="decision">
+      <div class="head"><span class="id">P10</span><h3>No subtitle; a first-visit hint explains Quick Meal</h3></div>
+      <dl>
+        <dt>Decision</dt><dd>The Quick Meal page has only its title, like other DoorDash pages at the same level. When no time, distance or budget is set, a hint above the list says what Quick Meal is for: "Short on time? Pick a time and a budget to see meals that fit." The hint goes away once a filter is on.</dd>
+        <dt>Why</dt><dd>A teammate noted that "Quick Meal" can read like "fast food", and that the message should not sound budget-first. A subtitle on every visit would fix the first point, but no other DoorDash page at this level has one, and it would take a line from the list every time. The hint shows only when it helps: on a first visit, or after "Clear all". It replaces the old hint, "Set a budget to see what fits.", which put budget first.</dd>
+        <dt>Evidence</dt><dd><ul class="ev"><li><span class="src">PR</span>The pitch leads with time: <q>students just tell [Quick Meal] how much time they have</q>.</li><li><span class="gap">No source</span> in the assignment documents for the fast-food concern; it came from the team's Slack review.</li></ul></dd>
       </dl>
     </div>
   </section>
@@ -546,6 +730,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
         <dt>Decision</dt><dd>Home (thin) → Quick Meal list → Filters sheet (plus a small single-filter sheet per chip) → Restaurant menu in budget view → Price breakdown sheet.</dd>
         <dt>Home</dt><dd>Clickable but shallow. Category row, one banner, cuisine chips, a "Near campus" row. Search shows a toast: "Search is not part of this demo."</dd>
         <dt>Not built</dt><dd>Cart, checkout, search and account. "Add to cart" shows a toast: "Cart is not part of this demo."</dd>
+        <dt>No preference ranking</dt><dd>Worksheet 2 ranks places by "preference fit" (Part D, C5 and C6; Part F-01). That needs a user profile: what each student likes, learned from past orders. The demo has no accounts and no order history, so it cannot show this honestly. A real backend would add it as one more sort the student picks, and the time and budget filters would still apply first (Part E).</dd>
         <dt>Why</dt><dd>The demo is about deciding fast within a time window and a budget. The menu page shows the all-in prices in full, on the list and the menu, with what breaks the budget marked.</dd>
       </dl>
     </div>
@@ -555,6 +740,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
       <dl>
         <dt>Decision</dt><dd>The location is fixed at San José State University in downtown San Jose, CA. "Now" is the only time. Closed places never appear. The page uses the dense-area distance steps. Filter steps, the slider range and the cuisine tabs are fixed in the page.</dd>
         <dt>Why</dt><dd>A fixed location gives the same results in every run, so the demo script and the acceptance criteria stay stable. Asking for the phone's location would add a permission prompt during a live demo and change the results by where the presenter stands.</dd>
+        <dt>Evidence</dt><dd><span class="src">WS2 G</span>The beachhead is Bay Area students: <q>Berkley (45K) + Stanford (17K) + SJSU(36K)</q>.</dd>
       </dl>
     </div>
 
@@ -562,9 +748,10 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
       <div class="head"><span class="id">D3</span><h3>Mock data, branding and photos</h3></div>
       <dl>
         <dt>Decision</dt><dd>Realistic mock data with made-up restaurant names near campus. DoorDash-like red and layout, but no DoorDash logo. Footer line: "Concept demo for a CMU course. Not affiliated with DoorDash."</dd>
-        <dt>Realism</dt><dd>Menu prices, delivery fees and wait times follow what students see near the campus. The cuisine mix matches the area. A few places are "close but slow" or "far but fast", such as 4th St. Noodle Bar (0.3 mi, 19 min) and Santa Clara Taco Co. (0.9 mi, 16 min), so time and distance filters both matter.</dd>
+        <dt>Realism</dt><dd>Menu prices, delivery fees and wait times follow what students see near the campus. The cuisine mix matches the area. A few places are "close but slow" or "far but fast", such as 4th St. Noodle Bar (0.3 mi, 19 min) and Santa Clara Taco Co. (0.9 mi, 16 min), so Delivery and Pickup give different lists.</dd>
         <dt>Photos</dt><dd>About 15 to 20 free food photos (Unsplash or Pexels license), one per dish type such as bowl, noodles, burger or taco, shared by similar dishes. Compressed and bundled. Fallback: colored tiles with the dish type.</dd>
         <dt>Why</dt><dd>DoorDash's US consumer terms, section 5 (p) to (r), ban collecting its text, photos or data by automated means or by "systematic retrieval", and its photos belong to DoorDash or the restaurants. The demo also lives on a public URL, where real store names next to made-up ratings, prices and wait times would show false facts about real businesses.</dd>
+        <dt>Evidence</dt><dd><span class="src">WS2 C·6</span>The smallest test: <q>Manually collect a list of restaurants near campus and calculate the estimated delivery time</q>. The mock data is that list.</dd>
       </dl>
     </div>
 
@@ -573,7 +760,8 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
       <dl>
         <dt>Service fee</dt><dd>15%. This matches DoorDash's published California rate for orders without DashPass (5% with DashPass). The demo prices every meal as a non-member, the case after a student's free DashPass year ends.</dd>
         <dt>Tax</dt><dd>One assumed rate of 9.5% for every place, stored per restaurant so the formula already works per address.</dd>
-        <dt>Small-order fee</dt><dd>$2.50 when the food costs less than $12. Assumed value.</dd>
+        <dt>Small-order fee</dt><dd>$2.50 when the food costs less than $12. Assumed value. It applies to pickup too.</dd>
+        <dt>Delivery fee</dt><dd>Set per restaurant. Delivery only; pickup has none.</dd>
         <dt>Tip</dt><dd>15%, the default the user would see.</dd>
         <dt>Rounding</dt><dd>All math in integer cents, each line rounded half up, so every breakdown adds up to the cent.</dd>
         <dt>Time range</dt><dd>The range runs from the restaurant's ETA minus 5 minutes to its ETA, for example 9–14 min for a 14-minute ETA. Filters and sorting use the ETA, the slow end. A real backend would return its own range.</dd>
@@ -593,29 +781,32 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
     <span class="eyebrow">No-match results</span>
     <h2>When nothing matches</h2>
     <p>The API always returns three lists. The page picks the layout from them, so there is no special code path for "empty".</p>
-<pre>GET /api/quick-meal/search?budget=15&amp;time=15&amp;distance=0.5
+<pre>GET /api/quick-meal/search?budget=15&amp;time=15
 
 {
-  "filters": { "budget": 15, "time": 15, "distance": 0.5, "cuisine": null, "sort": "best" },
+  "filters": { "budget": 15, "time": 15, "distance": null, "cuisine": null, "sort": "fastest" },
   "exact": [],
   "near": [
-    { "restaurantId": "taylor-st-dumplings", "restaurant": "Taylor St. Dumplings",
-      "dish": "Pork Dumplings (12)", "allIn": 16.32, "etaMin": 14, "distanceMi": 0.4,
-      "miss": [ { "filter": "budget", "over": 1.32, "label": "$1.32 over budget" } ] },
-    { "restaurantId": "fourth-st-noodle-bar", "dish": "Wonton Soup",
-      "miss": [ { "filter": "time", "over": 4, "label": "4 min slower" } ] }
+    { "restaurantId": "santa-clara-taco-co", "restaurant": "Santa Clara Taco Co.",
+      "dish": "Chicken Tacos (2)", "allIn": 12.86, "etaMin": 16, "distanceMi": 0.9,
+      "miss": [ { "filter": "time", "over": 1, "label": "1 min slower" } ] },
+    { "restaurantId": "taylor-st-dumplings", "dish": "Pork Dumplings (12)",
+      "miss": [ { "filter": "budget", "over": 1.32, "label": "$1.32 over budget" } ] }
   ],
   "relax": [
     { "filter": "budget", "to": 17, "count": 1, "label": "Budget up to $17 · 1 result" },
-    { "filter": "time",   "to": 20, "count": 1, "label": "Time up to 20 min · 1 result" }
+    { "filter": "time",   "to": 20, "count": 2, "label": "Time up to 20 min · 2 results" }
   ]
 }</pre>
     <ul class="plain">
       <li><b>Exact.</b> One lead meal per open place that passes every active filter.</li>
       <li><b>Near.</b> Only filled when exact is empty. For each open place, take its meal that misses least. Score the miss: budget overshoot ÷ $5, time overshoot ÷ 10 min, distance overshoot ÷ 1 mi, then add them up. Show the 5 lowest scores. Each card lists what it misses in plain words.</li>
       <li><b>Cuisine stays fixed.</b> Near meals only miss on budget, time or distance, never on cuisine. A student who picked Indian never sees a burger as "close". If no place of that cuisine is nearby at all, the relax chip reads "All cuisines · N results" and tapping it switches to the All tab.</li>
-      <li><b>Relax.</b> One suggestion per active filter, with the others held. Budget is a slider, so it suggests the lowest whole-dollar budget that gives at least one result ($16.32 rounds up to $17). Time and distance move to the next step that gives a result. If no single change helps, offer "Remove distance" or "Remove time". Tapping a chip applies it, moves the slider or step to match, and shows the new results.</li>
-      <li><b>Copy.</b> Title "No exact matches". Body "Nothing fits a $15 budget, 15 min and 0.5 mi. Here are the closest meals." No apology, no dead end.</li>
+      <li><b>Relax.</b> One suggestion per active filter, with the others held. Budget is a slider, so it suggests the lowest whole-dollar budget that gives at least one result ($16.32 rounds up to $17). Time and distance move to the next step that gives a result. If no single change helps, offer "Remove time" (or "Remove distance" for pickup). Tapping a chip applies it, moves the slider or step to match, and shows the new results.</li>
+      <li><b>Copy.</b> Title "No exact matches". Body "Nothing fits a $15 budget and 15 min. Here are the closest meals." No apology, no dead end.</li>
+      <li><b>Pickup.</b> Near meals show the distance and no time, miss only on budget or distance ("0.4 mi farther"), and use pickup prices.</li>
+      <li><b>Principle.</b> The miss labels make each near meal a cheap step: the student sees "1 min slower" and judges it. Relax chips loosen a filter only when tapped.</li>
+      <li><b>Evidence.</b> <span class="src">PR</span><q>If nothing fits, [Quick Meal] reports back truthfully and suggests the fastest options.</q> <span class="src">WS2 F-02</span><q>clearly indicate that no option fits the time window and show the closest alternatives with clearly labelling the estimated time</q>. With only time set, the closest meals are the fastest ones; with a budget too, a meal can also be close on price.</li>
     </ul>
   </section>
 
@@ -626,12 +817,16 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
       <table>
         <thead><tr><th>Case</th><th>What the user sees</th></tr></thead>
         <tbody>
-          <tr><td>First visit</td><td>No filters on. One meal per open place, best match first. A hint above the list: "Set a budget to see what fits."</td></tr>
-          <tr><td>Return visit</td><td>Saved time, budget and distance come back (P8). The cuisine tab is back on All.</td></tr>
+          <tr><td>First visit</td><td>No filters on. One meal per open place, fastest first. A hint above the list: "Short on time? Pick a time and a budget to see meals that fit." (P10).</td></tr>
+          <tr><td>Return visit</td><td>Saved delivery or pickup, its time or distance, and the budget come back (P8). The cuisine tab is back on All.</td></tr>
           <tr><td>Tab with no result</td><td>The no-match state, limited to that cuisine. If the cuisine has no place nearby at all, it offers "All cuisines · N results".</td></tr>
           <tr><td>Sort change</td><td>The lead meal on a card can change. Lowest price shows each place's cheapest fitting meal, and the menu lists that meal first too.</td></tr>
           <tr><td>Slider at the ends</td><td>Far right "$40+ (any)" removes the budget filter and the Budget chip turns grey again. Far left "$10" is allowed. It usually gives no exact match, which leads to the no-match state.</td></tr>
           <tr><td>One filter only</td><td>Works like the rest. The other chips stay grey.</td></tr>
+          <tr><td>Switch Delivery to Pickup</td><td>In the sheet, the time steps change to distance steps and the time step is cleared. Nothing applies until "Show results". Switching back shows the time steps with none picked.</td></tr>
+          <tr><td>Fastest, then Pickup</td><td>Pickup cards show no time, so Pickup has no Fastest. The sort becomes Nearest. Switching back to Delivery keeps Nearest until the student picks another sort.</td></tr>
+          <tr><td>Old <code>sort=best</code> link</td><td>Opens with the default sort for its side (Fastest or Nearest).</td></tr>
+          <tr><td>Link with time and distance</td><td>An old link such as <code>?time=20&amp;distance=1</code> opens in Delivery with 20 min. The distance is dropped.</td></tr>
           <tr><td>Clear all</td><td>In the sheet: resets choices. Nothing applies until "Show results".</td></tr>
           <tr><td>Close sheet without applying</td><td>Swipe down or tap outside. The list keeps its old filters.</td></tr>
           <tr><td>Menu with nothing under budget</td><td>The "Under your budget" section reads "Nothing here fits $15. Closest:" and the over section starts with the smallest overage.</td></tr>
@@ -647,7 +842,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
   <section>
     <span class="eyebrow">Validation</span>
     <h2>Acceptance criteria</h2>
-    <p>Quick Meal has no AI feature, so every must-have feature is validated with an acceptance criterion. Each one is walked through the deployed demo on a phone and recorded with a screenshot. Criteria with numbers are also checked by an automated test on the mock data, so the walkthrough and the test must agree.</p>
+    <p>Quick Meal uses no LLM or agent (Worksheet 2, Part C, field 7). Here "AI" means machine learning in DoorDash's backend, for example scores for ratings and preference fit (Part D, C5). Delivery-time estimates are deterministic (Part D, C3). Both come into the page as data. The page itself is deterministic: the same filters give the same list, and the time and budget filters are hard rules that no score can override (Part E). So every must-have feature is validated with an acceptance criterion. Each one is walked through the deployed demo on a phone and recorded with a screenshot. Criteria with numbers are also checked by an automated test on the mock data, so the walkthrough and the test must agree.</p>
     <div class="tbl">
       <table>
         <thead><tr><th>ID</th><th>Feature</th><th>Given / When / Then</th><th>How verified</th></tr></thead>
@@ -655,15 +850,16 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
           <tr><td class="mono">AC-01</td><td>Quick Meal entry</td><td>Given the Home screen, when the user taps Quick Meal in the category row, then the Quick Meal screen opens with the chip row (Filters, Time, Budget), the cuisine tabs below it (All selected) and a list of meal cards, with no Restaurant or Grocery tabs.</td><td>Walk it on a phone; screenshot</td></tr>
           <tr><td class="mono">AC-02</td><td>All-in budget</td><td>Given a budget of $20, when results load, then every card shows a meal with an estimated all-in price of $20.00 or less, and the breakdown behind any price (item, delivery fee, small-order fee, service fee, tax, tip) adds up to that price to the cent, and the small-order fee appears only when the item costs less than $12.</td><td>Walk it and tap 3 prices; screenshot. Automated test checks every meal.</td></tr>
           <tr><td class="mono">AC-03</td><td>Filters sheet</td><td>Given the Filters sheet, opened from either the top-right icon or the Filters chip, when the user sets the time to 30 min and the budget to $20, then the time group comes first and asks "How much time do you have?", the button reads "Show results", and after applying the list shows 6 meal cards from 6 different places, the chips read "30 min" and "Up to $20", and the Filters badge shows 2.</td><td>Walk it from both entry points; screenshot. Count matches the scenario test.</td></tr>
-          <tr><td class="mono">AC-04</td><td>Combined filters</td><td>Given budget $20, time 20 min and distance 1 mi are on, when the user taps the Chinese tab, then every card is a Chinese place that passes all three filters, and the count (2) is lower than on the All tab (4).</td><td>Walk it; screenshot. Automated test.</td></tr>
-          <tr><td class="mono">AC-05</td><td>No match and relax</td><td>Given budget $15, time 15 min and distance 0.5 mi, when results load, then the screen shows "No exact matches", up to 5 closest meals each labeled with how it misses (for example "$1.32 over budget"), and relax chips with result counts. When the user taps "Budget up to $17 · 1 result", the list shows exactly 1 meal and the slider moves to $17, while the saved default budget stays at $15.</td><td>Walk it, then reopen Quick Meal; screenshot both</td></tr>
+          <tr><td class="mono">AC-04</td><td>Combined filters</td><td>Given budget $20 and time 20 min are on, when the user taps the Chinese tab, then every card is a Chinese place that passes both filters, and the count (2) is lower than on the All tab (4).</td><td>Walk it; screenshot. Automated test.</td></tr>
+          <tr><td class="mono">AC-05</td><td>No match and relax</td><td>Given budget $15 and time 15 min, when results load, then the screen shows "No exact matches", up to 5 closest meals each labeled with how it misses (for example "1 min slower" or "$1.32 over budget"), and relax chips with result counts. When the user taps "Budget up to $17 · 1 result", the list shows exactly 1 meal and the slider moves to $17, while the saved default budget stays at $15.</td><td>Walk it, then reopen Quick Meal; screenshot both</td></tr>
           <tr><td class="mono">AC-06</td><td>Menu in budget view</td><td>Given a budget of $20, when the user taps "+2 more" on the Paseo Rice Bowl card, then the menu opens with "Under your budget (3)" listing the Chicken Rice Bowl first (the card's meal), then the Tofu Rice Bowl and Spam Musubi Plate, and the Veggie Bowl shows "$0.54 over".</td><td>Walk it; screenshot</td></tr>
           <tr><td class="mono">AC-07</td><td>Saved default</td><td>Given the user applied budget $20 and time 30 min and is on the Chinese tab, when they leave Quick Meal and come back, including after closing the browser tab, then budget $20 and time 30 min are on, the All tab is selected, and the 6 meal cards for $20 · 30 min show.</td><td>Walk it on a phone; screenshot before and after</td></tr>
           <tr><td class="mono">AC-08</td><td>Estimated times</td><td>Given time 30 min and budget $20, when results load, then every card shows one line like "Est. 9–14 min · 0.4 mi · $18.44 all-in", with the time as a range before the distance and price, the slow end of every range is 30 min or less, neither the time nor the price is bold, and the time group in the Filters sheet says "Not guaranteed."</td><td>Walk it; screenshot. Automated test checks every card.</td></tr>
+          <tr><td class="mono">AC-09</td><td>Delivery or pickup</td><td>Given budget $20 and time 30 min, when the user opens the Filters sheet and taps Pickup, then the time steps are replaced by 0.5 · 1 · 2 · 3 mi with none picked, and there is no "For pickup" text. When the user picks 1 mi and taps "Show results", the chip reads "Pickup · 1 mi", the URL has <code>distance=1</code> and no <code>time</code>, the Filters badge shows 2, the sort is Nearest, and the list shows 7 meal cards. Every card shows a line like "0.4 mi · Est. $16.74 all-in" with no time, and the Paseo Rice Bowl price breakdown has no delivery fee line and adds up to $16.74.</td><td>Walk it; screenshot both sides of the switch. Count matches the scenario test.</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="muted" style="font-size:0.9rem">Must-have features by screen: Quick Meal entry (1), meal list with all-in prices, cuisine tabs and chip row (2), Filters sheet (3), no-match results with relax chips (4), menu in budget view (5), price breakdown (6), saved default (2 and 3). For the 3 to 5 screens in Section 9, screens 5 and 6 can be one screenshot with the breakdown open over the menu. The results table records pass or fail for AC-01 to AC-08 after the walkthrough.</p>
+    <p class="muted" style="font-size:0.9rem">Must-have features by screen: Quick Meal entry (1), meal list with all-in prices, cuisine tabs and chip row (2), Filters sheet with the Delivery | Pickup switch (3), no-match results with relax chips (4), menu in budget view (5), price breakdown (6), saved default (2 and 3). For the 3 to 5 screens in Section 9, screens 5 and 6 can be one screenshot with the breakdown open over the menu. The results table records pass or fail for AC-01 to AC-09 after the walkthrough.</p>
   </section>
 
   <section>
@@ -675,8 +871,8 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
         <thead><tr><th>Route</th><th>Returns</th></tr></thead>
         <tbody>
           <tr><td><code>GET /api/home</code></td><td>Categories, banner, cuisine chips, "Near campus" row.</td></tr>
-          <tr><td><code>GET /api/quick-meal/search</code></td><td>Params <code>budget</code>, <code>time</code>, <code>distance</code>, <code>cuisine</code> (one value, empty for All), <code>sort</code>. Returns <code>exact</code> (one lead meal per place, with its other fitting meals), <code>near</code>, <code>relax</code>, and <code>total</code>. It runs when the user applies filters or taps a tab.</td></tr>
-          <tr><td><code>GET /api/quick-meal/restaurants/:id?budget=</code></td><td>One restaurant and its full menu in budget view. Each item has its est. all-in price, the breakdown lines, and, when a budget is given, "fits" or how much it is over.</td></tr>
+          <tr><td><code>GET /api/quick-meal/search</code></td><td>Params <code>budget</code>, <code>time</code> or <code>distance</code> (one of the two; if both come, <code>time</code> wins), <code>cuisine</code> (one value, empty for All), <code>sort</code>. Returns <code>exact</code> (one lead meal per place, with its other fitting meals), <code>near</code>, <code>relax</code>, and <code>total</code>. It runs when the user applies filters or taps a tab.</td></tr>
+          <tr><td><code>GET /api/quick-meal/restaurants/:id?budget=</code></td><td>One restaurant and its full menu in budget view. With <code>distance</code> set, it uses pickup prices and the page shows no time. Each item has its est. all-in price, the breakdown lines, and, when a budget is given, "fits" or how much it is over.</td></tr>
         </tbody>
       </table>
     </div>
@@ -700,7 +896,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
     { "id": "veggie-bowl",  "name": "Veggie Bowl",       "price": 11.50, "likePct": 85, "likeCount": 51,  "photo": "salad.webp" }
   ]
 }
-allIn = price + deliveryFee + (price &lt; 12 ? smallOrderFee : 0) + 15% service + price × taxRate + 15% tip
+allIn = price + (pickup ? 0 : deliveryFee) + (price &lt; 12 ? smallOrderFee : 0) + 15% service + price × taxRate + 15% tip
 // Compute in integer cents and round each line half up: 1150 × 15% = 172.5 → 173 cents ($1.73).
 // Float math would give $1.72 here and break the "$0.54 over" example.
 // taxRate is stored per restaurant. The demo uses one assumed rate; a real backend would look it up by address.</pre>
@@ -714,11 +910,13 @@ allIn = price + deliveryFee + (price &lt; 12 ? smallOrderFee : 0) + 15% service 
           <tr><td>Budget only</td><td>Up to $20</td><td class="num">10</td></tr>
           <tr><td>Slide budget up</td><td>Up to $25</td><td class="num">18</td></tr>
           <tr><td>Happy path</td><td>Up to $20 · 30 min</td><td class="num">6</td></tr>
-          <tr><td>Tight but OK</td><td>Up to $20 · 20 min · 1 mi</td><td class="num">4</td></tr>
-          <tr><td>Add a cuisine</td><td>Up to $20 · 20 min · 1 mi · Chinese tab</td><td class="num">2</td></tr>
+          <tr><td>Tight but OK</td><td>Up to $20 · 20 min</td><td class="num">4</td></tr>
+          <tr><td>Add a cuisine</td><td>Up to $20 · 20 min · Chinese tab</td><td class="num">2</td></tr>
           <tr><td>Cuisine only</td><td>Up to $20 · Chinese tab</td><td class="num">3</td></tr>
-          <tr><td>No match</td><td>Up to $15 · 15 min · 0.5 mi</td><td class="num zero">0 exact, 5 near</td></tr>
-          <tr><td>Relax from no match</td><td>Up to $17 · 15 min · 0.5 mi</td><td class="num">1</td></tr>
+          <tr><td>Pickup</td><td>Up to $20 · Pickup 1 mi</td><td class="num">7</td></tr>
+          <tr><td>No match</td><td>Up to $15 · 15 min</td><td class="num zero">0 exact, 5 near</td></tr>
+          <tr><td>Relax from no match</td><td>Up to $17 · 15 min</td><td class="num">1</td></tr>
+          <tr><td>Pickup after relax</td><td>Up to $17 · Pickup 1 mi</td><td class="num">5</td></tr>
           <tr><td>Fast only</td><td>Under 15 min</td><td class="num">3</td></tr>
           <tr><td>Paseo menu</td><td>Up to $20</td><td class="num">3 fit, 2 over</td></tr>
         </tbody>
@@ -735,7 +933,8 @@ allIn = price + deliveryFee + (price &lt; 12 ? smallOrderFee : 0) + 15% service 
       <li>Tap <b>Time ▾</b> and pick 30 min: 17 places. Point out that every time is an estimated range, not a promise.</li>
       <li>Tap <b>Budget ▾</b>. Slide to $25 and apply: 13 places. Open it again, slide to $20 and apply: 6 places.</li>
       <li>Scroll to the Paseo Rice Bowl card and tap "+2 more". The menu shows 3 bowls that fit and 2 that do not. The Tofu Rice Bowl is cheaper on the menu, but tap its price: the small-order fee makes it $19.48, more than the $18.73 Chicken Rice Bowl.</li>
-      <li>Go back. Open the Filters sheet and tighten to 15 min, $15 and 0.5 mi (distance, for pickup). Show the no-match state and how each meal misses. Tap "Budget up to $17 · 1 result". The slider moves to $17 and one meal shows.</li>
+      <li>Go back. Open the Filters sheet and tighten to 15 min and $15. Show the no-match state and how each meal misses: the Chicken Tacos are only "1 min slower", and the student judges that. Tap "Budget up to $17 · 1 result". The slider moves to $17 and one meal shows.</li>
+      <li>Open the Filters sheet and flip Delivery to Pickup. The time steps change to distance steps: one or the other, never both. Pick 1 mi and tap "Show results": 5 places. The cards show no time, and each price is lower by the delivery fee.</li>
     </ol>
   </section>
 
