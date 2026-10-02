@@ -261,7 +261,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
       <li><b>Time comes first</b>: "How much time do you have?" It filters on the estimated delivery time, from order to door. Times are <b>estimates, not promises</b>, shown as a range like "Est. 9–14 min".</li>
       <li>Budget means the <b>estimated all-in price of one meal</b>: food, fees, tax and tip, so the total at checkout is no surprise.</li>
       <li>Results are <b>restaurant cards</b> (an experiment in version 37): the place, its stars, the estimated time and distance, and which meals fit, like "5 under $20: Soup Dumplings (8), …". The card opens the restaurant's menu, where every meal shows its all-in price.</li>
-      <li><b>Delivery or pickup, not both</b>: one switch in the Filters sheet. Delivery filters by time, pickup filters by distance. Only one of the two is on at a time (P7). Pickup cards show the distance and no time, and the all-in price has no delivery fee.</li>
+      <li><b>Delivery or pickup, not both</b>: one switch in the Filters sheet. Delivery filters by time, pickup filters by distance. Only one of the two is on at a time (P7). Pickup cards show the distance and no time, and the all-in prices on the menu have no delivery fee.</li>
       <li><b>Every sort is visible</b>: Fastest (the default), Lowest price and Top rated for delivery; Nearest takes the place of Fastest for pickup. Each one sorts by a number on the card or the menu. There is no "Best match".</li>
       <li><b>Evidence</b>: each decision cites the team's press release, concept thesis and Worksheet 2. Those documents use the concept's earlier name, Busy Mode; Quick Meal is the current name.</li>
       <li><b>Cuisine tabs</b> across the top (All, Chinese, Indian …), one at a time. Chip row: Filters, then time (or distance for pickup), then a budget <b>slider</b>. Sort lives in the full Filters sheet.</li>
@@ -519,7 +519,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
           <div class="ph-foot"><span class="go">Add to cart · Est. $19.48</span></div>
         </div>
       </div>
-      <p class="cap"><b>6 · Price breakdown.</b> Opened by tapping the Tofu Rice Bowl price on screen 5. Any price on a card or the menu opens this sheet. This bowl is $1.25 cheaper on the menu than the Chicken Rice Bowl, but $0.75 more all-in because of the small-order fee.</p>
+      <p class="cap"><b>6 · Price breakdown.</b> Opened by tapping the Tofu Rice Bowl price on screen 5. Any price on the menu or on a near meal opens this sheet. This bowl is $1.25 cheaper on the menu than the Chicken Rice Bowl, but $0.75 more all-in because of the small-order fee.</p>
     </div>
 
   </div>
@@ -832,7 +832,7 @@ footer { margin-top: 56px; font-size: 0.85rem; color: var(--muted); }
       <table>
         <thead><tr><th>Case</th><th>What the user sees</th></tr></thead>
         <tbody>
-          <tr><td>First visit</td><td>No filters on. One meal per open place, fastest first. A hint above the list: "Short on time? Pick a time and a budget to see meals that fit." (P10).</td></tr>
+          <tr><td>First visit</td><td>No filters on. One card per open place, fastest first, each with "N on the menu". A hint above the list: "Short on time? Pick a time and a budget to see meals that fit." (P10).</td></tr>
           <tr><td>Return visit</td><td>Saved delivery or pickup, its time or distance, and the budget come back (P8). The cuisine tab is back on All.</td></tr>
           <tr><td>Tab with no result</td><td>The no-match state, limited to that cuisine. If the cuisine has no place nearby at all, it offers "All cuisines · N results".</td></tr>
           <tr><td>Sort change</td><td>The order of places and of names in each dish line can change. With Lowest price, each dish line starts with the place's cheapest meal that fits, and the menu lists that meal first too.</td></tr>
@@ -948,8 +948,8 @@ allIn = price + (pickup ? 0 : deliveryFee) + (price &lt; 12 ? smallOrderFee : 0)
       <li>Tap <b>Time ▾</b>, slide to 30 min and apply: 17 places. Point out that every time is an estimated range, not a promise.</li>
       <li>Tap <b>Budget ▾</b>. Slide to $25 and apply: 13 places. Open it again, slide to $20 and apply: 6 places.</li>
       <li>Scroll to the Paseo Rice Bowl card and tap "3 under $20". The menu shows 3 bowls that fit and 2 that do not. The Tofu Rice Bowl is cheaper on the menu, but tap its price: the small-order fee makes it $19.48, more than the $18.73 Chicken Rice Bowl.</li>
-      <li>Go back. Open the Filters sheet and tighten to 15 min and $15. Show the no-match state and how each meal misses: the Chicken Tacos are only "1 min slower", and the student judges that. Tap "Budget up to $17 · 1 result". The slider moves to $17 and one meal shows.</li>
-      <li>Open the Filters sheet and flip Delivery to Pickup. The time slider changes to a distance slider: one or the other, never both. Slide to 1 mi and tap "Show results": 5 places. The cards show no time, and each price is lower by the delivery fee.</li>
+      <li>Go back. Open the Filters sheet and tighten to 15 min and $15. Show the no-match state and how each meal misses: the Chicken Tacos are only "1 min slower", and the student judges that. Tap "Budget up to $17 · 1 result". The slider moves to $17 and one place shows.</li>
+      <li>Open the Filters sheet and flip Delivery to Pickup. The time slider changes to a distance slider: one or the other, never both. Slide to 1 mi and tap "Show results": 5 places. The cards show the distance and no time. Open a menu: each price is lower by the delivery fee.</li>
     </ol>
   </section>
 
