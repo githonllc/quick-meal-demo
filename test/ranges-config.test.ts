@@ -79,9 +79,9 @@ describe('ranges', () => {
 })
 
 describe('demo config', () => {
-  it('defaults to dish cards, saved filters on, study off, normal network', () => {
+  it('defaults to restaurant cards, saved filters on, study off, normal network', () => {
     expect(loadConfig(fakeStore())).toEqual({
-      layout: 'meals',
+      layout: 'places',
       time: { min: 15, max: 45, step: 1 },
       distance: { min: 0.5, max: 5, step: 0.5 },
       saveFilters: true,
@@ -122,7 +122,7 @@ describe('demo config', () => {
       network: { delayMs: 0, fail: true },
     })
     // Only the layout, as a study link or the e2e helper saves it.
-    expect(parseConfig('{"layout":"places"}')).toEqual({ ...DEFAULT_CONFIG, layout: 'places' })
+    expect(parseConfig('{"layout":"meals"}')).toEqual({ ...DEFAULT_CONFIG, layout: 'meals' })
     expect(parseConfig('{"network":7}').network).toEqual(DEFAULT_CONFIG.network)
   })
 

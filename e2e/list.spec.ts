@@ -46,6 +46,9 @@ test('error state offers a retry', async ({ page }) => {
 })
 
 test('a study link with ?layout= sets the layout, it stays, and the sort follows it', async ({ page }) => {
+  // Start on dish cards, so the link has something to change.
+  await page.goto('/')
+  await setLayout(page, 'meals')
   await page.goto('/quick-meal?budget=20&time=30&sort=liked&layout=places')
   await expect(page.getByTestId('count-line')).toHaveText('6 places have a meal that fits · top rated first')
   await expect(page.getByTestId('meal-card').first().locator('.meal-rating')).toBeVisible()
@@ -58,8 +61,13 @@ test('a study link with ?layout= sets the layout, it stays, and the sort follows
   await expect(page.getByTestId('meal-price')).toHaveCount(6)
 })
 
-// Dish cards: the main design and the default layout.
+// Dish cards, set in the demo settings.
 test.describe('dish cards', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/')
+    await setLayout(page, 'meals')
+  })
+
   test('AC-02: every price fits the budget and each breakdown adds up', async ({ page }) => {
     await page.goto('/quick-meal?budget=20')
     await waitForResults(page)
@@ -139,7 +147,7 @@ test.describe('dish cards', () => {
   })
 })
 
-// Restaurant cards, set in the demo settings.
+// Restaurant cards: the default layout, set here too so these tests say what they need.
 test.describe('restaurant cards', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/')

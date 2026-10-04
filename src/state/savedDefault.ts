@@ -42,7 +42,7 @@ function budget(raw: unknown): number | null {
 // A saved value outside the current range moves to the nearest valid one (P8).
 // The range is the one in the demo settings, so a saved time also snaps to a new range.
 // A saved Most liked or Top rated becomes the sort this layout shows.
-export function loadDefault(store = browserStorage(), layout: Layout = 'meals'): Partial<UiFilters> | null {
+export function loadDefault(store = browserStorage(), layout: Layout = 'places'): Partial<UiFilters> | null {
   try {
     const config = loadConfig(store)
     if (!config.saveFilters) return null

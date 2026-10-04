@@ -25,7 +25,7 @@ export async function setStop(slider: Locator, stop: string) {
   await slider.fill(String(i))
 }
 
-// Sets the card layout of the demo settings: 'meals' (dish cards, the default) or 'places'.
+// Sets the card layout of the demo settings: 'meals' (dish cards) or 'places' (restaurant cards, the default).
 // Call it on a page of the app, after any localStorage.clear(); the next page load uses it.
 // The key matches src/state/config.ts. The rest of the config gets its defaults.
 export async function setLayout(page: Page, layout: 'meals' | 'places') {

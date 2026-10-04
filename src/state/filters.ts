@@ -33,7 +33,7 @@ function parseStep<T extends number>(raw: string | null, steps: readonly T[]): T
 // An old link with both time and distance keeps the time and drops the distance.
 // The sort is one the layout shows: Most liked and Top rated swap with the layout.
 // Time and distance must be stops of the ranges in the demo settings (pass the config).
-export function parseUrl(search: string, layout: Layout = 'meals', ranges: Ranges = DEFAULT_RANGES): UiFilters {
+export function parseUrl(search: string, layout: Layout = 'places', ranges: Ranges = DEFAULT_RANGES): UiFilters {
   const q = new URLSearchParams(search)
   const time = parseStep(q.get('time'), stepsOf(ranges.time))
   const distance = time === null ? parseStep(q.get('distance'), stepsOf(ranges.distance)) : null
@@ -48,7 +48,7 @@ export function parseUrl(search: string, layout: Layout = 'meals', ranges: Range
 
 // Switches to the other side: clears the other side's value and swaps the two defaults.
 // Fastest becomes Nearest in Pickup, and Nearest becomes Fastest in Delivery. Other sorts stay.
-export function toSide(f: UiFilters, pickup: boolean, layout: Layout = 'meals'): UiFilters {
+export function toSide(f: UiFilters, pickup: boolean, layout: Layout = 'places'): UiFilters {
   return { ...f, ...(pickup ? { time: null } : { distance: null }), sort: sortForLayout(f.sort, pickup, layout) }
 }
 
@@ -67,7 +67,7 @@ export function toQuery(f: UiFilters): string {
 // The filters to start from when the page opens. Any of the four filter keys in the URL
 // (even budget=40, "any") means the URL wins; otherwise the saved default fills them.
 // Cuisine always comes from the URL (design P8).
-export function initialFilters(search: string, store = browserStorage(), layout: Layout = 'meals'): UiFilters {
+export function initialFilters(search: string, store = browserStorage(), layout: Layout = 'places'): UiFilters {
   const url = parseUrl(search, layout, loadConfig(store))
   const q = new URLSearchParams(search)
   if (['budget', 'time', 'distance', 'sort'].some((k) => q.has(k))) return url

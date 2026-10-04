@@ -13,6 +13,10 @@ import './quick-meal.css'
 import './settings.css'
 
 const LAYOUT_LABELS: Record<Layout, string> = { meals: 'Dish first', places: 'Restaurant first' }
+const LAYOUT_HELP: Record<Layout, string> = {
+  places: 'One place per card, with the meals that fit.',
+  meals: 'One meal and its all-in price per card.',
+}
 
 function delayLabel(ms: number): string {
   return ms === 0 ? 'None' : formatSeconds(ms)
@@ -131,18 +135,22 @@ export function SettingsScreen() {
       </p>
 
       <Group title="Layout" help="What the Quick Meal list shows first.">
-        <div className="seg" role="radiogroup" aria-label="Layout">
-          {(['meals', 'places'] as const).map((l) => (
-            <button
-              key={l}
-              role="radio"
-              aria-checked={config.layout === l}
-              className={config.layout === l ? 'seg-opt on' : 'seg-opt'}
-              data-testid={`layout-${l}`}
-              onClick={() => set({ layout: l })}
-            >
-              {LAYOUT_LABELS[l]}
-            </button>
+        <div className="set-radios" role="radiogroup" aria-label="Layout">
+          {(['places', 'meals'] as const).map((l) => (
+            <label key={l} className="set-radio">
+              <input
+                type="radio"
+                name="layout"
+                value={l}
+                checked={config.layout === l}
+                data-testid={`layout-${l}`}
+                onChange={() => set({ layout: l })}
+              />
+              <span>
+                <b>{LAYOUT_LABELS[l]}</b>
+                <small>{LAYOUT_HELP[l]}</small>
+              </span>
+            </label>
           ))}
         </div>
       </Group>
@@ -223,7 +231,7 @@ export function SettingsScreen() {
         </button>
       </Group>
 
-      <Group title="Restore default settings" help="Dish first, time 15 to 45 min by 1, distance 0.5 to 5 mi by 0.5, Save filters on, Study timer off, no delay or failure.">
+      <Group title="Restore default settings" help="Restaurant first, time 15 to 45 min by 1, distance 0.5 to 5 mi by 0.5, Save filters on, Study timer off, no delay or failure.">
         <button className="opt set-wide" onClick={restoreDefaults}>
           Restore default settings
         </button>

@@ -21,14 +21,15 @@ describe('filters in the URL', () => {
       cuisine: 'fast-food',
       sort: 'price',
     })
-    expect(parseUrl('budget=15&distance=0.5&sort=liked')).toEqual({ ...NONE, budget: 15, distance: 0.5, sort: 'liked' })
+    expect(parseUrl('budget=15&distance=0.5&sort=liked', 'meals')).toEqual({ ...NONE, budget: 15, distance: 0.5, sort: 'liked' })
     expect(parseUrl('budget=15&distance=0.5&sort=rated', 'places')).toEqual({ ...NONE, budget: 15, distance: 0.5, sort: 'rated' })
   })
 
   it('reads Most liked and Top rated as the sort the layout shows, on both sides', () => {
-    // Dish cards (the default) show Most liked; restaurant cards show Top rated.
+    // Restaurant cards (the default) show Top rated; dish cards show Most liked.
     for (const raw of ['liked', 'rated']) {
-      expect(parseUrl(`sort=${raw}`).sort).toBe('liked')
+      expect(parseUrl(`sort=${raw}`).sort).toBe('rated')
+      expect(parseUrl(`sort=${raw}`, 'meals').sort).toBe('liked')
       expect(parseUrl(`distance=1&sort=${raw}`, 'meals').sort).toBe('liked')
       expect(parseUrl(`sort=${raw}`, 'places').sort).toBe('rated')
       expect(parseUrl(`distance=1&sort=${raw}`, 'places').sort).toBe('rated')

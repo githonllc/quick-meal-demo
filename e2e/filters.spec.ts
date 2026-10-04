@@ -26,7 +26,7 @@ async function expectBudget20Time30(page: Page) {
   await expect(page.getByTestId('chip-filters-badge')).toHaveText('2')
 }
 
-// The Filters chip is the only way in. The top-right icon is the demo settings gear.
+// The Filters chip is the only way in. The top-right icon opens the demo settings.
 test('AC-03: the Filters sheet opens from the Filters chip', async ({ page }) => {
   await page.goto('/quick-meal')
   await expect(page.getByTestId('meal-card')).toHaveCount(28)
@@ -151,6 +151,7 @@ async function cents(el: import('@playwright/test').Locator): Promise<number> {
 }
 
 test('AC-09: Pickup swaps time for distance and drops the delivery fee', async ({ page }) => {
+  await setLayout(page, 'meals')
   await page.goto('/quick-meal?budget=20&time=30')
   await expectBudget20Time30(page)
   await page.getByTestId('chip-filters').click()
@@ -320,6 +321,7 @@ test('after a switch in the Time chip sheet the slider is at Any', async ({ page
 })
 
 test('a breakdown opened while pickup loads keeps the prices of the tapped card', async ({ page }) => {
+  await setLayout(page, 'meals')
   await page.goto('/quick-meal?budget=20&time=30')
   await expectBudget20Time30(page)
   // Hold the pickup answer so the delivery cards stay on screen, dimmed.
@@ -401,18 +403,18 @@ test('switching sides swaps Fastest and Nearest, and a step on the same side kee
   await expect(page).toHaveURL(/\/quick-meal\?time=30$/)
 
   // Delivery shows no Nearest option: each side shows exactly 3 sorts.
-  // Dish cards (the default) sort by Most liked, restaurant cards by Top rated.
-  await page.getByTestId('chip-filters').click()
-  await expect(sheet.locator('[data-testid^="sort-"]')).toHaveText(['Fastest', 'Lowest price', 'Most liked'])
-  await sheet.getByTestId('side-pickup').click()
-  await expect(sheet.locator('[data-testid^="sort-"]')).toHaveText(['Nearest', 'Lowest price', 'Most liked'])
-  await setLayout(page, 'places')
-  await page.goto('/quick-meal?time=30')
-  await waitForResults(page)
+  // Restaurant cards (the default) sort by Top rated, dish cards by Most liked.
   await page.getByTestId('chip-filters').click()
   await expect(sheet.locator('[data-testid^="sort-"]')).toHaveText(['Fastest', 'Lowest price', 'Top rated'])
   await sheet.getByTestId('side-pickup').click()
   await expect(sheet.locator('[data-testid^="sort-"]')).toHaveText(['Nearest', 'Lowest price', 'Top rated'])
+  await setLayout(page, 'meals')
+  await page.goto('/quick-meal?time=30')
+  await waitForResults(page)
+  await page.getByTestId('chip-filters').click()
+  await expect(sheet.locator('[data-testid^="sort-"]')).toHaveText(['Fastest', 'Lowest price', 'Most liked'])
+  await sheet.getByTestId('side-pickup').click()
+  await expect(sheet.locator('[data-testid^="sort-"]')).toHaveText(['Nearest', 'Lowest price', 'Most liked'])
 
   // Lowest price survives switches, and a step on the same side keeps it.
   await page.goto('/quick-meal?time=30&sort=price')

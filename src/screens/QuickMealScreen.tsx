@@ -17,7 +17,7 @@ import { PlaceCard } from '../components/PlaceCard'
 import { Skeleton } from '../components/Skeleton'
 import { StepSheet } from '../components/StepSheet'
 import { useToast } from '../components/Toast'
-import { GearIcon, TopBar } from '../components/TopBar'
+import { SlidersIcon, TopBar } from '../components/TopBar'
 import { navigate, useRoute } from '../router'
 import { useConfig } from '../state/config'
 import { activeCount, initialFilters, parseUrl, toQuery, withQuery } from '../state/filters'
@@ -142,7 +142,7 @@ export function QuickMealScreen() {
         title="Quick Meal"
         right={
           <button className="icon-btn" aria-label="Demo settings" onClick={() => navigate('/demo-settings')}>
-            <GearIcon />
+            <SlidersIcon />
           </button>
         }
       />

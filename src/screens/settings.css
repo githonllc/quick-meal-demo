@@ -78,6 +78,38 @@
   width: 100%;
 }
 
+/* Layout: one radio row per choice, its name on top and what it shows under it. */
+.set-radios {
+  display: grid;
+}
+.set-radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 44px;
+  padding: 8px 0;
+  cursor: pointer;
+}
+.set-radio input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--ink);
+}
+.set-radio span {
+  display: grid;
+  gap: 2px;
+}
+.set-radio b {
+  font-size: 15px;
+  font-weight: 600;
+}
+.set-radio small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
 /* Time and distance ranges: From, To and Step side by side. */
 .set-range {
   display: grid;

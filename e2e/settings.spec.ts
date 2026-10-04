@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
-import { setConfig, setStop, waitForResults } from './helpers'
+import { setConfig, setLayout, setStop, waitForResults } from './helpers'
 
 const CONFIG = 'quickMeal.config.v1'
 const FILTERS = 'quickMeal.filters.v1'
@@ -24,7 +24,7 @@ async function addToCart(page: Page) {
   await page.getByTestId('breakdown-sheet').getByRole('button', { name: /^Add to cart/ }).click()
 }
 
-test('the gear opens the demo settings, and Back returns to the same list', async ({ page }) => {
+test('the sliders button opens the demo settings, and Back returns to the same list', async ({ page }) => {
   await page.goto('/quick-meal?budget=20&time=30')
   await page.getByRole('button', { name: 'Demo settings' }).click()
   await expect(page).toHaveURL(/\/demo-settings$/)
@@ -35,17 +35,26 @@ test('the gear opens the demo settings, and Back returns to the same list', asyn
   await expect(page).toHaveURL(/\/quick-meal\?budget=20&time=30$/)
 })
 
-test('Layout switches between dish cards and restaurant cards', async ({ page }) => {
+test('Layout switches between restaurant cards and dish cards', async ({ page }) => {
   await page.goto('/demo-settings')
-  await expect(page.getByTestId('layout-meals')).toHaveAttribute('aria-checked', 'true')
-  await page.getByTestId('layout-places').click()
-  await expect(page.getByTestId('layout-places')).toHaveAttribute('aria-checked', 'true')
-  expect(JSON.parse((await local(page, CONFIG)) ?? '{}').layout).toBe('places')
+  // Two radio rows, Restaurant first on top and checked.
+  await expect(page.getByRole('radiogroup', { name: 'Layout' }).getByRole('radio')).toHaveCount(2)
+  await expect(page.locator('.set-radio')).toHaveText([/^Restaurant first/, /^Dish first/])
+  await expect(page.getByTestId('layout-places')).toBeChecked()
   await page.goto('/quick-meal')
   await waitForResults(page)
   // Restaurant cards have no price button.
   await expect(page.getByTestId('meal-card').first()).toBeVisible()
   await expect(page.getByTestId('meal-price')).toHaveCount(0)
+
+  await page.goto('/demo-settings')
+  await page.getByText('Dish first').click()
+  await expect(page.getByTestId('layout-meals')).toBeChecked()
+  await expect(page.getByTestId('layout-places')).not.toBeChecked()
+  expect(JSON.parse((await local(page, CONFIG)) ?? '{}').layout).toBe('meals')
+  await page.goto('/quick-meal')
+  await waitForResults(page)
+  await expect(page.getByTestId('meal-price').first()).toBeVisible()
 })
 
 test('Save filters off: no load, no save, no "Saved" toast, on the list and on the menu', async ({ page }) => {
@@ -80,10 +89,10 @@ test('Save filters off: no load, no save, no "Saved" toast, on the list and on t
 })
 
 test('Reset demo state clears saved filters and results, and keeps the settings', async ({ page }) => {
-  const config = JSON.stringify({ layout: 'places', study: true })
+  const config = JSON.stringify({ layout: 'meals', study: true })
   await page.evaluate(
     ([c, f, t, r]) => {
-      localStorage.setItem(c, JSON.stringify({ layout: 'places', study: true }))
+      localStorage.setItem(c, JSON.stringify({ layout: 'meals', study: true }))
       localStorage.setItem(f, '{"budget":20}')
       localStorage.setItem(t, '1')
       localStorage.setItem(r, '[]')
@@ -95,7 +104,7 @@ test('Reset demo state clears saved filters and results, and keeps the settings'
   await expect(page.getByTestId('toast')).toHaveText('Demo state reset.')
   for (const key of [FILTERS, TOAST_FLAG, RESULTS]) expect(await local(page, key)).toBeNull()
   expect(await local(page, CONFIG)).toBe(config)
-  await expect(page.getByTestId('layout-places')).toHaveAttribute('aria-checked', 'true')
+  await expect(page.getByTestId('layout-meals')).toBeChecked()
 })
 
 test('a time range of 10 to 60 min by 5: slider, URL, menu and relax chip use its steps', async ({ page }) => {
@@ -180,7 +189,7 @@ test('the start-up URL is cleaned: an off-step time, a sort of the other layout,
 
 test('Restore default settings sets every switch back', async ({ page }) => {
   await setConfig(page, {
-    layout: 'places',
+    layout: 'meals',
     time: { min: 10, max: 60, step: 5 },
     distance: { min: 1, max: 10, step: 1 },
     saveFilters: false,
@@ -190,7 +199,7 @@ test('Restore default settings sets every switch back', async ({ page }) => {
   await page.goto('/demo-settings')
   await expect(page.getByRole('switch', { name: 'Study timer' })).toHaveAttribute('aria-checked', 'true')
   await page.getByRole('button', { name: 'Restore default settings' }).click()
-  await expect(page.getByTestId('layout-meals')).toHaveAttribute('aria-checked', 'true')
+  await expect(page.getByTestId('layout-places')).toBeChecked()
   await expect(page.getByRole('switch', { name: 'Save filters' })).toHaveAttribute('aria-checked', 'true')
   await expect(page.getByRole('switch', { name: 'Study timer' })).toHaveAttribute('aria-checked', 'false')
   await expect(page.getByRole('switch', { name: 'Fail every request' })).toHaveAttribute('aria-checked', 'false')
@@ -198,7 +207,7 @@ test('Restore default settings sets every switch back', async ({ page }) => {
   await expect(page.getByTestId('time-min')).toHaveValue('15')
   await expect(page.getByTestId('distance-step')).toHaveValue('0.5')
   expect(JSON.parse((await local(page, CONFIG)) ?? '{}')).toMatchObject({
-    layout: 'meals',
+    layout: 'places',
     study: false,
     time: { min: 15, max: 45, step: 1 },
     distance: { min: 0.5, max: 5, step: 0.5 },
@@ -206,6 +215,7 @@ test('Restore default settings sets every switch back', async ({ page }) => {
 })
 
 test('study off: Add to cart records nothing', async ({ page }) => {
+  await setLayout(page, 'meals')
   await page.goto('/quick-meal?budget=20&time=30')
   await page.getByTestId('meal-price').first().click()
   await addToCart(page)
@@ -215,7 +225,7 @@ test('study off: Add to cart records nothing', async ({ page }) => {
 })
 
 test('study on: the first Add to cart records one result, a second tap records nothing', async ({ page, context }) => {
-  await setConfig(page, { study: true })
+  await setConfig(page, { study: true, layout: 'meals' })
   await page.goto('/')
   await page.getByTestId('quick-meal-entry').click()
   await waitForResults(page)
@@ -300,7 +310,7 @@ test('study on: Home cancels the trial, and Quick Meal starts a new one', async 
 })
 
 test('study on: a reload starts a new trial, so the time counts from the reload', async ({ page }) => {
-  await setConfig(page, { study: true })
+  await setConfig(page, { study: true, layout: 'meals' })
   await page.goto('/quick-meal?budget=20&time=30')
   await waitForResults(page)
   const id = await trialId(page)
@@ -326,7 +336,7 @@ test('study on: a reload starts a new trial, so the time counts from the reload'
 })
 
 test('study on: a ?layout= link after an abandoned trial records the new layout', async ({ page }) => {
-  await setConfig(page, { study: true })
+  await setConfig(page, { study: true, layout: 'meals' })
   await page.goto('/quick-meal')
   await waitForResults(page)
   expect(await trialId(page)).not.toBeNull()
@@ -343,7 +353,7 @@ test('study on: a ?layout= link after an abandoned trial records the new layout'
 })
 
 test('study on: a result that cannot be saved says so', async ({ page }) => {
-  await setConfig(page, { study: true })
+  await setConfig(page, { study: true, layout: 'meals' })
   await page.goto('/quick-meal?budget=20&time=30')
   await waitForResults(page)
   // Storage that is full for the results only.

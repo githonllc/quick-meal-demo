@@ -107,7 +107,8 @@ describe('saved default', () => {
 
   it('turns a saved Most liked or Top rated into the sort the layout shows', () => {
     for (const sort of ['liked', 'rated']) {
-      expect(loadDefault(stored({ sort }))?.sort).toBe('liked')
+      expect(loadDefault(stored({ sort }))?.sort).toBe('rated')
+      expect(loadDefault(stored({ sort }), 'meals')?.sort).toBe('liked')
       expect(loadDefault(stored({ distance: 1, sort }), 'meals')?.sort).toBe('liked')
       expect(loadDefault(stored({ sort }), 'places')?.sort).toBe('rated')
       expect(loadDefault(stored({ distance: 1, sort }), 'places')?.sort).toBe('rated')

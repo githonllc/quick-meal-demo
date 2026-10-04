@@ -7,7 +7,7 @@ import type { Store } from './savedDefault'
 // The demo settings for the research team. One key in local storage.
 const KEY = 'quickMeal.config.v1'
 
-// Dish cards (the main design) or restaurant cards.
+// Dish cards or restaurant cards (the default).
 export type Layout = 'meals' | 'places'
 export const LAYOUTS: readonly Layout[] = ['meals', 'places']
 export const DELAYS = [0, 500, 1500, 3000] as const
@@ -22,7 +22,7 @@ export interface DemoConfig {
 }
 
 export const DEFAULT_CONFIG: DemoConfig = {
-  layout: 'meals',
+  layout: 'places',
   time: DEFAULT_RANGES.time,
   distance: DEFAULT_RANGES.distance,
   saveFilters: true,
