@@ -162,6 +162,22 @@ test('a distance range of 1 to 10 mi by 1: pickup at 7 mi opens a menu with pick
   expect(((await res.json()) as { pickup: boolean }).pickup).toBe(true)
 })
 
+test('the start-up URL is cleaned: an off-step time, a sort of the other layout, a layout param', async ({ page }) => {
+  await setConfig(page, { time: { min: 10, max: 60, step: 5 } })
+  await page.goto('/quick-meal?time=22')
+  await waitForResults(page)
+  await expect(page).toHaveURL(/\/quick-meal$/)
+
+  await page.goto('/quick-meal?layout=places&sort=liked')
+  await waitForResults(page)
+  await expect(page).toHaveURL(/\/quick-meal\?sort=rated$/)
+
+  // The error-state demo link keeps its fail=1.
+  await page.goto('/quick-meal?fail=1&sort=fastest')
+  await expect(page.getByTestId('retry')).toBeVisible()
+  await expect(page).toHaveURL(/\/quick-meal\?fail=1$/)
+})
+
 test('Restore default settings sets every switch back', async ({ page }) => {
   await setConfig(page, {
     layout: 'places',
@@ -281,6 +297,67 @@ test('study on: Home cancels the trial, and Quick Meal starts a new one', async 
   const next = await trialId(page)
   expect(next).not.toBeNull()
   expect(next).not.toBe(id)
+})
+
+test('study on: a reload starts a new trial, so the time counts from the reload', async ({ page }) => {
+  await setConfig(page, { study: true })
+  await page.goto('/quick-meal?budget=20&time=30')
+  await waitForResults(page)
+  const id = await trialId(page)
+  expect(id).not.toBeNull()
+  // Make the old trial look 10 minutes old.
+  await page.evaluate((k) => {
+    const t = JSON.parse(sessionStorage.getItem(k) ?? '{}')
+    sessionStorage.setItem(k, JSON.stringify({ ...t, startedAt: t.startedAt - 600_000 }))
+  }, TRIAL)
+
+  await page.reload()
+  await waitForResults(page)
+  const next = await trialId(page)
+  expect(next).not.toBeNull()
+  expect(next).not.toBe(id)
+  await page.getByTestId('meal-price').first().click()
+  await addToCart(page)
+  await expect(page.getByTestId('toast')).toHaveText(/^Time to first Add to cart/)
+  const rows = await results(page)
+  expect(rows).toHaveLength(1)
+  expect(rows[0].id).toBe(next)
+  expect(rows[0].ms as number).toBeLessThan(60_000)
+})
+
+test('study on: a ?layout= link after an abandoned trial records the new layout', async ({ page }) => {
+  await setConfig(page, { study: true })
+  await page.goto('/quick-meal')
+  await waitForResults(page)
+  expect(await trialId(page)).not.toBeNull()
+
+  await page.goto('/quick-meal?layout=places')
+  await waitForResults(page)
+  await page.getByTestId('meal-card').filter({ hasText: 'Paseo Rice Bowl' }).click()
+  await page.getByTestId('menu-row').filter({ hasText: 'Tofu Rice Bowl' }).click()
+  await addToCart(page)
+  await expect(page.getByTestId('toast')).toHaveText(/^Time to first Add to cart/)
+  const rows = await results(page)
+  expect(rows).toHaveLength(1)
+  expect(rows[0]).toMatchObject({ layout: 'places', path: 'menu' })
+})
+
+test('study on: a result that cannot be saved says so', async ({ page }) => {
+  await setConfig(page, { study: true })
+  await page.goto('/quick-meal?budget=20&time=30')
+  await waitForResults(page)
+  // Storage that is full for the results only.
+  await page.evaluate((k) => {
+    const setItem = Storage.prototype.setItem
+    Storage.prototype.setItem = function (key: string, value: string) {
+      if (key === k) throw new Error('full')
+      setItem.call(this, key, value)
+    }
+  }, RESULTS)
+  await page.getByTestId('meal-price').first().click()
+  await addToCart(page)
+  await expect(page.getByTestId('toast')).toHaveText('Study result not saved')
+  expect(await local(page, RESULTS)).toBeNull()
 })
 
 test('network delay: a repeated search shows the loading bar, even when cached', async ({ page }) => {

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { DEFAULT_RANGES, isValidRange } from '../../shared/ranges'
 import type { Range } from '../../shared/ranges'
 import { browserStorage } from './savedDefault'
+import type { Store } from './savedDefault'
 
 // The demo settings for the research team. One key in local storage.
 const KEY = 'quickMeal.config.v1'
@@ -66,7 +67,12 @@ export function parseConfig(raw: string | null | undefined): DemoConfig {
   }
 }
 
+// The last config saved in this tab, and the store it went to (tests pass their own stores).
+let current: { store: Store | null; config: DemoConfig } | null = null
+
+// Storage is read until this tab saves a config. After that the saved one is used.
 export function loadConfig(store = browserStorage()): DemoConfig {
+  if (current && current.store === store) return current.config
   try {
     return parseConfig(store?.getItem(KEY))
   } catch {
@@ -78,6 +84,7 @@ export function loadConfig(store = browserStorage()): DemoConfig {
 const listeners = new Set<(c: DemoConfig) => void>()
 
 export function saveConfig(c: DemoConfig, store = browserStorage()): void {
+  current = { store, config: c }
   try {
     store?.setItem(KEY, JSON.stringify(c))
   } catch {

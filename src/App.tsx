@@ -17,10 +17,13 @@ function Screen() {
 
   // Study timer: opening Quick Meal starts a trial, a menu keeps it, Home or the settings cancel it.
   // Back from a menu never starts one, even after the trial ended there.
+  // A page load (a reload or a link) on Quick Meal starts a new trial, so an old one never counts.
   // This runs after the screen's own effects, so the URL already holds the start filters.
   useEffect(() => {
     const fromMenu = prevPath.current === '/quick-meal/restaurants/:id'
+    const pageLoad = prevPath.current === null
     prevPath.current = path
+    if (pageLoad && path === '/quick-meal') cancelTrial()
     if (study && path === '/quick-meal' && !fromMenu) startTrial(layout, toQuery(parseUrl(window.location.search, layout, { time, distance })))
     else if (!study || path === '/' || path === '/demo-settings') cancelTrial()
   }, [path, study, layout, time, distance])

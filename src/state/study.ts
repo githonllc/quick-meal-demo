@@ -1,3 +1,4 @@
+import { LAYOUTS } from './config'
 import type { Layout } from './config'
 import { browserStorage } from './savedDefault'
 import type { Store } from './savedDefault'
@@ -55,11 +56,15 @@ function read<T>(store: Store | null, key: string): T | null {
   }
 }
 
-function write(store: Store | null, key: string, value: unknown): void {
+// True when the value was saved.
+function write(store: Store | null, key: string, value: unknown): boolean {
   try {
-    store?.setItem(key, JSON.stringify(value))
+    if (!store) return false
+    store.setItem(key, JSON.stringify(value))
+    return true
   } catch {
     // No storage: the study timer does nothing.
+    return false
   }
 }
 
@@ -76,8 +81,9 @@ export function activeTrial(session = sessionStore()): Trial | null {
 }
 
 // Starts a trial unless one is running, so going back from a menu keeps the same trial.
+// A running trial of the other layout is replaced: its result would name the wrong layout.
 export function startTrial(layout: Layout, startFilters: string, now = Date.now(), session = sessionStore()): void {
-  if (activeTrial(session)) return
+  if (activeTrial(session)?.layout === layout) return
   const id = `${now.toString(36)}-${Math.random().toString(36).slice(2, 6)}`
   write(session, TRIAL_KEY, { id, startedAt: now, layout, startFilters, firstOpenAt: null } satisfies Trial)
 }
@@ -93,7 +99,7 @@ export function markFirstOpen(now = Date.now(), session = sessionStore()): void 
 }
 
 // The first "Add to cart" ends the trial and records one result. Later taps find no trial
-// and record nothing until the next trial starts.
+// and record nothing until the next trial starts. When the result cannot be saved it returns null.
 export function endTrial(
   tapped: Tapped,
   now = Date.now(),
@@ -113,13 +119,40 @@ export function endTrial(
     startFilters: trial.startFilters,
   }
   // Keep the newest results only.
-  write(local, RESULTS_KEY, [...loadResults(local), result].slice(-MAX_RESULTS))
-  return result
+  return write(local, RESULTS_KEY, [...loadResults(local), result].slice(-MAX_RESULTS)) ? result : null
 }
 
+const PATHS: readonly StudyPath[] = ['list', 'near', 'menu']
+const isNumber = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
+
+// A stored row with every field of the right type.
+function isResult(v: unknown): v is StudyResult {
+  if (typeof v !== 'object' || v === null) return false
+  const r = v as Record<string, unknown>
+  return (
+    typeof r.id === 'string' &&
+    typeof r.at === 'string' &&
+    LAYOUTS.some((l) => l === r.layout) &&
+    isNumber(r.ms) &&
+    (r.firstOpenMs === null || isNumber(r.firstOpenMs)) &&
+    PATHS.some((p) => p === r.path) &&
+    typeof r.restaurant === 'string' &&
+    typeof r.item === 'string' &&
+    isNumber(r.totalCents) &&
+    typeof r.startFilters === 'string'
+  )
+}
+
+// Bad rows and repeated ids are dropped, so the list and the CSV only show good results.
 export function loadResults(local = browserStorage()): StudyResult[] {
   const rows = read<unknown>(local, RESULTS_KEY)
-  return Array.isArray(rows) ? (rows as StudyResult[]) : []
+  if (!Array.isArray(rows)) return []
+  const ids = new Set<string>()
+  return rows.filter((r): r is StudyResult => {
+    if (!isResult(r) || ids.has(r.id)) return false
+    ids.add(r.id)
+    return true
+  })
 }
 
 export function clearResults(local = browserStorage()): void {

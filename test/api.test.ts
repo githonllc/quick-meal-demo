@@ -88,6 +88,13 @@ describe('handleApi', () => {
     const distance = await get('/api/quick-meal/search?drange=1,10,1&distance=7')
     expect(distance.res.status).toBe(200)
     expect(distance.body.filters.distanceMi).toBe(7)
+    // min need not be a multiple of the step: 15 to 45 by 10, 0.5 to 4.5 mi by 1.
+    const time10 = await get('/api/quick-meal/search?trange=15,45,10&time=35')
+    expect(time10.res.status).toBe(200)
+    expect(time10.body.filters.timeMin).toBe(35)
+    const mile = await get('/api/quick-meal/search?drange=0.5,4.5,1&distance=1.5')
+    expect(mile.res.status).toBe(200)
+    expect(mile.body.filters.distanceMi).toBe(1.5)
     // The relax option moves by the range's steps: 20 min, not 16.
     const relax = await get('/api/quick-meal/search?budget=15&time=15&trange=10,60,5')
     expect(relax.body.relax.map((r: { label: string }) => r.label)).toEqual([
@@ -111,6 +118,9 @@ describe('handleApi', () => {
     ['drange=0.5,10,0.25', 'Invalid range'],
     ['drange=0.5,10,1', 'Invalid range'],
     ['drange=0.25,5,0.5', 'Invalid range'],
+    ['drange=0.7,2.7,1', 'Invalid range'],
+    ['trange=15,45,10&time=30', 'Invalid time'],
+    ['drange=0.5,4.5,1&distance=1', 'Invalid distance'],
   ])('search?%s is 400', async (query, error) => {
     const { res, body } = await get(`/api/quick-meal/search?${query}`)
     expect(res.status).toBe(400)

@@ -66,8 +66,17 @@ describe('study trial', () => {
     const session = fakeStore()
     startTrial('meals', '', 1000, session)
     const first = activeTrial(session)
-    startTrial('places', 'budget=10', 5000, session)
+    startTrial('meals', 'budget=10', 5000, session)
     expect(activeTrial(session)).toEqual(first)
+  })
+
+  it('replaces a running trial of the other layout (a ?layout= link)', () => {
+    const session = fakeStore()
+    const local = fakeStore()
+    startTrial('meals', '', 1000, session)
+    startTrial('places', 'budget=10', 5000, session)
+    expect(activeTrial(session)).toMatchObject({ layout: 'places', startedAt: 5000, startFilters: 'budget=10' })
+    expect(endTrial(TAP, 6000, session, local)).toMatchObject({ layout: 'places', ms: 1000 })
   })
 
   it('ends at the first tap only: a second tap records nothing', () => {
@@ -119,6 +128,52 @@ describe('study trial', () => {
     expect(loadResults(broken)).toEqual([])
     expect(() => cancelTrial(broken)).not.toThrow()
     expect(() => clearResults(broken)).not.toThrow()
+  })
+
+  it('returns null and ends the trial when the result cannot be saved', () => {
+    const session = fakeStore()
+    const full: Store = {
+      getItem: () => null,
+      setItem: () => {
+        throw new Error('full')
+      },
+    }
+    startTrial('meals', '', 0, session)
+    expect(endTrial(TAP, 100, session, full)).toBeNull()
+    expect(activeTrial(session)).toBeNull()
+  })
+
+  it('drops stored rows with a bad field and repeated ids', () => {
+    const local = fakeStore()
+    const good: StudyResult = {
+      id: 'a',
+      at: '2026-10-04T12:00:00.000Z',
+      layout: 'meals',
+      ms: 1200,
+      firstOpenMs: null,
+      ...TAP,
+      startFilters: '',
+    }
+    const rows = [
+      good,
+      { ...good, id: 'b', firstOpenMs: 300 },
+      { ...good, ms: 99 }, // repeated id
+      { ...good, id: 'c', layout: 'grid' },
+      { ...good, id: 'd', ms: '1200' },
+      { ...good, id: 'e', ms: null },
+      { ...good, id: 'f', firstOpenMs: 'x' },
+      { ...good, id: 'g', path: 'home' },
+      { ...good, id: 'h', restaurant: 7 },
+      { ...good, id: 'i', item: null },
+      { ...good, id: 'j', totalCents: '899' },
+      { ...good, id: 'k', startFilters: undefined },
+      { ...good, id: 1 },
+      { ...good, id: 'l', at: 0 },
+      null,
+      'row',
+    ]
+    local.setItem('quickMeal.study.v1', JSON.stringify(rows))
+    expect(loadResults(local)).toEqual([good, { ...good, id: 'b', firstOpenMs: 300 }])
   })
 
   it('reads bad stored results as none', () => {

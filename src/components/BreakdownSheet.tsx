@@ -1,7 +1,7 @@
 import { formatCents, formatPercentBps } from '../../shared/format'
 import type { MenuItem, PriceBreakdown } from '../../shared/types'
 import { loadConfig } from '../state/config'
-import { endTrial, formatSeconds } from '../state/study'
+import { activeTrial, endTrial, formatSeconds } from '../state/study'
 import type { StudyPath } from '../state/study'
 import { Sheet } from './Sheet'
 import { useToast } from './Toast'
@@ -28,8 +28,10 @@ export function BreakdownSheet({
   // The first tap ends the study trial. Without a trial it is still only a demo button.
   const addToCart = () => {
     const tapped = { path, restaurant: restaurantName, item: item.name, totalCents: price.totalCents }
-    const result = loadConfig().study ? endTrial(tapped) : null
-    show(result ? `Time to first Add to cart: ${formatSeconds(result.ms)}` : 'Cart is not part of this demo.')
+    const trial = loadConfig().study && activeTrial() !== null
+    const result = trial ? endTrial(tapped) : null
+    if (result) show(`Time to first Add to cart: ${formatSeconds(result.ms)}`)
+    else show(trial ? 'Study result not saved' : 'Cart is not part of this demo.')
   }
   const rows = [
     { id: 'item', label: item.name, cents: price.itemCents },

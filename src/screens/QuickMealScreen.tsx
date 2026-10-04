@@ -72,9 +72,13 @@ export function QuickMealScreen() {
   const { show } = useToast()
 
   // Only rewrites the URL when the start filters differ from it (#9: saved default).
+  // It compares with the URL as written, so a sort the layout does not show, a time off the range's
+  // steps or a layout= link param is cleaned up. The fail=1 demo param stays.
   useEffect(() => {
-    const start = initialFilters(window.location.search, browserStorage(), layout)
-    if (toQuery(start) !== toQuery(parseUrl(window.location.search, layout, { time, distance }))) setFilters(start)
+    const raw = new URLSearchParams(window.location.search)
+    const start = new URLSearchParams(toQuery(initialFilters(window.location.search, browserStorage(), layout)))
+    if (raw.get('fail') === '1') start.set('fail', '1')
+    if (start.toString() !== raw.toString()) navigate(withQuery('/quick-meal', start.toString()), { replace: true })
     // It runs again after a layout or range change, with that layout's sorts and those steps.
   }, [layout, time, distance])
 

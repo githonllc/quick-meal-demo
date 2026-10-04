@@ -47,6 +47,10 @@ describe('ranges', () => {
     expect(isValidRange('time', { min: 15, max: 60, step: 15 })).toBe(true)
     expect(isValidRange('distance', { min: 0.5, max: 10, step: 0.5 })).toBe(true)
     expect(isValidRange('distance', { min: 1, max: 10, step: 1 })).toBe(true)
+    // max − min is a whole number of steps; min need not be a multiple of the step.
+    expect(isValidRange('time', { min: 15, max: 45, step: 10 })).toBe(true)
+    expect(isValidRange('time', { min: 10, max: 55, step: 15 })).toBe(true)
+    expect(isValidRange('distance', { min: 0.5, max: 4.5, step: 1 })).toBe(true)
   })
 
   it.each([
@@ -57,13 +61,14 @@ describe('ranges', () => {
     ['time', { min: 15, max: 45, step: 2 }, 'step not allowed'],
     ['time', { min: 15, max: 40, step: 10 }, 'max not a whole number of steps'],
     ['time', { min: 15.5, max: 45.5, step: 1 }, 'not whole minutes'],
-    ['time', { min: 10, max: 55, step: 15 }, 'min not on the step grid'],
-    ['distance', { min: 0.7, max: 2.7, step: 1 }, 'min not on the step grid'],
+    ['time', { min: 10, max: 50, step: 15 }, 'max not a whole number of steps'],
+    ['distance', { min: 0.7, max: 2.7, step: 1 }, 'min and max not on half miles'],
+    ['distance', { min: 0.5, max: 5, step: 1 }, 'max not a whole number of steps'],
     ['time', { min: '15', max: 45, step: 1 }, 'a string'],
     ['time', null, 'null'],
     ['distance', { min: 0.25, max: 5, step: 0.5 }, 'quarter miles'],
     ['distance', { min: 0.5, max: 5, step: 0.25 }, 'a 0.25 step'],
-    ['distance', { min: 0.4, max: 5, step: 0.5 }, 'max not a whole number of steps'],
+    ['distance', { min: 0.4, max: 5, step: 0.5 }, 'min not on half miles'],
     ['distance', { min: 0, max: 5, step: 0.5 }, 'min below 0.5'],
     ['distance', { min: 0.5, max: 10.5, step: 0.5 }, 'max above 10'],
     ['distance', { min: 0.5, max: 5, step: 2 }, 'step not allowed'],
@@ -128,6 +133,20 @@ describe('demo config', () => {
     expect(loadConfig(null)).toEqual(DEFAULT_CONFIG)
     expect(loadConfig(broken)).toEqual(DEFAULT_CONFIG)
     expect(() => saveConfig(DEFAULT_CONFIG, broken)).not.toThrow()
+  })
+
+  it('a change holds in this tab when storage cannot save it', () => {
+    const store: Store = {
+      getItem: () => null,
+      setItem: () => {
+        throw new Error('full')
+      },
+    }
+    const c = { ...DEFAULT_CONFIG, layout: 'places' as const, study: true }
+    saveConfig(c, store)
+    expect(loadConfig(store)).toEqual(c)
+    applyLayoutParam('?layout=meals', store)
+    expect(loadConfig(store)).toEqual({ ...c, layout: 'meals' })
   })
 
   it('reset restores the defaults', () => {

@@ -16,9 +16,10 @@ export const DEFAULT_RANGES: Ranges = {
 
 // Allowed values, in whole units: minutes for time, tenths of a mile for distance.
 // Miles stop at tenths because formatMiles and the search round to 0.1.
-const RULES: Record<RangeKind, { scale: number; low: number; high: number; steps: number[] }> = {
-  time: { scale: 1, low: 5, high: 90, steps: [1, 5, 10, 15] },
-  distance: { scale: 10, low: 5, high: 100, steps: [5, 10] },
+// min and max sit on grid units: whole minutes, half miles (the values the settings page can show).
+const RULES: Record<RangeKind, { scale: number; grid: number; low: number; high: number; steps: number[] }> = {
+  time: { scale: 1, grid: 1, low: 5, high: 90, steps: [1, 5, 10, 15] },
+  distance: { scale: 10, grid: 5, low: 5, high: 100, steps: [5, 10] },
 }
 
 // A value in whole units, or null when it is not on the grid (for example 0.75 mi).
@@ -28,18 +29,18 @@ function units(x: unknown, scale: number): number | null {
   return n / scale === x ? n : null
 }
 
-// min < max, both in the allowed span, an allowed step, and both on the step's grid
-// (so every stop is a value the settings page can show). The check uses whole numbers, never a float %.
+// min < max, both in the allowed span and on the grid, an allowed step, and max − min a whole
+// number of steps (so 15 to 45 by 10 is valid). The check uses whole numbers, never a float %.
 export function isValidRange(kind: RangeKind, r: unknown): r is Range {
   if (typeof r !== 'object' || r === null) return false
   const { min, max, step } = r as Record<string, unknown>
-  const { scale, low, high, steps } = RULES[kind]
+  const { scale, grid, low, high, steps } = RULES[kind]
   const lo = units(min, scale)
   const hi = units(max, scale)
   const st = units(step, scale)
   if (lo === null || hi === null || st === null) return false
   if (lo < low || hi > high || lo >= hi || !steps.includes(st)) return false
-  return lo % st === 0 && hi % st === 0
+  return lo % grid === 0 && hi % grid === 0 && (hi - lo) % st === 0
 }
 
 // Every stop from min to max, rounded to 2 decimals so 0.5 steps stay exact.
