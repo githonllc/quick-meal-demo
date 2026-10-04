@@ -16,7 +16,6 @@ const names = (page: Page, section: string) =>
 test('AC-06: the menu shows what fits first, then what is just over', async ({ page }) => {
   await page.goto('/quick-meal?budget=20&time=30')
   const card = page.getByTestId('meal-card').filter({ hasText: 'Paseo Rice Bowl' })
-  await expect(card.getByTestId('meal-more')).toContainText('3 under $20: Chicken Rice Bowl, Tofu Rice Bowl, ')
   await card.getByTestId('meal-more').click()
   await expect(page).toHaveURL(new RegExp(`${MENU}\\?budget=20$`))
   await waitForResults(page, 'menu-results')

@@ -3,7 +3,8 @@ import type { MealCard as Meal } from '../../shared/types'
 import { FoodTile } from './FoodTile'
 
 // One restaurant per card, with no price: the menu has the prices. Tapping anywhere opens the menu.
-export function MealCard({
+// The restaurant-cards layout of the demo settings.
+export function PlaceCard({
   card,
   budget,
   pickup,

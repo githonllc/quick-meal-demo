@@ -1,6 +1,6 @@
 {
-  "name": "Quick Meal Demo (restaurant cards)",
-  "short_name": "QM Cards",
+  "name": "Quick Meal Demo",
+  "short_name": "Quick Meal",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

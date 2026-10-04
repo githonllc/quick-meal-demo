@@ -104,7 +104,21 @@
   font-size: 13px;
   white-space: nowrap;
 }
-/* Time and distance share one plain line, so neither looks like a promise. */
+/* Dish cards: the dish's likes, then the place and its stars. */
+.meal-like {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.meal-rest {
+  font-size: 14px;
+  font-weight: 600;
+}
+/* Time, distance and (on dish cards) price share one plain line, so none of them looks like a promise. */
+.meal-rest span,
 .meal-meta {
   margin: 0;
   color: var(--ink);

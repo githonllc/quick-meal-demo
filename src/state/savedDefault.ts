@@ -1,5 +1,7 @@
-import { BUDGET_MAX, BUDGET_MIN, DISTANCE_STEPS, TIME_STEPS, sortFor } from '../../shared/constants'
+import { BUDGET_MAX, BUDGET_MIN, DISTANCE_STEPS, TIME_STEPS } from '../../shared/constants'
+import type { Layout } from './config'
 import type { UiFilters } from './filters'
+import { sortForLayout } from './sorts'
 
 // The saved default lives in local storage (design D5). Cuisine is never saved (P8).
 const KEY = 'quickMeal.filters.v1'
@@ -33,7 +35,8 @@ function budget(raw: unknown): number | null {
 }
 
 // A saved value outside the current range moves to the nearest valid one (P8).
-export function loadDefault(store = browserStorage()): Partial<UiFilters> | null {
+// A saved Most liked or Top rated becomes the sort this layout shows.
+export function loadDefault(store = browserStorage(), layout: Layout = 'meals'): Partial<UiFilters> | null {
   try {
     const raw = store?.getItem(KEY)
     if (!raw) return null
@@ -47,7 +50,7 @@ export function loadDefault(store = browserStorage()): Partial<UiFilters> | null
       budget: budget(saved.budget),
       time,
       distance,
-      sort: sortFor(typeof saved.sort === 'string' ? saved.sort : null, distance !== null),
+      sort: sortForLayout(typeof saved.sort === 'string' ? saved.sort : null, distance !== null, layout),
     }
   } catch {
     return null

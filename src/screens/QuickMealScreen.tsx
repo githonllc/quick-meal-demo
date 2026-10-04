@@ -9,17 +9,19 @@ import { CuisineTabs } from '../components/CuisineTabs'
 import { FilterChips } from '../components/FilterChips'
 import { FiltersSheet } from '../components/FiltersSheet'
 import type { SheetKind } from '../components/FilterChips'
+import { DishCard } from '../components/DishCard'
 import { LoadingBar } from '../components/LoadingBar'
-import { MealCard } from '../components/MealCard'
 import { NoMatch } from '../components/NoMatch'
+import { PlaceCard } from '../components/PlaceCard'
 import { Skeleton } from '../components/Skeleton'
 import { StepSheet } from '../components/StepSheet'
 import { useToast } from '../components/Toast'
 import { SlidersIcon, TopBar } from '../components/TopBar'
 import { navigate, useRoute } from '../router'
+import { useConfig } from '../state/config'
 import { activeCount, initialFilters, parseUrl, toQuery, withQuery } from '../state/filters'
 import type { UiFilters } from '../state/filters'
-import { firstSave, saveDefault } from '../state/savedDefault'
+import { browserStorage, firstSave, saveDefault } from '../state/savedDefault'
 import './quick-meal.css'
 
 // The URL holds the filters. Every change rewrites it, and the fetch follows the URL.
@@ -39,7 +41,9 @@ function countLine(res: SearchResponse, f: UiFilters): string {
 
 export function QuickMealScreen() {
   const { query } = useRoute()
-  const filters = parseUrl(query.toString())
+  const { layout } = useConfig()
+  // The sort follows the layout, so a sort=liked link shows Top rated on restaurant cards.
+  const filters = parseUrl(query.toString(), layout)
   const key = toQuery(filters)
 
   const [attempt, setAttempt] = useState(0)
@@ -52,16 +56,17 @@ export function QuickMealScreen() {
   )
   // The last successful answer. It stays on screen while the next request loads.
   const [shown, setShown] = useState<SearchResponse | null>(cached)
-  // The tapped near card and whether it was priced for pickup, fixed at tap time.
+  // The tapped card and whether it was priced for pickup, fixed at tap time.
   const [priced, setPriced] = useState<{ card: Meal; pickup: boolean } | null>(null)
   const [open, setOpen] = useState<SheetKind | null>(null)
   const { show } = useToast()
 
   // Only rewrites the URL when the start filters differ from it (#9: saved default).
   useEffect(() => {
-    const start = initialFilters(window.location.search)
-    if (toQuery(start) !== toQuery(parseUrl(window.location.search))) setFilters(start)
-  }, [])
+    const start = initialFilters(window.location.search, browserStorage(), layout)
+    if (toQuery(start) !== toQuery(parseUrl(window.location.search, layout))) setFilters(start)
+    // It runs again after a layout change, with that layout's sorts.
+  }, [layout])
 
   // One request at a time: a new filter aborts the request still in flight.
   const req = `${key}#${attempt}`
@@ -174,15 +179,27 @@ export function QuickMealScreen() {
                   {activeCount(filters) === 0 && (
                     <p className="qm-hint">Short on time? Pick a time and a budget to see meals that fit.</p>
                   )}
-                  {shown.exact.map((card) => (
-                    <MealCard
-                      key={card.restaurant.id}
-                      card={card}
-                      budget={filters.budget}
-                      pickup={pickup}
-                      onOpen={() => openMenu(card.restaurant.id)}
-                    />
-                  ))}
+                  {/* Dish cards (the main design) or restaurant cards, as set in the demo settings. */}
+                  {shown.exact.map((card) =>
+                    layout === 'meals' ? (
+                      <DishCard
+                        key={card.restaurant.id}
+                        card={card}
+                        budget={filters.budget}
+                        pickup={pickup}
+                        onOpen={() => openMenu(card.restaurant.id)}
+                        onPrice={() => setPriced({ card, pickup })}
+                      />
+                    ) : (
+                      <PlaceCard
+                        key={card.restaurant.id}
+                        card={card}
+                        budget={filters.budget}
+                        pickup={pickup}
+                        onOpen={() => openMenu(card.restaurant.id)}
+                      />
+                    ),
+                  )}
                 </>
               )}
             </div>

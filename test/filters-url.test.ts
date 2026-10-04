@@ -21,13 +21,20 @@ describe('filters in the URL', () => {
       cuisine: 'fast-food',
       sort: 'price',
     })
-    expect(parseUrl('budget=15&distance=0.5&sort=rated')).toEqual({ ...NONE, budget: 15, distance: 0.5, sort: 'rated' })
+    expect(parseUrl('budget=15&distance=0.5&sort=liked')).toEqual({ ...NONE, budget: 15, distance: 0.5, sort: 'liked' })
+    expect(parseUrl('budget=15&distance=0.5&sort=rated', 'places')).toEqual({ ...NONE, budget: 15, distance: 0.5, sort: 'rated' })
   })
 
-  it('reads an old sort=liked as Top rated on both sides', () => {
-    expect(parseUrl('sort=liked').sort).toBe('rated')
-    expect(parseUrl('distance=1&sort=liked').sort).toBe('rated')
-    expect(toQuery(parseUrl('time=30&sort=liked'))).toBe('time=30&sort=rated')
+  it('reads Most liked and Top rated as the sort the layout shows, on both sides', () => {
+    // Dish cards (the default) show Most liked; restaurant cards show Top rated.
+    for (const raw of ['liked', 'rated']) {
+      expect(parseUrl(`sort=${raw}`).sort).toBe('liked')
+      expect(parseUrl(`distance=1&sort=${raw}`, 'meals').sort).toBe('liked')
+      expect(parseUrl(`sort=${raw}`, 'places').sort).toBe('rated')
+      expect(parseUrl(`distance=1&sort=${raw}`, 'places').sort).toBe('rated')
+    }
+    expect(toQuery(parseUrl('time=30&sort=rated', 'meals'))).toBe('time=30&sort=liked')
+    expect(toQuery(parseUrl('time=30&sort=liked', 'places'))).toBe('time=30&sort=rated')
   })
 
   it('keeps the time and drops the distance when a link has both', () => {
@@ -86,10 +93,10 @@ describe('filters in the URL', () => {
     expect(toSide(toSide({ ...NONE, time: 30 }, true), false).sort).toBe('fastest')
   })
 
-  it('Lowest price and Top rated survive any number of side switches', () => {
-    for (const sort of ['price', 'rated'] as const) {
+  it("Lowest price and the layout's Most liked or Top rated survive any number of side switches", () => {
+    for (const [sort, layout] of [['price', 'meals'], ['price', 'places'], ['liked', 'meals'], ['rated', 'places']] as const) {
       let f: UiFilters = { ...NONE, time: 30, sort }
-      for (const p of [true, false, true, false, true]) f = toSide(f, p)
+      for (const p of [true, false, true, false, true]) f = toSide(f, p, layout)
       expect(f.sort).toBe(sort)
     }
   })

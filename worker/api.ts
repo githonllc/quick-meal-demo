@@ -46,9 +46,8 @@ export function parseFilters(params: URLSearchParams): Filters | { error: string
   if (cuisine === undefined) return { error: 'Invalid cuisine' }
 
   // A missing sort, a sort the side does not have, or the removed sort=best becomes the side's default.
-  // The old sort=liked is Top rated now.
   const sortRaw = params.get('sort')
-  if (sortRaw !== null && sortRaw !== 'best' && sortRaw !== 'liked' && !SORTS.some((s) => s.id === sortRaw)) {
+  if (sortRaw !== null && sortRaw !== 'best' && !SORTS.some((s) => s.id === sortRaw)) {
     return { error: 'Invalid sort' }
   }
   const sort = sortFor(sortRaw, distanceMi !== null)

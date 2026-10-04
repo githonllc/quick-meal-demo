@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { DISTANCE_STEPS, TIME_STEPS } from '../../shared/constants'
 import { formatMiles } from '../../shared/format'
+import { useConfig } from '../state/config'
 import { toSide } from '../state/filters'
 import type { UiFilters } from '../state/filters'
 import { SheetFoot } from './FiltersSheet'
@@ -96,12 +97,13 @@ export function StepSheet({
   onApply: (f: UiFilters) => void
   onClose: () => void
 }) {
+  const { layout } = useConfig()
   const [pickup, setPickup] = useState(filters.distance !== null)
   const [draft, setDraft] = useState(filters)
   const switchSide = (p: boolean) => {
     if (p === pickup) return
     setPickup(p)
-    setDraft((d) => ({ ...toSide(d, p), time: null, distance: null }))
+    setDraft((d) => ({ ...toSide(d, p, layout), time: null, distance: null }))
   }
   return (
     <Sheet title="Get it by" testId="sheet-time" onClose={onClose}>
@@ -111,7 +113,7 @@ export function StepSheet({
       <SheetFoot
         onClear={() => {
           setPickup(false)
-          setDraft((d) => ({ ...toSide(d, false), time: null, distance: null }))
+          setDraft((d) => ({ ...toSide(d, false, layout), time: null, distance: null }))
         }}
         onApply={() => onApply(draft)}
       />

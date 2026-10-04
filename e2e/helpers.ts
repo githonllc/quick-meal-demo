@@ -15,3 +15,12 @@ export async function setStop(slider: Locator, stop: string) {
   if (i < 0) throw new Error(`No stop "${stop}" in ${JSON.stringify(stops)}`)
   await slider.fill(String(i))
 }
+
+// Sets the card layout of the demo settings: 'meals' (dish cards, the default) or 'places'.
+// Call it on a page of the app, after any localStorage.clear(); the next page load uses it.
+// The key matches src/state/config.ts. The rest of the config gets its defaults.
+export async function setLayout(page: Page, layout: 'meals' | 'places') {
+  await page.evaluate((l) => localStorage.setItem('quickMeal.config.v1', JSON.stringify({ layout: l })), layout)
+  const saved = await page.evaluate(() => localStorage.getItem('quickMeal.config.v1'))
+  expect(JSON.parse(saved ?? '{}').layout).toBe(layout)
+}

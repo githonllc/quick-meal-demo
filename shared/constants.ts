@@ -1,11 +1,12 @@
+import { DEFAULT_RANGES, stepsOf } from './ranges';
 import type { SortId } from './types';
 
 export const BUDGET_MIN = 10; // dollars
 export const BUDGET_MAX = 40; // dollars; the slider's max means "any budget" (null)
 // Every minute from 15 to 45. The slider's last stop after 45 means "any time" (null).
-export const TIME_STEPS: readonly number[] = Array.from({ length: 31 }, (_, i) => 15 + i);
+export const TIME_STEPS: readonly number[] = stepsOf(DEFAULT_RANGES.time);
 // Every half mile from 0.5 to 5. The slider's last stop after 5 means "any distance" (null).
-export const DISTANCE_STEPS: readonly number[] = Array.from({ length: 10 }, (_, i) => (i + 1) / 2);
+export const DISTANCE_STEPS: readonly number[] = stepsOf(DEFAULT_RANGES.distance);
 export const SERVICE_FEE_BPS = 1500; // 15%
 export const TIP_BPS = 1500; // 15%
 export const SMALL_ORDER_THRESHOLD_CENTS = 1200;
@@ -27,21 +28,21 @@ export const CUISINES = [
 export const SORTS = [
   { id: 'fastest', label: 'Fastest' },
   { id: 'price', label: 'Lowest price' },
+  { id: 'liked', label: 'Most liked' },
   { id: 'rated', label: 'Top rated' },
   { id: 'nearest', label: 'Nearest' },
 ] as const;
-// Each side shows 3 sorts. Delivery has no Nearest and Pickup has no Fastest.
-// The first sort of each side is its default.
-export const DELIVERY_SORT_IDS = ['fastest', 'price', 'rated'] as const;
-export const PICKUP_SORT_IDS = ['nearest', 'price', 'rated'] as const;
+// The sorts the API takes on each side. Delivery has no Nearest and Pickup has no Fastest.
+// The first sort of each side is its default. Dish cards offer Most liked and restaurant cards
+// offer Top rated (src/state/sorts.ts), so the API takes both.
+export const DELIVERY_SORT_IDS = ['fastest', 'price', 'liked', 'rated'] as const;
+export const PICKUP_SORT_IDS = ['nearest', 'price', 'liked', 'rated'] as const;
 
 // The asked sort if the side has it, otherwise the side's default.
-// So an old sort=best link, or a sort from the other side, gets a sort the side shows.
-// Most liked was renamed Top rated, so an old sort=liked becomes rated.
+// So an old sort=best link, or a sort from the other side, gets a sort the side has.
 export function sortFor(raw: string | null | undefined, pickup: boolean): SortId {
   const ids: readonly SortId[] = pickup ? PICKUP_SORT_IDS : DELIVERY_SORT_IDS;
-  const asked = raw === 'liked' ? 'rated' : raw;
-  return ids.find((id) => id === asked) ?? ids[0];
+  return ids.find((id) => id === raw) ?? ids[0];
 }
 export const PHOTO_KINDS = [
   'bowl',

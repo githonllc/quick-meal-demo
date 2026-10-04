@@ -84,10 +84,18 @@ describe('saved default', () => {
   it("turns an unknown sort into the side's default", () => {
     expect(loadDefault(stored({ sort: 'cheap' }))?.sort).toBe('fastest')
     expect(loadDefault(stored({ sort: 'best' }))?.sort).toBe('fastest')
-    expect(loadDefault(stored({ sort: 'liked' }))?.sort).toBe('rated')
-    expect(loadDefault(stored({ distance: 1, sort: 'liked' }))?.sort).toBe('rated')
     expect(loadDefault(stored({ distance: 1, sort: 'fastest' }))?.sort).toBe('nearest')
     expect(loadDefault(stored({ time: 30, sort: 'nearest' }))?.sort).toBe('fastest')
+  })
+
+  it('turns a saved Most liked or Top rated into the sort the layout shows', () => {
+    for (const sort of ['liked', 'rated']) {
+      expect(loadDefault(stored({ sort }))?.sort).toBe('liked')
+      expect(loadDefault(stored({ distance: 1, sort }), 'meals')?.sort).toBe('liked')
+      expect(loadDefault(stored({ sort }), 'places')?.sort).toBe('rated')
+      expect(loadDefault(stored({ distance: 1, sort }), 'places')?.sort).toBe('rated')
+    }
+    expect(initialFilters('', stored({ time: 30, sort: 'liked' }), 'places').sort).toBe('rated')
   })
 
   it('returns null for bad JSON or a value that is not an object', () => {

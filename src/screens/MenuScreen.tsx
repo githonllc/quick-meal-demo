@@ -10,9 +10,10 @@ import { LoadingBar } from '../components/LoadingBar'
 import { MenuRow } from '../components/MenuRow'
 import { useToast } from '../components/Toast'
 import { back, navigate, useRoute } from '../router'
+import { useConfig } from '../state/config'
 import { parseUrl, toQuery, withQuery } from '../state/filters'
 import type { UiFilters } from '../state/filters'
-import { firstSave, loadDefault, saveDefault } from '../state/savedDefault'
+import { browserStorage, firstSave, loadDefault, saveDefault } from '../state/savedDefault'
 import './menu.css'
 
 // The answer to one request: a menu, a failure, or a missing restaurant.
@@ -20,7 +21,8 @@ type Result = { req: string; menu: MenuView | null; missing: boolean }
 
 export function MenuScreen() {
   const { params, query } = useRoute()
-  const filters = parseUrl(query.toString())
+  const { layout } = useConfig()
+  const filters = parseUrl(query.toString(), layout)
   // Distance stays: it means pickup prices (design P6).
   const key = toQuery({ ...filters, time: null, cuisine: null })
   const path = `/quick-meal/restaurants/${params.id}`
@@ -53,7 +55,7 @@ export function MenuScreen() {
   // Changing the budget here is a user choice, so it also saves the default (design P8).
   // Only the budget changes in the saved default. Time, distance and sort stay as saved.
   const applyBudget = (f: UiFilters) => {
-    const saved = loadDefault()
+    const saved = loadDefault(browserStorage(), layout)
     saveDefault({
       budget: f.budget,
       time: saved?.time ?? null,

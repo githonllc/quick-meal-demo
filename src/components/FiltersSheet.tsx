@@ -1,15 +1,12 @@
 import { useState } from 'react'
-import { DELIVERY_SORT_IDS, PICKUP_SORT_IDS, SORTS } from '../../shared/constants'
+import { SORTS } from '../../shared/constants'
+import { useConfig } from '../state/config'
 import { toSide } from '../state/filters'
 import type { UiFilters } from '../state/filters'
+import { sortIds } from '../state/sorts'
 import { BudgetSlider } from './BudgetSlider'
 import { Sheet } from './Sheet'
 import { SpeedPicker } from './StepSheet'
-
-// Each side shows the 3 sorts its cards have numbers for (design P2).
-const sorts = (ids: readonly string[]) => ids.map((id) => SORTS.find((s) => s.id === id)!)
-const DELIVERY_SORTS = sorts(DELIVERY_SORT_IDS)
-const PICKUP_SORTS = sorts(PICKUP_SORT_IDS)
 
 // Every filter sheet ends with Clear and Show results. Clear only resets the draft;
 // nothing changes on the list until the user applies.
@@ -47,6 +44,7 @@ export function FiltersSheet({
   onApply: (f: UiFilters) => void
   onClose: () => void
 }) {
+  const { layout } = useConfig()
   const [draft, setDraft] = useState(filters)
   const [pickup, setPickup] = useState(filters.distance !== null)
   const set = (patch: Partial<UiFilters>) => setDraft((d) => ({ ...d, ...patch }))
@@ -54,7 +52,7 @@ export function FiltersSheet({
   const switchSide = (p: boolean) => {
     if (p === pickup) return
     setPickup(p)
-    setDraft((d) => toSide(d, p))
+    setDraft((d) => toSide(d, p, layout))
   }
 
   return (
@@ -71,15 +69,16 @@ export function FiltersSheet({
       <div className="grp">
         <h3>Sort by</h3>
         <div className="opts three">
-          {(pickup ? PICKUP_SORTS : DELIVERY_SORTS).map((s) => (
+          {/* Each side and layout shows the 3 sorts its cards have numbers for (design P2). */}
+          {sortIds(pickup, layout).map((id) => (
             <button
-              key={s.id}
-              className={s.id === draft.sort ? 'opt on' : 'opt'}
-              aria-pressed={s.id === draft.sort}
-              data-testid={`sort-${s.id}`}
-              onClick={() => set({ sort: s.id })}
+              key={id}
+              className={id === draft.sort ? 'opt on' : 'opt'}
+              aria-pressed={id === draft.sort}
+              data-testid={`sort-${id}`}
+              onClick={() => set({ sort: id })}
             >
-              {s.label}
+              {SORTS.find((s) => s.id === id)?.label}
             </button>
           ))}
         </div>
