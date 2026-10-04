@@ -49,13 +49,13 @@ Distance in half miles and Clear in chip sheets (`dcf3ed8`, variant design versi
 Run all e2e tests against the live demo:
 
 ```sh
-BASE_URL=https://quick-meal-demo-cards.ioenv.workers.dev npm run e2e
+BASE_URL=https://quick-meal-demo.ioenv.workers.dev npm run e2e
 ```
 
 Save the screenshots below again (they are skipped in a normal run):
 
 ```sh
-SCREENSHOTS=1 BASE_URL=https://quick-meal-demo-cards.ioenv.workers.dev npx playwright test e2e/screenshots.spec.ts
+SCREENSHOTS=1 BASE_URL=https://quick-meal-demo.ioenv.workers.dev npx playwright test e2e/screenshots.spec.ts
 ```
 
 ## Screenshots

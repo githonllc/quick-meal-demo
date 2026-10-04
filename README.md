@@ -4,11 +4,22 @@ Quick Meal is a demo of a fast meal ordering app for university students. It run
 
 Concept demo for a CMU course. Not affiliated with DoorDash.
 
-Live demo: https://quick-meal-demo-cards.ioenv.workers.dev
-
-**This branch (`restaurant-cards`) is a design variant.** Result cards show restaurants with the meals that fit, instead of one meal and its all-in price. It deploys to its own Worker, `quick-meal-demo-cards`. The main design and demo live on `main`: https://quick-meal-demo.ioenv.workers.dev. Do not merge this branch into `main` without changing the Worker name in `wrangler.jsonc` back.
+Live demo: https://quick-meal-demo.ioenv.workers.dev
 
 Add it to your Home Screen to open it full screen like an app. iPhone: open it in Safari, tap Share, then Add to Home Screen. Android: open it in Chrome, tap the menu, then Add to Home screen (or Install app).
+
+## Demo settings
+
+For the research team, not for students. The gear at the top right of Quick Meal opens `/demo-settings`. There you can:
+
+- pick the card layout: Dish first (the default) or Restaurant first. A link with `?layout=meals` or `?layout=places` sets it too.
+- set the time range (default 15 to 45 min, 1 min steps) and the distance range (default 0.5 to 5 mi, 0.5 mi steps). Changing a range clears the saved filters, and old links with other values may not work.
+- turn Save filters on or off (on by default).
+- turn on the Study timer: it records the time from opening Quick Meal to the first Add to cart, per try, and copies the results as CSV.
+- add a network delay or make every request fail.
+- reset the demo state, or restore the default settings.
+
+The settings live in the browser's local storage. See D6 in the design page.
 
 ## Scripts
 
@@ -24,7 +35,7 @@ Add it to your Home Screen to open it full screen like an app. iPhone: open it i
 
 The full design page has the screens, product decisions and acceptance criteria.
 
-- [Live design page](https://quick-meal-demo-cards.ioenv.workers.dev/design): open it in a browser.
+- [Live design page](https://quick-meal-demo.ioenv.workers.dev/design): open it in a browser.
 - [docs/design.png](docs/design.png): the whole page as one image. GitHub shows it directly.
 - [docs/design.html](docs/design.html): the source. GitHub shows it as code.
 
