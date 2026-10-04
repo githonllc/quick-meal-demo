@@ -214,14 +214,18 @@ test('the Delivery slider shows the time above the track and ends at Any time', 
   const sheet = page.getByTestId('sheet-filters')
   const slider = sheet.getByTestId('time-slider')
   const val = sheet.getByTestId('time-slider-val')
-  await expect(sheet.locator('.slider-ticks span')).toHaveText(['15', '20', '30', '45', 'Any'])
+  // 31 stops are too many to label, so only the two ends have labels, like the budget slider.
+  await expect(slider.locator('xpath=following-sibling::div[1]/span')).toHaveText(['15 min', 'Any'])
   await expect(val).toHaveText('Any time')
   await setStop(slider, '30')
   await expect(val).toHaveText('Up to 30 min')
   await expect(slider).toHaveAttribute('aria-valuetext', '30 minutes')
-  // The keyboard moves one stop at a time, and End is Any.
+  // The keyboard moves one minute at a time, and End is Any.
   await slider.press('ArrowRight')
-  await expect(val).toHaveText('Up to 45 min')
+  await expect(val).toHaveText('Up to 31 min')
+  await setStop(slider, '45')
+  await slider.press('ArrowRight')
+  await expect(val).toHaveText('Any time')
   await slider.press('End')
   await expect(val).toHaveText('Any time')
   await expect(slider).toHaveAttribute('aria-valuetext', 'Any time')

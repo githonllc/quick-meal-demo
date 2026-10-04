@@ -70,7 +70,7 @@ describe('no-match scenario: budget 1500, time 15', () => {
   it('offers exactly two relax chips: budget and time', () => {
     expect(res.relax).toEqual([
       { filter: 'budget', to: 17, count: 1, label: 'Budget up to $17 · 1 result' },
-      { filter: 'time', to: 20, count: 2, label: 'Time up to 20 min · 2 results' },
+      { filter: 'time', to: 16, count: 1, label: 'Time up to 16 min · 1 result' },
     ])
   })
 })

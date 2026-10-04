@@ -41,7 +41,7 @@ describe('handleApi', () => {
     expect(body.near).toHaveLength(5)
     expect(body.relax.map((r: { label: string }) => r.label)).toEqual([
       'Budget up to $17 · 1 result',
-      'Time up to 20 min · 2 results',
+      'Time up to 16 min · 1 result',
     ])
   })
 
@@ -69,7 +69,9 @@ describe('handleApi', () => {
   it.each([
     ['budget=9', 'Invalid budget'],
     ['budget=abc', 'Invalid budget'],
-    ['time=25', 'Invalid time'],
+    ['time=14', 'Invalid time'],
+    ['time=46', 'Invalid time'],
+    ['time=20.5', 'Invalid time'],
     ['distance=0.7', 'Invalid distance'],
     ['cuisine=thai', 'Invalid cuisine'],
     ['sort=rating', 'Invalid sort'],

@@ -68,8 +68,8 @@ describe('saved default', () => {
   })
 
   it('moves time and distance to the nearest step, ties to the smaller one', () => {
-    expect(loadDefault(stored({ time: 25 }))?.time).toBe(20)
-    expect(loadDefault(stored({ time: 26 }))?.time).toBe(30)
+    expect(loadDefault(stored({ time: 25 }))?.time).toBe(25)
+    expect(loadDefault(stored({ time: 25.5 }))?.time).toBe(25)
     expect(loadDefault(stored({ time: 90 }))?.time).toBe(45)
     expect(loadDefault(stored({ time: 1 }))?.time).toBe(15)
     expect(loadDefault(stored({ distance: 2.5 }))?.distance).toBe(2)

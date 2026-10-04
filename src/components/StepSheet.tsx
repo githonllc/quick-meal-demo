@@ -74,6 +74,7 @@ export function SpeedPicker({
             )}
             say={(t) => `${t} minutes`}
             testId="time-slider"
+            ends={[`${TIME_STEPS[0]} min`, 'Any']}
             onChange={(time) => onPick({ ...filters, distance: null, time })}
           />
         </>

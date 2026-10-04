@@ -15,7 +15,7 @@ test('AC-05: no exact match shows the message, relax chips and near cards', asyn
   const chips = page.getByTestId('relax-chip')
   await expect(chips).toHaveCount(2)
   await expect(chips.nth(0)).toHaveText('Budget up to $17 · 1 result')
-  await expect(chips.nth(1)).toHaveText('Time up to 20 min · 2 results')
+  await expect(chips.nth(1)).toHaveText('Time up to 16 min · 1 result')
   const near = page.getByTestId('near-card')
   await expect(near).toHaveCount(5)
   await expect(near.first()).toContainText('Chicken Tacos (2)')

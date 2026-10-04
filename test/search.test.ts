@@ -286,10 +286,10 @@ describe('search: relax', () => {
   })
 
   it('picks the first time step that has a result', () => {
-    // Curry House eta 25: 20 min gives 0, 30 min gives 1.
+    // Curry House eta 25: 24 min gives 0, 25 min gives 1.
     const res = search(restaurants, filters({ timeMin: 15, cuisine: 'indian' }))
     expect(res.relax).toEqual([
-      { filter: 'time', to: 30, count: 1, label: 'Time up to 30 min · 1 result' },
+      { filter: 'time', to: 25, count: 1, label: 'Time up to 25 min · 1 result' },
     ])
   })
 
@@ -324,7 +324,7 @@ describe('search: relax', () => {
     const delivery = search([tacoLoco, cheap], filters({ budgetCents: 1000, timeMin: 15 }))
     expect(delivery.relax).toEqual([
       { filter: 'budget', to: 11, count: 1, label: 'Budget up to $11 · 1 result' },
-      { filter: 'time', to: 30, count: 1, label: 'Time up to 30 min · 1 result' },
+      { filter: 'time', to: 25, count: 1, label: 'Time up to 25 min · 1 result' },
     ])
     const pickup = search([tacoLoco, cheap], filters({ budgetCents: 1000, distanceMi: 0.5 }))
     expect(pickup.relax).toEqual([

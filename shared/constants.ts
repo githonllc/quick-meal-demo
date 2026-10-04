@@ -2,7 +2,8 @@ import type { SortId } from './types';
 
 export const BUDGET_MIN = 10; // dollars
 export const BUDGET_MAX = 40; // dollars; the slider's max means "any budget" (null)
-export const TIME_STEPS = [15, 20, 30, 45] as const;
+// Every minute from 15 to 45. The slider's last stop after 45 means "any time" (null).
+export const TIME_STEPS: readonly number[] = Array.from({ length: 31 }, (_, i) => 15 + i);
 export const DISTANCE_STEPS = [0.5, 1, 2, 3] as const;
 export const SERVICE_FEE_BPS = 1500; // 15%
 export const TIP_BPS = 1500; // 15%
