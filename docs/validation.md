@@ -42,6 +42,8 @@ Design text fix (`e648236`: cards show no price, so the design points to the men
 
 Time in 1-minute steps (`0202cab`, variant design version 38, Worker version `1aa02509`): 42 tests ran against the variant URL and all passed. The live API now gives "Time up to 16 min · 1 result" for $15 and 15 min, takes `time=25` and rejects `time=46`. Shots 3 (the time slider ends at "15 min" and "Any") and 4 (the new time relax chip) were saved again.
 
+Distance in half miles and Clear in chip sheets (`dcf3ed8`, variant design version 39, Worker version `f346f817`): 45 tests ran against the variant URL and all passed, including new checks for the distance slider and for Clear in the Budget and Time sheets. The live API takes `distance=4.5` and `distance=5` and rejects `distance=5.5` and `distance=2.3`. All 6 shots were taken again and came out the same, because none of them shows a chip's sheet or the distance slider.
+
 ## How to re-run
 
 Run all e2e tests against the live demo:
