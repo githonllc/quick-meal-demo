@@ -14,6 +14,7 @@ import { useConfig } from '../state/config'
 import { parseUrl, toQuery, withQuery } from '../state/filters'
 import type { UiFilters } from '../state/filters'
 import { browserStorage, firstSave, loadDefault, saveDefault } from '../state/savedDefault'
+import { markFirstOpen } from '../state/study'
 import './menu.css'
 
 // The answer to one request: a menu, a failure, or a missing restaurant.
@@ -35,6 +36,9 @@ export function MenuScreen() {
   const [budgetOpen, setBudgetOpen] = useState(false)
   const { show } = useToast()
 
+  // Opening a menu counts as the first open of a study trial, if it is the first.
+  useEffect(() => markFirstOpen(), [])
+
   // One request at a time: a new budget or sort aborts the request still in flight.
   const req = `${path}?${key}#${attempt}`
   useEffect(() => {
@@ -52,7 +56,8 @@ export function MenuScreen() {
     return () => controller.abort()
   }, [params.id, key, req])
 
-  // Changing the budget here is a user choice, so it also saves the default (design P8).
+  // Changing the budget here is a user choice, so it also saves the default (design P8),
+  // unless Save filters is off in the demo settings: then these calls load and save nothing.
   // Only the budget changes in the saved default. Time, distance and sort stay as saved.
   const applyBudget = (f: UiFilters) => {
     const saved = loadDefault(browserStorage(), layout)
@@ -180,6 +185,7 @@ export function MenuScreen() {
           restaurantName={menu.restaurant.name}
           price={priced.price}
           pickup={menu.pickup}
+          path="menu"
           onClose={() => setPriced(null)}
         />
       )}

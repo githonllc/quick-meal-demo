@@ -1,4 +1,5 @@
 import type { HomeData, MenuView, SearchResponse } from '../shared/types'
+import { loadConfig } from './state/config'
 
 export class ApiError extends Error {
   status: number
@@ -12,17 +13,36 @@ export class ApiError extends Error {
 // so a cached answer is always right. A real backend would need a short expiry here.
 const cache = new Map<string, unknown>()
 
-function request(path: string, params: URLSearchParams): { url: string; cacheable: boolean } {
+// The Network switches of the demo settings act here: a delay before every answer, cached or not,
+// and a simulated failure. The old /quick-meal?fail=1 link still fails too.
+function request(path: string, params: URLSearchParams): { url: string; cacheable: boolean; delayMs: number } {
+  const { network } = loadConfig()
   const query = new URLSearchParams(params)
-  // Lets us demo the error state with /quick-meal?fail=1
-  if (new URLSearchParams(window.location.search).get('fail') === '1') query.set('fail', '1')
+  if (network.fail || new URLSearchParams(window.location.search).get('fail') === '1') query.set('fail', '1')
   const qs = query.toString()
   // Never cache the simulated failure, so every retry really asks the server again.
-  return { url: qs ? `${path}?${qs}` : path, cacheable: query.get('fail') !== '1' }
+  return { url: qs ? `${path}?${qs}` : path, cacheable: query.get('fail') !== '1', delayMs: network.delayMs }
+}
+
+// Waits like a slow network. An abort stops the wait.
+function pause(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(signal.reason)
+    const timer = window.setTimeout(resolve, ms)
+    signal?.addEventListener(
+      'abort',
+      () => {
+        window.clearTimeout(timer)
+        reject(signal.reason)
+      },
+      { once: true },
+    )
+  })
 }
 
 async function get<T>(path: string, params: URLSearchParams, signal?: AbortSignal): Promise<T> {
-  const { url, cacheable } = request(path, params)
+  const { url, cacheable, delayMs } = request(path, params)
+  if (delayMs > 0) await pause(delayMs, signal)
   if (cacheable && cache.has(url)) return cache.get(url) as T
   const res = await fetch(url, { signal })
   if (!res.ok) {
@@ -44,8 +64,9 @@ export function searchMeals(params: URLSearchParams, signal?: AbortSignal): Prom
 
 // The answer we already have for this search, if any, so a screen can show it in its first render.
 export function cachedSearch(params: URLSearchParams): SearchResponse | undefined {
-  const { url, cacheable } = request('/api/quick-meal/search', params)
-  return cacheable ? (cache.get(url) as SearchResponse | undefined) : undefined
+  // With a simulated delay or failure there is none, so the screen shows that it is loading.
+  const { url, cacheable, delayMs } = request('/api/quick-meal/search', params)
+  return cacheable && delayMs === 0 ? (cache.get(url) as SearchResponse | undefined) : undefined
 }
 
 export function getMenu(id: string, params: URLSearchParams, signal?: AbortSignal): Promise<MenuView> {

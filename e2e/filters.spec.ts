@@ -26,23 +26,21 @@ async function expectBudget20Time30(page: Page) {
   await expect(page.getByTestId('chip-filters-badge')).toHaveText('2')
 }
 
-test('AC-03: the Filters sheet opens from the chip and the top-right icon', async ({ page }) => {
-  const openers = [page.getByTestId('chip-filters'), page.getByRole('button', { name: 'Open filters' })]
-  for (const opener of openers) {
-    await page.evaluate(() => localStorage.clear())
-    await page.goto('/quick-meal')
-    await expect(page.getByTestId('meal-card')).toHaveCount(28)
-    await opener.click()
-    // The first group is Delivery | Pickup, on Delivery, asking for time.
-    await expect(page.getByTestId('sheet-filters').locator('.grp h3').first()).toHaveText('Get it by')
-    await expect(page.getByTestId('side-delivery')).toHaveAttribute('aria-checked', 'true')
-    await expect(page.getByTestId('sheet-filters').locator('.grp-q')).toHaveText('How much time do you have?')
-    await pickBudget20Time30(page)
-    await page.getByTestId('sheet-apply').click()
-    await expect(page.getByTestId('sheet-filters')).toHaveCount(0)
-    await expectBudget20Time30(page)
-    await expect(page).toHaveURL(/\/quick-meal\?budget=20&time=30$/)
-  }
+// The Filters chip is the only way in. The top-right icon is the demo settings gear.
+test('AC-03: the Filters sheet opens from the Filters chip', async ({ page }) => {
+  await page.goto('/quick-meal')
+  await expect(page.getByTestId('meal-card')).toHaveCount(28)
+  await page.getByTestId('chip-filters').click()
+  // The first group is Delivery | Pickup, on Delivery, asking for time.
+  await expect(page.getByTestId('sheet-filters').locator('.grp h3').first()).toHaveText('Get it by')
+  await expect(page.getByTestId('side-delivery')).toHaveAttribute('aria-checked', 'true')
+  await expect(page.getByTestId('sheet-filters').locator('.grp-q')).toHaveText('How much time do you have?')
+  await pickBudget20Time30(page)
+  await page.getByTestId('sheet-apply').click()
+  await expect(page.getByTestId('sheet-filters')).toHaveCount(0)
+  await expectBudget20Time30(page)
+  await expect(page).toHaveURL(/\/quick-meal\?budget=20&time=30$/)
+  await expect(page.getByRole('button', { name: 'Open filters' })).toHaveCount(0)
 })
 
 test('AC-07: applied filters come back next visit, the cuisine tab does not', async ({ page, context, browser, baseURL }) => {

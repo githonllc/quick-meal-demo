@@ -1,9 +1,12 @@
 import { BUDGET_MAX, BUDGET_MIN, DISTANCE_STEPS, TIME_STEPS } from '../../shared/constants'
+import { loadConfig } from './config'
 import type { Layout } from './config'
 import type { UiFilters } from './filters'
 import { sortForLayout } from './sorts'
 
 // The saved default lives in local storage (design D5). Cuisine is never saved (P8).
+// With "Save filters" off in the demo settings, nothing is loaded or saved and no "Saved" toast shows.
+// Every screen goes through these functions, so that one switch covers them all.
 const KEY = 'quickMeal.filters.v1'
 const TOAST_KEY = 'quickMeal.savedToastShown'
 
@@ -11,6 +14,7 @@ const TOAST_KEY = 'quickMeal.savedToastShown'
 export interface Store {
   getItem(key: string): string | null
   setItem(key: string, value: string): void
+  removeItem?(key: string): void
 }
 
 // Some private modes throw when the page touches localStorage.
@@ -38,6 +42,7 @@ function budget(raw: unknown): number | null {
 // A saved Most liked or Top rated becomes the sort this layout shows.
 export function loadDefault(store = browserStorage(), layout: Layout = 'meals'): Partial<UiFilters> | null {
   try {
+    if (!loadConfig(store).saveFilters) return null
     const raw = store?.getItem(KEY)
     if (!raw) return null
     const v: unknown = JSON.parse(raw)
@@ -59,6 +64,7 @@ export function loadDefault(store = browserStorage(), layout: Layout = 'meals'):
 
 export function saveDefault(f: UiFilters, store = browserStorage()): void {
   try {
+    if (!loadConfig(store).saveFilters) return
     const { budget, time, sort } = f
     const distance = time === null ? f.distance : null
     store?.setItem(KEY, JSON.stringify({ budget, time, distance, sort }))
@@ -70,10 +76,20 @@ export function saveDefault(f: UiFilters, store = browserStorage()): void {
 // True only the first time filters are saved, so the "Saved" toast shows once.
 export function firstSave(store = browserStorage()): boolean {
   try {
-    if (!store || store.getItem(TOAST_KEY)) return false
+    if (!store || !loadConfig(store).saveFilters || store.getItem(TOAST_KEY)) return false
     store.setItem(TOAST_KEY, '1')
     return true
   } catch {
     return false
+  }
+}
+
+// Reset demo state: no saved filters, and the "Saved" toast shows again.
+export function forgetDefault(store = browserStorage()): void {
+  try {
+    store?.removeItem?.(KEY)
+    store?.removeItem?.(TOAST_KEY)
+  } catch {
+    // No storage: there is nothing saved to forget.
   }
 }

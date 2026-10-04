@@ -24,3 +24,9 @@ export async function setLayout(page: Page, layout: 'meals' | 'places') {
   const saved = await page.evaluate(() => localStorage.getItem('quickMeal.config.v1'))
   expect(JSON.parse(saved ?? '{}').layout).toBe(layout)
 }
+
+// Sets fields of the demo settings, e.g. { study: true } or { network: { delayMs: 500, fail: false } }.
+// Like setLayout: call it on a page of the app; the next page load uses it.
+export async function setConfig(page: Page, config: Record<string, unknown>) {
+  await page.evaluate((c) => localStorage.setItem('quickMeal.config.v1', JSON.stringify(c)), config)
+}

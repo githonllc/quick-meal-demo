@@ -9,7 +9,7 @@ const KEY = 'quickMeal.config.v1'
 // Dish cards (the main design) or restaurant cards.
 export type Layout = 'meals' | 'places'
 export const LAYOUTS: readonly Layout[] = ['meals', 'places']
-const DELAYS = [0, 500, 1500, 3000] as const
+export const DELAYS = [0, 500, 1500, 3000] as const
 
 export interface DemoConfig {
   layout: Layout

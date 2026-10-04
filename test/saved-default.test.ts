@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { initialFilters } from '../src/state/filters'
 import type { UiFilters } from '../src/state/filters'
-import { firstSave, loadDefault, saveDefault } from '../src/state/savedDefault'
+import { firstSave, forgetDefault, loadDefault, saveDefault } from '../src/state/savedDefault'
 import type { Store } from '../src/state/savedDefault'
 
 const KEY = 'quickMeal.filters.v1'
@@ -15,6 +15,9 @@ function fakeStore(init: Record<string, string> = {}): Store & { data: Record<st
     getItem: (k) => (k in data ? data[k] : null),
     setItem: (k, v) => {
       data[k] = v
+    },
+    removeItem: (k) => {
+      delete data[k]
     },
   }
 }
@@ -139,5 +142,41 @@ describe('initial filters', () => {
   it('reads only the URL when there is no saved default or no storage', () => {
     expect(initialFilters('?cuisine=sushi', fakeStore())).toEqual({ ...NONE, cuisine: 'sushi' })
     expect(initialFilters('', broken)).toEqual(NONE)
+  })
+})
+
+// "Save filters" off in the demo settings: one switch for every screen.
+describe('save filters off', () => {
+  const off = () => fakeStore({ 'quickMeal.config.v1': JSON.stringify({ saveFilters: false }) })
+  const F: UiFilters = { budget: 20, time: 30, distance: null, cuisine: null, sort: 'price' }
+
+  it('loads nothing, even when a default was saved', () => {
+    const store = off()
+    store.data[KEY] = JSON.stringify({ budget: 20, time: 30, sort: 'price' })
+    expect(loadDefault(store)).toBeNull()
+    expect(initialFilters('', store)).toEqual(NONE)
+  })
+
+  it('saves nothing and never says "first save"', () => {
+    const store = off()
+    saveDefault(F, store)
+    expect(store.data[KEY]).toBeUndefined()
+    expect(firstSave(store)).toBe(false)
+    expect(store.data['quickMeal.savedToastShown']).toBeUndefined()
+  })
+})
+
+describe('forget default', () => {
+  it('clears the saved filters and the toast flag, and keeps the config', () => {
+    const store = fakeStore({ 'quickMeal.config.v1': '{"layout":"places"}' })
+    saveDefault({ budget: 20, time: 30, distance: null, cuisine: null, sort: 'price' }, store)
+    firstSave(store)
+    forgetDefault(store)
+    expect(store.data).toEqual({ 'quickMeal.config.v1': '{"layout":"places"}' })
+    expect(firstSave(store)).toBe(true)
+  })
+
+  it('does nothing when storage throws', () => {
+    expect(() => forgetDefault(broken)).not.toThrow()
   })
 })

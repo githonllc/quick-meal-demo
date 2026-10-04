@@ -13,7 +13,9 @@ export function matchRoute(pathname: string, search: string): Route {
   const query = new URLSearchParams(search)
   const menu = MENU_PATH.exec(pathname)
   if (menu) return { path: '/quick-meal/restaurants/:id', params: { id: menu[1] }, query }
-  if (pathname.replace(/\/$/, '') === '/quick-meal') return { path: '/quick-meal', params: {}, query }
+  const plain = pathname.replace(/\/$/, '')
+  if (plain === '/quick-meal') return { path: '/quick-meal', params: {}, query }
+  if (plain === '/demo-settings') return { path: '/demo-settings', params: {}, query }
   return { path: '/', params: {}, query }
 }
 

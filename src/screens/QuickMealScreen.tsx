@@ -16,12 +16,14 @@ import { PlaceCard } from '../components/PlaceCard'
 import { Skeleton } from '../components/Skeleton'
 import { StepSheet } from '../components/StepSheet'
 import { useToast } from '../components/Toast'
-import { SlidersIcon, TopBar } from '../components/TopBar'
+import { GearIcon, TopBar } from '../components/TopBar'
 import { navigate, useRoute } from '../router'
 import { useConfig } from '../state/config'
 import { activeCount, initialFilters, parseUrl, toQuery, withQuery } from '../state/filters'
 import type { UiFilters } from '../state/filters'
 import { browserStorage, firstSave, saveDefault } from '../state/savedDefault'
+import { markFirstOpen } from '../state/study'
+import type { StudyPath } from '../state/study'
 import './quick-meal.css'
 
 // The URL holds the filters. Every change rewrites it, and the fetch follows the URL.
@@ -56,8 +58,12 @@ export function QuickMealScreen() {
   )
   // The last successful answer. It stays on screen while the next request loads.
   const [shown, setShown] = useState<SearchResponse | null>(cached)
-  // The tapped card and whether it was priced for pickup, fixed at tap time.
-  const [priced, setPriced] = useState<{ card: Meal; pickup: boolean } | null>(null)
+  // The tapped card, whether it was priced for pickup and where it was, fixed at tap time.
+  const [priced, setPriced] = useState<{ card: Meal; pickup: boolean; path: StudyPath } | null>(null)
+  const openPrice = (p: NonNullable<typeof priced>) => {
+    markFirstOpen()
+    setPriced(p)
+  }
   const [open, setOpen] = useState<SheetKind | null>(null)
   const { show } = useToast()
 
@@ -127,8 +133,8 @@ export function QuickMealScreen() {
       <TopBar
         title="Quick Meal"
         right={
-          <button className="icon-btn" aria-label="Open filters" onClick={() => onOpen('filters')}>
-            <SlidersIcon />
+          <button className="icon-btn" aria-label="Demo settings" onClick={() => navigate('/demo-settings')}>
+            <GearIcon />
           </button>
         }
       />
@@ -167,7 +173,7 @@ export function QuickMealScreen() {
                   relax={shown.relax}
                   onRelax={relaxTo}
                   onOpen={(card) => openMenu(card.restaurant.id)}
-                  onPrice={(card) => setPriced({ card, pickup })}
+                  onPrice={(card) => openPrice({ card, pickup, path: 'near' })}
                 />
               )}
 
@@ -188,7 +194,7 @@ export function QuickMealScreen() {
                         budget={filters.budget}
                         pickup={pickup}
                         onOpen={() => openMenu(card.restaurant.id)}
-                        onPrice={() => setPriced({ card, pickup })}
+                        onPrice={() => openPrice({ card, pickup, path: 'list' })}
                       />
                     ) : (
                       <PlaceCard
@@ -221,6 +227,7 @@ export function QuickMealScreen() {
           restaurantName={priced.card.restaurant.name}
           price={priced.card.price}
           pickup={priced.pickup}
+          path={priced.path}
           onClose={() => setPriced(null)}
         />
       )}

@@ -1,24 +1,36 @@
 import { formatCents, formatPercentBps } from '../../shared/format'
 import type { MenuItem, PriceBreakdown } from '../../shared/types'
+import { loadConfig } from '../state/config'
+import { endTrial, formatSeconds } from '../state/study'
+import type { StudyPath } from '../state/study'
 import { Sheet } from './Sheet'
 import { useToast } from './Toast'
 
 // Shows how the estimated all-in price adds up, line by line.
 // Pickup has no delivery fee, so it has no delivery fee line (design P4).
+// path says where the user tapped the price (study timer): the list, a near card or the menu.
 export function BreakdownSheet({
   item,
   restaurantName,
   price,
   pickup,
+  path,
   onClose,
 }: {
   item: MenuItem
   restaurantName: string
   price: PriceBreakdown
   pickup: boolean
+  path: StudyPath
   onClose: () => void
 }) {
   const { show } = useToast()
+  // The first tap ends the study trial. Without a trial it is still only a demo button.
+  const addToCart = () => {
+    const tapped = { path, restaurant: restaurantName, item: item.name, totalCents: price.totalCents }
+    const result = loadConfig().study ? endTrial(tapped) : null
+    show(result ? `Time to first Add to cart: ${formatSeconds(result.ms)}` : 'Cart is not part of this demo.')
+  }
   const rows = [
     { id: 'item', label: item.name, cents: price.itemCents },
     { id: 'delivery', label: 'Delivery fee', cents: price.deliveryFeeCents },
@@ -48,7 +60,7 @@ export function BreakdownSheet({
         </div>
       </div>
       <p className="bd-note">Tip is 15% by default. The final price is shown at checkout.</p>
-      <button className="sheet-go" onClick={() => show('Cart is not part of this demo.')}>
+      <button className="sheet-go" onClick={addToCart}>
         Add to cart · Est. {formatCents(price.totalCents)}
       </button>
     </Sheet>
