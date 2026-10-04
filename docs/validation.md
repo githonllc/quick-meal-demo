@@ -42,7 +42,7 @@ Time in 1-minute steps (`0202cab`, variant design version 38, Worker version `1a
 
 Distance in half miles and Clear in chip sheets (`dcf3ed8`, variant design version 39, Worker version `f346f817`): 45 tests ran against the variant URL and all passed, including new checks for the distance slider and for Clear in the Budget and Time sheets. The live API takes `distance=4.5` and `distance=5` and rejects `distance=5.5` and `distance=2.3`. All 6 shots were taken again and came out the same, because none of them shows a chip's sheet or the distance slider.
 
-Demo settings (`186b004`, design version 40, one app with both layouts): on the preview Worker `quick-meal-demo-next` (version `1e8e3e29`), 70 tests ran and all passed. The live API took a custom range (`time=25&trange=10,60,5` 200, `time=22&trange=10,60,5` 400, menu with `drange=1,10,1` 200) and both `sort=liked` and `sort=rated`. Shots 2, 3, 4 and 6 were saved again (dish cards and the gear).
+Demo settings (`186b004`, design version 40, one app with both layouts): on the preview Worker `quick-meal-demo-next` (version `1e8e3e29`), 70 tests ran and all passed. The live API took a custom range (`time=25&trange=10,60,5` 200, `time=22&trange=10,60,5` 400, menu with `drange=1,10,1` 200) and both `sort=liked` and `sort=rated`. Shots 2, 3, 4 and 6 were saved again (dish cards and the gear). Then the same commit went live on Worker `quick-meal-demo` (version `3c92abc1`). The first full run, right after the deploy, had 2 failures that came from the old version still being served (the old 4-stop slider and no settings page); a minute later the live page loaded the new build (`index-DuoqafBw.js`) and the full suite passed 70 of 70.
 
 ## How to re-run
 
