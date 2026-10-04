@@ -46,6 +46,8 @@ Demo settings (`186b004`, design version 40, one app with both layouts): on the 
 
 Design version 41 (`14e0b3d`: restaurant cards by default, Layout as radio rows, sliders icon for Demo settings): live on Worker `quick-meal-demo` (version `13bab2c5`). The live page loaded the new build (`index-r1FImV5n.js`) before the run; 70 tests ran and all passed. Shots 2, 3, 4 and 6 were saved again. The preview Worker `quick-meal-demo-next` was then deleted.
 
+Range boxes (`b193b72`: Time range and Distance range are typed From and To boxes with Apply, not long dropdowns): live on Worker `quick-meal-demo` (version `73c86575`); the live page loaded the new build (`index-CNDGR0mU.js`), and 72 tests ran and all passed.
+
 ## How to re-run
 
 Run all e2e tests against the live demo:
