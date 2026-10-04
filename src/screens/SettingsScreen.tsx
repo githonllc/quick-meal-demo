@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { formatCents, formatMiles, pluralize } from '../../shared/format'
-import { DEFAULT_RANGES, isValidRange, rangeParam, stepsOf } from '../../shared/ranges'
-import type { Range, RangeKind } from '../../shared/ranges'
+import { DEFAULT_RANGES, draftRange, rangeError, rangeLimits, rangeParam } from '../../shared/ranges'
+import type { Range, RangeDraft, RangeKind } from '../../shared/ranges'
 import { useToast } from '../components/Toast'
 import { TopBar } from '../components/TopBar'
 import { DELAYS, resetConfig, saveConfig, useConfig } from '../state/config'
@@ -32,41 +32,78 @@ function Toggle({ label, on, onChange }: { label: string; on: boolean; onChange:
   )
 }
 
-// The choices of the range selects. Each select only offers values that make a valid range
-// with the other two (shared/ranges.ts), so every pick is valid.
-const RANGE_CHOICES: Record<RangeKind, { values: number[]; steps: number[]; show: (v: number) => string }> = {
-  time: { values: stepsOf({ min: 5, max: 90, step: 1 }), steps: [1, 5, 10, 15], show: (v) => `${v} min` },
-  distance: { values: stepsOf({ min: 0.5, max: 10, step: 0.5 }), steps: [0.5, 1], show: formatMiles },
-}
+// The text of the boxes for a saved range.
+const toDraft = (r: Range): RangeDraft => ({ min: String(r.min), max: String(r.max), step: String(r.step) })
 
-function RangeSelects({ kind, range, onChange }: { kind: RangeKind; range: Range; onChange: (r: Range) => void }) {
-  const { values, steps, show } = RANGE_CHOICES[kind]
-  const fields = [
-    { field: 'min', label: 'From', options: values },
-    { field: 'max', label: 'To', options: values },
-    { field: 'step', label: 'Step', options: steps },
-  ] as const
+// From and To are typed in, Step is picked. Nothing is saved until Apply (or Enter), and only a
+// valid range that differs from the saved one can be applied. An invalid one says why.
+function RangeInputs({ kind, range, onApply }: { kind: RangeKind; range: Range; onApply: (r: Range) => void }) {
+  const { low, high, grid, steps } = rangeLimits(kind)
+  const saved = rangeParam(range)
+  const [draft, setDraft] = useState(() => toDraft(range))
+  // A new saved range (Apply, Restore default settings) resets the boxes.
+  const [seen, setSeen] = useState(saved)
+  if (seen !== saved) {
+    setSeen(saved)
+    setDraft(toDraft(range))
+  }
+  const error = rangeError(kind, draft)
+  const next = draftRange(draft)
+  const canApply = error === null && rangeParam(next) !== saved
+  const errorId = `${kind}-error`
+  const show = (v: number) => (kind === 'time' ? `${v} min` : formatMiles(v))
+  const unit = kind === 'time' ? 'min' : 'mi'
+  const box = (field: 'min' | 'max', label: string, testId: string) => (
+    <label>
+      <span>{label}</span>
+      <input
+        type="number"
+        inputMode="decimal"
+        min={low}
+        max={high}
+        step={grid}
+        value={draft[field]}
+        aria-invalid={error !== null}
+        aria-describedby={error ? errorId : undefined}
+        data-testid={`${kind}-${testId}`}
+        onChange={(e) => setDraft({ ...draft, [field]: e.target.value })}
+      />
+    </label>
+  )
   return (
-    <div className="set-range">
-      {fields.map(({ field, label, options }) => (
-        <label key={field}>
-          <span>{label}</span>
+    <form
+      className="set-range"
+      noValidate
+      onSubmit={(e) => {
+        e.preventDefault()
+        if (canApply) onApply(next)
+      }}
+    >
+      <div className="set-range-row">
+        {box('min', `From (${unit})`, 'from')}
+        {box('max', `To (${unit})`, 'to')}
+        <label>
+          <span>Step</span>
           <select
-            value={range[field]}
-            data-testid={`${kind}-${field}`}
-            onChange={(e) => onChange({ ...range, [field]: Number(e.target.value) })}
+            value={draft.step}
+            data-testid={`${kind}-step`}
+            onChange={(e) => setDraft({ ...draft, step: e.target.value })}
           >
-            {options
-              .filter((v) => isValidRange(kind, { ...range, [field]: v }))
-              .map((v) => (
-                <option key={v} value={v}>
-                  {show(v)}
-                </option>
-              ))}
+            {steps.map((v) => (
+              <option key={v} value={String(v)}>
+                {show(v)}
+              </option>
+            ))}
           </select>
         </label>
-      ))}
-    </div>
+      </div>
+      <p className="set-range-error" id={errorId} role="status" data-testid={`${kind}-error`}>
+        {error}
+      </p>
+      <button type="submit" className="opt set-wide" disabled={!canApply} data-testid={`${kind}-apply`}>
+        Apply
+      </button>
+    </form>
   )
 }
 
@@ -121,9 +158,12 @@ export function SettingsScreen() {
     forgetDefault()
   }
 
+  // Bumped by Restore default settings, so the range boxes also drop typed text that was never applied.
+  const [restored, setRestored] = useState(0)
   const restoreDefaults = () => {
     if (!sameRanges(config)) forgetDefault()
     resetConfig()
+    setRestored((n) => n + 1)
     show('Default settings restored.')
   }
 
@@ -156,11 +196,11 @@ export function SettingsScreen() {
       </Group>
 
       <Group title="Time range" help="The stops of the Delivery time slider.">
-        <RangeSelects kind="time" range={config.time} onChange={(r) => setRange('time', r)} />
+        <RangeInputs key={`time-${restored}`} kind="time" range={config.time} onApply={(r) => setRange('time', r)} />
       </Group>
 
       <Group title="Distance range" help="The stops of the Pickup distance slider.">
-        <RangeSelects kind="distance" range={config.distance} onChange={(r) => setRange('distance', r)} />
+        <RangeInputs key={`distance-${restored}`} kind="distance" range={config.distance} onApply={(r) => setRange('distance', r)} />
         <p className="grp-help" data-testid="range-note">
           Changing a range clears the saved filters.
         </p>

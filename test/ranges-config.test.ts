@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_RANGES, isValidRange, stepsOf } from '../shared/ranges'
+import { DEFAULT_RANGES, draftRange, isValidRange, rangeError, stepsOf } from '../shared/ranges'
+import type { RangeKind } from '../shared/ranges'
 import { DEFAULT_CONFIG, applyLayoutParam, loadConfig, parseConfig, resetConfig, saveConfig } from '../src/state/config'
 import type { Store } from '../src/state/savedDefault'
 import { sortForLayout, sortIds } from '../src/state/sorts'
@@ -75,6 +76,55 @@ describe('ranges', () => {
     ['distance', { min: 0.5, max: Infinity, step: 0.5 }, 'not finite'],
   ] as const)('rejects a %s range with %s (%s)', (kind, r, _why) => {
     expect(isValidRange(kind, r)).toBe(false)
+  })
+})
+
+describe('range errors', () => {
+  const draft = (min: string, max: string, step: string) => ({ min, max, step })
+
+  it.each([
+    ['time', draft('', '45', '1'), 'From must be 5 to 90 min'],
+    ['time', draft('abc', '45', '1'), 'From must be 5 to 90 min'],
+    ['time', draft('4', '45', '1'), 'From must be 5 to 90 min'],
+    ['time', draft('15', '91', '1'), 'To must be 5 to 90 min'],
+    ['time', draft('15.5', '45', '1'), 'Use whole minutes, like 20'],
+    ['time', draft('60', '45', '1'), 'To must be more than From'],
+    ['time', draft('30', '30', '1'), 'To must be more than From'],
+    ['time', draft('15', '40', '10'), 'To − From must be a whole number of steps'],
+    ['time', draft('15', '45', '2'), 'Pick a step from the list'],
+    ['distance', draft('0.3', '5', '0.5'), 'From must be 0.5 to 10 mi'],
+    ['distance', draft('1', '10.5', '0.5'), 'To must be 0.5 to 10 mi'],
+    ['distance', draft('1.3', '5', '0.5'), 'Use half miles, like 1.5'],
+    ['distance', draft('1', '4.25', '0.5'), 'Use half miles, like 1.5'],
+    ['distance', draft('5', '1', '0.5'), 'To must be more than From'],
+    ['distance', draft('0.5', '5', '1'), 'To − From must be a whole number of steps'],
+  ] as const)('a %s draft %o says: %s', (kind, d, message) => {
+    expect(rangeError(kind, d)).toBe(message)
+  })
+
+  it('says nothing for a valid draft, and reads a blank box as no number', () => {
+    expect(rangeError('time', draft('10', '60', '5'))).toBeNull()
+    expect(rangeError('distance', draft(' 1 ', '10', '1'))).toBeNull()
+    expect(draftRange(draft('', '45', '1')).min).toBeNaN()
+  })
+
+  // Every cell of a grid of From, To and Step: no message exactly when isValidRange is true.
+  it.each(['time', 'distance'] as RangeKind[])('agrees with isValidRange for every %s draft on a grid', (kind) => {
+    const values =
+      kind === 'time'
+        ? [0, 4, 4.5, 5, 6, 7.5, 10, 15, 20, 25, 45, 60, 89, 90, 91, 100]
+        : Array.from({ length: 112 }, (_, i) => i / 10)
+    const steps = kind === 'time' ? [0, 1, 2, 5, 10, 15, 20] : [0, 0.25, 0.5, 1, 2]
+    let valid = 0
+    for (const min of values)
+      for (const max of values)
+        for (const step of steps) {
+          const r = { min, max, step }
+          const ok = isValidRange(kind, r)
+          if (ok) valid++
+          expect(rangeError(kind, draft(String(min), String(max), String(step))) === null, `${kind} ${min} ${max} ${step}`).toBe(ok)
+        }
+    expect(valid).toBeGreaterThan(10)
   })
 })
 

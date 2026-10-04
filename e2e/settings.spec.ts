@@ -112,13 +112,17 @@ test('a time range of 10 to 60 min by 5: slider, URL, menu and relax chip use it
   await page.evaluate((k) => localStorage.setItem(k, JSON.stringify({ budget: 15, time: 17 })), FILTERS)
   await page.goto('/demo-settings')
   await expect(page.getByTestId('range-note')).toHaveText('Changing a range clears the saved filters.')
+  await expect(page.getByTestId('time-step').locator('option')).toHaveText(['1 min', '5 min', '10 min', '15 min'])
+  await expect(page.getByTestId('time-apply')).toBeDisabled()
+  await page.getByTestId('time-from').fill('10')
+  await page.getByTestId('time-to').fill('60')
   await page.getByTestId('time-step').selectOption('5')
-  await page.getByTestId('time-min').selectOption('10')
-  await page.getByTestId('time-max').selectOption('60')
+  // Nothing is saved until Apply.
+  expect(await local(page, CONFIG)).toBeNull()
+  await page.getByTestId('time-apply').click()
   expect(JSON.parse((await local(page, CONFIG)) ?? '{}').time).toEqual({ min: 10, max: 60, step: 5 })
   expect(await local(page, FILTERS)).toBeNull()
-  // Only steps that fit: 50 min is not a multiple of 15.
-  await expect(page.getByTestId('time-step').locator('option')).toHaveText(['1 min', '5 min', '10 min'])
+  await expect(page.getByTestId('time-apply')).toBeDisabled()
 
   await page.goto('/quick-meal')
   await waitForResults(page)
@@ -146,9 +150,11 @@ test('a time range of 10 to 60 min by 5: slider, URL, menu and relax chip use it
 
 test('a distance range of 1 to 10 mi by 1: pickup at 7 mi opens a menu with pickup prices', async ({ page }) => {
   await page.goto('/demo-settings')
-  await page.getByTestId('distance-min').selectOption('1')
-  await page.getByTestId('distance-max').selectOption('10')
+  await page.getByTestId('distance-from').fill('1')
+  await page.getByTestId('distance-to').fill('10')
   await page.getByTestId('distance-step').selectOption('1')
+  // Enter in a box applies.
+  await page.getByTestId('distance-to').press('Enter')
   expect(JSON.parse((await local(page, CONFIG)) ?? '{}').distance).toEqual({ min: 1, max: 10, step: 1 })
 
   await page.goto('/quick-meal')
@@ -169,6 +175,31 @@ test('a distance range of 1 to 10 mi by 1: pickup at 7 mi opens a menu with pick
   expect(res.status()).toBe(200)
   expect(new URL(res.url()).searchParams.get('drange')).toBe('1,10,1')
   expect(((await res.json()) as { pickup: boolean }).pickup).toBe(true)
+})
+
+test('an invalid range says why and cannot be applied', async ({ page }) => {
+  await page.goto('/demo-settings')
+  const from = page.getByTestId('time-from')
+  await expect(page.getByTestId('time-error')).toHaveText('')
+  await expect(from).toHaveAttribute('aria-invalid', 'false')
+  await from.fill('60')
+  await expect(page.getByTestId('time-error')).toHaveText('To must be more than From')
+  await expect(page.getByTestId('time-apply')).toBeDisabled()
+  await expect(from).toHaveAttribute('aria-invalid', 'true')
+  await expect(from).toHaveAttribute('aria-describedby', 'time-error')
+  // Enter does not apply an invalid range.
+  await from.press('Enter')
+  expect(await local(page, CONFIG)).toBeNull()
+
+  await page.getByTestId('distance-from').fill('1.3')
+  await expect(page.getByTestId('distance-error')).toHaveText('Use half miles, like 1.5')
+  await expect(page.getByTestId('distance-apply')).toBeDisabled()
+  await page.getByTestId('distance-from').fill('1.5')
+  await expect(page.getByTestId('distance-error')).toHaveText('')
+  await expect(page.getByTestId('distance-apply')).toBeEnabled()
+
+  // No sideways scroll on a 390 px phone.
+  expect(await page.evaluate<number>('document.documentElement.scrollWidth')).toBeLessThanOrEqual(390)
 })
 
 test('the start-up URL is cleaned: an off-step time, a sort of the other layout, a layout param', async ({ page }) => {
@@ -198,13 +229,18 @@ test('Restore default settings sets every switch back', async ({ page }) => {
   })
   await page.goto('/demo-settings')
   await expect(page.getByRole('switch', { name: 'Study timer' })).toHaveAttribute('aria-checked', 'true')
+  await expect(page.getByTestId('time-from')).toHaveValue('10')
+  // A typed range that was not applied goes back too.
+  await page.getByTestId('time-from').fill('20')
   await page.getByRole('button', { name: 'Restore default settings' }).click()
   await expect(page.getByTestId('layout-places')).toBeChecked()
   await expect(page.getByRole('switch', { name: 'Save filters' })).toHaveAttribute('aria-checked', 'true')
   await expect(page.getByRole('switch', { name: 'Study timer' })).toHaveAttribute('aria-checked', 'false')
   await expect(page.getByRole('switch', { name: 'Fail every request' })).toHaveAttribute('aria-checked', 'false')
   await expect(page.getByTestId('delay-0')).toHaveAttribute('aria-checked', 'true')
-  await expect(page.getByTestId('time-min')).toHaveValue('15')
+  await expect(page.getByTestId('time-from')).toHaveValue('15')
+  await expect(page.getByTestId('time-to')).toHaveValue('45')
+  await expect(page.getByTestId('distance-from')).toHaveValue('0.5')
   await expect(page.getByTestId('distance-step')).toHaveValue('0.5')
   expect(JSON.parse((await local(page, CONFIG)) ?? '{}')).toMatchObject({
     layout: 'places',
@@ -396,4 +432,17 @@ test('network fail: every request fails until it is turned off', async ({ page }
   await page.getByTestId('retry').click()
   await waitForResults(page)
   await expect(page.getByTestId('meal-card')).toHaveCount(28)
+})
+
+test('Restore default settings clears typed ranges even when the saved ranges are the defaults', async ({ page }) => {
+  await page.goto('/demo-settings')
+  await page.getByTestId('time-from').fill('60')
+  await page.getByTestId('distance-to').fill('1.3')
+  await expect(page.getByTestId('time-error')).toBeVisible()
+  await page.getByRole('button', { name: 'Restore default settings' }).click()
+  await expect(page.getByTestId('time-from')).toHaveValue('15')
+  await expect(page.getByTestId('distance-to')).toHaveValue('5')
+  // The error line is a live region that stays in the page; it is empty when the range is valid.
+  await expect(page.getByTestId('time-error')).toHaveText('')
+  await expect(page.getByTestId('distance-error')).toHaveText('')
 })

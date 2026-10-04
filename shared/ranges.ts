@@ -43,6 +43,46 @@ export function isValidRange(kind: RangeKind, r: unknown): r is Range {
   return lo % grid === 0 && hi % grid === 0 && (hi - lo) % st === 0
 }
 
+// What the settings page needs to edit a range: the allowed span, the grid and the steps, in miles or minutes.
+export function rangeLimits(kind: RangeKind): { low: number; high: number; grid: number; steps: number[] } {
+  const { scale, grid, low, high, steps } = RULES[kind]
+  return { low: low / scale, high: high / scale, grid: grid / scale, steps: steps.map((s) => s / scale) }
+}
+
+// The range typed on the settings page, as the text of each box.
+export interface RangeDraft {
+  min: string
+  max: string
+  step: string
+}
+
+// A draft as numbers. A box that is not a plain number gives NaN (Number('') would give 0).
+export function draftRange(d: RangeDraft): Range {
+  const num = (s: string) => (/^\d+(\.\d+)?$/.test(s.trim()) ? Number(s) : NaN)
+  return { min: num(d.min), max: num(d.max), step: num(d.step) }
+}
+
+// Why a draft is not a valid range, or null when it is. Null exactly when isValidRange is true.
+export function rangeError(kind: RangeKind, d: RangeDraft): string | null {
+  const { scale, grid, low, high, steps } = RULES[kind]
+  const unit = kind === 'time' ? 'min' : 'mi'
+  const r = draftRange(d)
+  const ends = [
+    { name: 'From', v: r.min },
+    { name: 'To', v: r.max },
+  ]
+  for (const { name, v } of ends)
+    if (!(v >= low / scale && v <= high / scale)) return `${name} must be ${low / scale} to ${high / scale} ${unit}`
+  for (const { v } of ends) {
+    const n = units(v, scale)
+    if (n === null || n % grid !== 0) return kind === 'time' ? 'Use whole minutes, like 20' : 'Use half miles, like 1.5'
+  }
+  const st = units(r.step, scale)
+  if (st === null || !steps.includes(st)) return 'Pick a step from the list'
+  if (r.min >= r.max) return 'To must be more than From'
+  return isValidRange(kind, r) ? null : 'To − From must be a whole number of steps'
+}
+
 // Every stop from min to max, rounded to 2 decimals so 0.5 steps stay exact.
 export function stepsOf(r: Range): number[] {
   const count = Math.round((r.max - r.min) / r.step)

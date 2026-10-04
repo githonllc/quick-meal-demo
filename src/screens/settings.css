@@ -110,10 +110,14 @@
   font-size: 13px;
 }
 
-/* Time and distance ranges: From, To and Step side by side. */
+/* Time and distance ranges: From, To and Step side by side, the reason and Apply under them. */
 .set-range {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.set-range-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 .set-range label {
@@ -122,7 +126,10 @@
   color: var(--muted);
   font-size: 13px;
 }
+.set-range input,
 .set-range select {
+  width: 100%;
+  min-width: 0;
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -130,4 +137,16 @@
   color: inherit;
   font: inherit;
   font-size: 15px;
+}
+.set-range input[aria-invalid='true'] {
+  border-color: var(--warn);
+}
+.set-range-error {
+  margin: 0;
+  color: var(--warn);
+  font-size: 13px;
+}
+.set-range .opt:disabled {
+  color: var(--muted);
+  cursor: default;
 }
