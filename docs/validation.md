@@ -40,6 +40,8 @@ Variant: restaurant cards (`7214fb9`, Worker `quick-meal-demo-cards`): 42 tests 
 
 Design text fix (`e648236`: cards show no price, so the design points to the menu for prices): 42 tests ran against the variant URL and all passed. All 6 shots were taken again and came out the same, so they still match the variant.
 
+Time in 1-minute steps (`0202cab`, variant design version 38, Worker version `1aa02509`): 42 tests ran against the variant URL and all passed. The live API now gives "Time up to 16 min · 1 result" for $15 and 15 min, takes `time=25` and rejects `time=46`. Shots 3 (the time slider ends at "15 min" and "Any") and 4 (the new time relax chip) were saved again.
+
 ## How to re-run
 
 Run all e2e tests against the live demo:
