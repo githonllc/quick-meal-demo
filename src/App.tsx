@@ -12,7 +12,7 @@ import { cancelTrial, startTrial } from './state/study'
 
 function Screen() {
   const { path } = useRoute()
-  const { study, layout } = useConfig()
+  const { study, layout, time, distance } = useConfig()
   const prevPath = useRef<string | null>(null)
 
   // Study timer: opening Quick Meal starts a trial, a menu keeps it, Home or the settings cancel it.
@@ -21,9 +21,9 @@ function Screen() {
   useEffect(() => {
     const fromMenu = prevPath.current === '/quick-meal/restaurants/:id'
     prevPath.current = path
-    if (study && path === '/quick-meal' && !fromMenu) startTrial(layout, toQuery(parseUrl(window.location.search, layout)))
+    if (study && path === '/quick-meal' && !fromMenu) startTrial(layout, toQuery(parseUrl(window.location.search, layout, { time, distance })))
     else if (!study || path === '/' || path === '/demo-settings') cancelTrial()
-  }, [path, study, layout])
+  }, [path, study, layout, time, distance])
 
   if (path === '/quick-meal') return <QuickMealScreen />
   if (path === '/quick-meal/restaurants/:id') return <MenuScreen />

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
-import { setConfig, waitForResults } from './helpers'
+import { setConfig, setStop, waitForResults } from './helpers'
 
 const CONFIG = 'quickMeal.config.v1'
 const FILTERS = 'quickMeal.filters.v1'
@@ -29,7 +29,7 @@ test('the gear opens the demo settings, and Back returns to the same list', asyn
   await page.getByRole('button', { name: 'Demo settings' }).click()
   await expect(page).toHaveURL(/\/demo-settings$/)
   await expect(page.getByTestId('settings-banner')).toHaveText('For the research team. Not part of the student app.')
-  for (const name of ['Layout', 'Save filters', 'Study timer', 'Network', 'Reset demo state', 'Restore default settings'])
+  for (const name of ['Layout', 'Time range', 'Distance range', 'Save filters', 'Study timer', 'Network', 'Reset demo state', 'Restore default settings'])
     await expect(page.getByRole('heading', { name, exact: true })).toBeVisible()
   await page.getByLabel('Back').click()
   await expect(page).toHaveURL(/\/quick-meal\?budget=20&time=30$/)
@@ -98,8 +98,79 @@ test('Reset demo state clears saved filters and results, and keeps the settings'
   await expect(page.getByTestId('layout-places')).toHaveAttribute('aria-checked', 'true')
 })
 
+test('a time range of 10 to 60 min by 5: slider, URL, menu and relax chip use its steps', async ({ page }) => {
+  // A default saved before the change: a new range clears it.
+  await page.evaluate((k) => localStorage.setItem(k, JSON.stringify({ budget: 15, time: 17 })), FILTERS)
+  await page.goto('/demo-settings')
+  await expect(page.getByTestId('range-note')).toHaveText('Changing a range clears the saved filters.')
+  await page.getByTestId('time-step').selectOption('5')
+  await page.getByTestId('time-min').selectOption('10')
+  await page.getByTestId('time-max').selectOption('60')
+  expect(JSON.parse((await local(page, CONFIG)) ?? '{}').time).toEqual({ min: 10, max: 60, step: 5 })
+  expect(await local(page, FILTERS)).toBeNull()
+  // Only steps that fit: 50 min is not a multiple of 15.
+  await expect(page.getByTestId('time-step').locator('option')).toHaveText(['1 min', '5 min', '10 min'])
+
+  await page.goto('/quick-meal')
+  await waitForResults(page)
+  await page.getByTestId('chip-time').click()
+  const sheet = page.getByTestId('sheet-time')
+  await expect(sheet.locator('.slider-ends span')).toHaveText(['10 min', 'Any'])
+  await setStop(sheet.getByTestId('time-slider'), '25')
+  await expect(sheet.getByTestId('time-slider-val')).toHaveText('Up to 25 min')
+  await sheet.getByTestId('sheet-apply').click()
+  await expect(page).toHaveURL(/\/quick-meal\?time=25$/)
+  await waitForResults(page)
+  await expect(page.getByTestId('chip-time')).toHaveText('25 min ▾')
+
+  // The menu request carries the range and loads.
+  const menu = page.waitForResponse((r) => r.url().includes('/api/quick-meal/restaurants/'))
+  await page.getByTestId('meal-card').first().click()
+  expect((await menu).status()).toBe(200)
+  await waitForResults(page, 'menu-results')
+  await expect(page.getByTestId('retry')).toHaveCount(0)
+
+  // The relax chip moves by 5 min: 20, not 16.
+  await page.goto('/quick-meal?budget=15&time=15')
+  await expect(page.getByTestId('relax-chip').nth(1)).toHaveText('Time up to 20 min · 2 results')
+})
+
+test('a distance range of 1 to 10 mi by 1: pickup at 7 mi opens a menu with pickup prices', async ({ page }) => {
+  await page.goto('/demo-settings')
+  await page.getByTestId('distance-min').selectOption('1')
+  await page.getByTestId('distance-max').selectOption('10')
+  await page.getByTestId('distance-step').selectOption('1')
+  expect(JSON.parse((await local(page, CONFIG)) ?? '{}').distance).toEqual({ min: 1, max: 10, step: 1 })
+
+  await page.goto('/quick-meal')
+  await waitForResults(page)
+  await page.getByTestId('chip-time').click()
+  const sheet = page.getByTestId('sheet-time')
+  await sheet.getByTestId('side-pickup').click()
+  await expect(sheet.locator('.slider-ends span')).toHaveText(['1 mi', 'Any'])
+  await setStop(sheet.getByTestId('distance-slider'), '7')
+  await sheet.getByTestId('sheet-apply').click()
+  await expect(page).toHaveURL(/\/quick-meal\?distance=7$/)
+  await waitForResults(page)
+  await expect(page.getByTestId('chip-time')).toHaveText('Pickup · 7 mi ▾')
+
+  const menu = page.waitForResponse((r) => r.url().includes('/api/quick-meal/restaurants/'))
+  await page.getByTestId('meal-card').first().click()
+  const res = await menu
+  expect(res.status()).toBe(200)
+  expect(new URL(res.url()).searchParams.get('drange')).toBe('1,10,1')
+  expect(((await res.json()) as { pickup: boolean }).pickup).toBe(true)
+})
+
 test('Restore default settings sets every switch back', async ({ page }) => {
-  await setConfig(page, { layout: 'places', saveFilters: false, study: true, network: { delayMs: 500, fail: true } })
+  await setConfig(page, {
+    layout: 'places',
+    time: { min: 10, max: 60, step: 5 },
+    distance: { min: 1, max: 10, step: 1 },
+    saveFilters: false,
+    study: true,
+    network: { delayMs: 500, fail: true },
+  })
   await page.goto('/demo-settings')
   await expect(page.getByRole('switch', { name: 'Study timer' })).toHaveAttribute('aria-checked', 'true')
   await page.getByRole('button', { name: 'Restore default settings' }).click()
@@ -108,7 +179,14 @@ test('Restore default settings sets every switch back', async ({ page }) => {
   await expect(page.getByRole('switch', { name: 'Study timer' })).toHaveAttribute('aria-checked', 'false')
   await expect(page.getByRole('switch', { name: 'Fail every request' })).toHaveAttribute('aria-checked', 'false')
   await expect(page.getByTestId('delay-0')).toHaveAttribute('aria-checked', 'true')
-  expect(JSON.parse((await local(page, CONFIG)) ?? '{}')).toMatchObject({ layout: 'meals', study: false })
+  await expect(page.getByTestId('time-min')).toHaveValue('15')
+  await expect(page.getByTestId('distance-step')).toHaveValue('0.5')
+  expect(JSON.parse((await local(page, CONFIG)) ?? '{}')).toMatchObject({
+    layout: 'meals',
+    study: false,
+    time: { min: 15, max: 45, step: 1 },
+    distance: { min: 0.5, max: 5, step: 0.5 },
+  })
 })
 
 test('study off: Add to cart records nothing', async ({ page }) => {

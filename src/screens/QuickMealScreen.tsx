@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { SORTS } from '../../shared/constants'
+import { rangeParam } from '../../shared/ranges'
 import { pluralize } from '../../shared/format'
 import type { DistanceStep, MealCard as Meal, Relax, SearchResponse, TimeStep } from '../../shared/types'
 import { cachedSearch, searchMeals } from '../api'
@@ -43,10 +44,13 @@ function countLine(res: SearchResponse, f: UiFilters): string {
 
 export function QuickMealScreen() {
   const { query } = useRoute()
-  const { layout } = useConfig()
+  const { layout, time, distance } = useConfig()
   // The sort follows the layout, so a sort=liked link shows Top rated on restaurant cards.
-  const filters = parseUrl(query.toString(), layout)
+  // Time and distance are stops of the ranges in the demo settings.
+  const filters = parseUrl(query.toString(), layout, { time, distance })
   const key = toQuery(filters)
+  // The ranges go with every request (src/api.ts), so a new range fetches again.
+  const ranges = `${rangeParam(time)}|${rangeParam(distance)}`
 
   const [attempt, setAttempt] = useState(0)
   // Going back from a menu mounts this screen again. If the answer for this URL is cached,
@@ -54,7 +58,7 @@ export function QuickMealScreen() {
   const [cached] = useState(() => cachedSearch(new URLSearchParams(key)) ?? null)
   // The answer to one request. data is null when the request failed.
   const [result, setResult] = useState<{ req: string; data: SearchResponse | null } | null>(
-    cached && { req: `${key}#0`, data: cached },
+    cached && { req: `${key}#${ranges}#0`, data: cached },
   )
   // The last successful answer. It stays on screen while the next request loads.
   const [shown, setShown] = useState<SearchResponse | null>(cached)
@@ -70,12 +74,12 @@ export function QuickMealScreen() {
   // Only rewrites the URL when the start filters differ from it (#9: saved default).
   useEffect(() => {
     const start = initialFilters(window.location.search, browserStorage(), layout)
-    if (toQuery(start) !== toQuery(parseUrl(window.location.search, layout))) setFilters(start)
-    // It runs again after a layout change, with that layout's sorts.
-  }, [layout])
+    if (toQuery(start) !== toQuery(parseUrl(window.location.search, layout, { time, distance }))) setFilters(start)
+    // It runs again after a layout or range change, with that layout's sorts and those steps.
+  }, [layout, time, distance])
 
   // One request at a time: a new filter aborts the request still in flight.
-  const req = `${key}#${attempt}`
+  const req = `${key}#${ranges}#${attempt}`
   useEffect(() => {
     const controller = new AbortController()
     searchMeals(new URLSearchParams(key), controller.signal)

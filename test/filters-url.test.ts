@@ -63,6 +63,17 @@ describe('filters in the URL', () => {
     expect(parseUrl('?%%%')).toEqual(NONE)
   })
 
+  it('reads time and distance as stops of the ranges it is given', () => {
+    const ranges = { time: { min: 10, max: 60, step: 5 }, distance: { min: 1, max: 10, step: 1 } }
+    expect(parseUrl('?time=50', 'meals', ranges).time).toBe(50)
+    expect(parseUrl('?time=17', 'meals', ranges).time).toBeNull()
+    expect(parseUrl('?distance=7', 'meals', ranges).distance).toBe(7)
+    expect(parseUrl('?distance=1.5', 'meals', ranges).distance).toBeNull()
+    // The default ranges stop at 45 min and 5 mi.
+    expect(parseUrl('?time=50').time).toBeNull()
+    expect(parseUrl('?distance=7').distance).toBeNull()
+  })
+
   it("toQuery leaves out empty fields and the side's default sort", () => {
     expect(toQuery(NONE)).toBe('')
     expect(toQuery({ ...NONE, budget: 20 })).toBe('budget=20')

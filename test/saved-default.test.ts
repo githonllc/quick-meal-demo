@@ -84,6 +84,20 @@ describe('saved default', () => {
     expect(loadDefault(stored({ time: null, distance: 'far' }))).toMatchObject({ time: null, distance: null })
   })
 
+  it('moves time and distance to the nearest stop of the ranges in the demo settings', () => {
+    const config = JSON.stringify({ time: { min: 10, max: 60, step: 5 }, distance: { min: 1, max: 10, step: 1 } })
+    const inRange = (v: unknown) => fakeStore({ [KEY]: JSON.stringify(v), 'quickMeal.config.v1': config })
+    expect(loadDefault(inRange({ time: 17 }))?.time).toBe(15)
+    expect(loadDefault(inRange({ time: 18 }))?.time).toBe(20)
+    expect(loadDefault(inRange({ time: 50 }))?.time).toBe(50)
+    expect(loadDefault(inRange({ time: 90 }))?.time).toBe(60)
+    expect(loadDefault(inRange({ distance: 0.5 }))?.distance).toBe(1)
+    expect(loadDefault(inRange({ distance: 2.5 }))?.distance).toBe(2)
+    expect(loadDefault(inRange({ distance: 9 }))?.distance).toBe(9)
+    // The URL is read with the same ranges.
+    expect(initialFilters('?time=50', inRange({})).time).toBe(50)
+  })
+
   it("turns an unknown sort into the side's default", () => {
     expect(loadDefault(stored({ sort: 'cheap' }))?.sort).toBe('fastest')
     expect(loadDefault(stored({ sort: 'best' }))?.sort).toBe('fastest')

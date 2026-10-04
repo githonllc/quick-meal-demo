@@ -1,4 +1,5 @@
-import { BUDGET_MAX, BUDGET_MIN, DISTANCE_STEPS, TIME_STEPS } from '../../shared/constants'
+import { BUDGET_MAX, BUDGET_MIN } from '../../shared/constants'
+import { stepsOf } from '../../shared/ranges'
 import { loadConfig } from './config'
 import type { Layout } from './config'
 import type { UiFilters } from './filters'
@@ -39,18 +40,20 @@ function budget(raw: unknown): number | null {
 }
 
 // A saved value outside the current range moves to the nearest valid one (P8).
+// The range is the one in the demo settings, so a saved time also snaps to a new range.
 // A saved Most liked or Top rated becomes the sort this layout shows.
 export function loadDefault(store = browserStorage(), layout: Layout = 'meals'): Partial<UiFilters> | null {
   try {
-    if (!loadConfig(store).saveFilters) return null
+    const config = loadConfig(store)
+    if (!config.saveFilters) return null
     const raw = store?.getItem(KEY)
     if (!raw) return null
     const v: unknown = JSON.parse(raw)
     if (typeof v !== 'object' || v === null || Array.isArray(v)) return null
     const saved = v as Record<string, unknown>
     // Delivery or pickup, never both: a saved time wins over a saved distance (P7).
-    const time = nearest(saved.time, TIME_STEPS)
-    const distance = time === null ? nearest(saved.distance, DISTANCE_STEPS) : null
+    const time = nearest(saved.time, stepsOf(config.time))
+    const distance = time === null ? nearest(saved.distance, stepsOf(config.distance)) : null
     return {
       budget: budget(saved.budget),
       time,

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { DISTANCE_STEPS, TIME_STEPS } from '../../shared/constants'
+import { stepsOf } from '../../shared/ranges'
 import { formatMiles } from '../../shared/format'
 import { useConfig } from '../state/config'
 import { toSide } from '../state/filters'
@@ -21,6 +21,10 @@ export function SpeedPicker({
   onSide: (pickup: boolean) => void
   onPick: (f: UiFilters) => void
 }) {
+  // The stops come from the ranges in the demo settings.
+  const config = useConfig()
+  const timeStops = stepsOf(config.time)
+  const distanceStops = stepsOf(config.distance)
   const sides = [
     { pickup: false, label: 'Delivery' },
     { pickup: true, label: 'Pickup' },
@@ -45,7 +49,7 @@ export function SpeedPicker({
         <>
           <p className="grp-q">How far can you go?</p>
           <StepSlider
-            stops={DISTANCE_STEPS}
+            stops={distanceStops}
             value={filters.distance}
             label="How far can you go?"
             any="Any distance"
@@ -56,7 +60,7 @@ export function SpeedPicker({
             )}
             say={(m) => (m === 1 ? '1 mile' : `${m} miles`)}
             testId="distance-slider"
-            first={formatMiles(DISTANCE_STEPS[0])}
+            first={formatMiles(distanceStops[0])}
             onChange={(distance) => onPick({ ...filters, time: null, distance })}
           />
         </>
@@ -65,7 +69,7 @@ export function SpeedPicker({
           <p className="grp-q">How much time do you have?</p>
           <p className="grp-help">Estimated arrival within this window. Not guaranteed.</p>
           <StepSlider
-            stops={TIME_STEPS}
+            stops={timeStops}
             value={filters.time}
             label="How much time do you have?"
             any="Any time"
@@ -76,7 +80,7 @@ export function SpeedPicker({
             )}
             say={(t) => `${t} minutes`}
             testId="time-slider"
-            first={`${TIME_STEPS[0]} min`}
+            first={`${timeStops[0]} min`}
             onChange={(time) => onPick({ ...filters, distance: null, time })}
           />
         </>

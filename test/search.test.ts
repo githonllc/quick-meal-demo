@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { SORTS } from '../shared/constants'
 import { menuView } from '../shared/menu'
 import { priceItem, toSummary } from '../shared/pricing'
+import { DEFAULT_RANGES } from '../shared/ranges'
 import { search } from '../shared/search'
 import type { SortId } from '../shared/types'
 import {
@@ -321,6 +322,21 @@ describe('search: relax', () => {
     expect(search([sliceHouse], filters({ distanceMi: 2 })).relax[0].to).toBe(2.5)
     // Far Burger 3.6 mi: the next half mile that reaches it is 4.
     expect(search([farBurger], filters({ distanceMi: 1 })).relax[0].to).toBe(4)
+  })
+
+  it('moves time and distance by the steps of the ranges it is given', () => {
+    // Far Burger eta 50: past the default 45, but 10 to 60 min by 5 reaches it at 50.
+    const time = { ...DEFAULT_RANGES, time: { min: 10, max: 60, step: 5 } }
+    expect(search(restaurants, filters({ timeMin: 30, cuisine: 'burgers' }), time).relax).toEqual([
+      { filter: 'time', to: 50, count: 1, label: 'Time up to 50 min · 1 result' },
+    ])
+    // Curry House eta 25: 15 to 90 min by 15 jumps from 15 to 30.
+    const quarter = { ...DEFAULT_RANGES, time: { min: 15, max: 90, step: 15 } }
+    expect(search(restaurants, filters({ timeMin: 15, cuisine: 'indian' }), quarter).relax[0].to).toBe(30)
+    // Slice House 2.5 mi: 1 to 10 mi by 1 goes from 1 to 3. A place 5.4 mi away is reached at 6.
+    const miles = { ...DEFAULT_RANGES, distance: { min: 1, max: 10, step: 1 } }
+    expect(search([sliceHouse], filters({ distanceMi: 1 }), miles).relax[0].to).toBe(3)
+    expect(search([{ ...farBurger, distanceMi: 5.4 }], filters({ distanceMi: 1 }), miles).relax[0].to).toBe(6)
   })
 
   it('offers "Remove distance" when no step has a result', () => {

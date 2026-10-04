@@ -1,3 +1,4 @@
+import { DEFAULT_RANGES, rangeParam } from '../shared/ranges'
 import type { HomeData, MenuView, SearchResponse } from '../shared/types'
 import { loadConfig } from './state/config'
 
@@ -15,9 +16,15 @@ const cache = new Map<string, unknown>()
 
 // The Network switches of the demo settings act here: a delay before every answer, cached or not,
 // and a simulated failure. The old /quick-meal?fail=1 link still fails too.
+// A time or distance range that is not the default goes to the search and the menu as trange / drange,
+// so the Worker takes its steps. It is part of the URL, so a cached answer is per range too.
 function request(path: string, params: URLSearchParams): { url: string; cacheable: boolean; delayMs: number } {
-  const { network } = loadConfig()
+  const { network, time, distance } = loadConfig()
   const query = new URLSearchParams(params)
+  if (path.startsWith('/api/quick-meal/')) {
+    if (rangeParam(time) !== rangeParam(DEFAULT_RANGES.time)) query.set('trange', rangeParam(time))
+    if (rangeParam(distance) !== rangeParam(DEFAULT_RANGES.distance)) query.set('drange', rangeParam(distance))
+  }
   if (network.fail || new URLSearchParams(window.location.search).get('fail') === '1') query.set('fail', '1')
   const qs = query.toString()
   // Never cache the simulated failure, so every retry really asks the server again.

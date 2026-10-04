@@ -1,15 +1,9 @@
-import {
-  BUDGET_MAX,
-  DISTANCE_STEPS,
-  NEAR_LIMIT,
-  SCORE_BUDGET_CENTS,
-  SCORE_DISTANCE_MI,
-  SCORE_TIME_MIN,
-  TIME_STEPS,
-} from './constants'
+import { BUDGET_MAX, NEAR_LIMIT, SCORE_BUDGET_CENTS, SCORE_DISTANCE_MI, SCORE_TIME_MIN } from './constants'
 import { formatCents, formatDollars, formatMiles, pluralize } from './format'
 import { compareIds, menuView } from './menu'
 import { priceItem, toSummary } from './pricing'
+import { DEFAULT_RANGES, stepsOf } from './ranges'
+import type { Ranges } from './ranges'
 import type {
   Filters,
   MealCard,
@@ -23,14 +17,15 @@ import type {
   SortId,
 } from './types'
 
-export function search(restaurants: Restaurant[], f: Filters): SearchResponse {
+// The ranges give the steps a relax option can move time or distance to.
+export function search(restaurants: Restaurant[], f: Filters, ranges: Ranges = DEFAULT_RANGES): SearchResponse {
   const exact = exactCards(restaurants, f)
   // Near and relax are only for the "no results" screen.
   if (exact.length > 0) {
     return { filters: f, total: exact.length, exact, near: [], relax: [] }
   }
   const near = nearCards(restaurants, f)
-  const relax = relaxOptions(restaurants, f, near)
+  const relax = relaxOptions(restaurants, f, near, ranges)
   return { filters: f, total: 0, exact, near, relax }
 }
 
@@ -179,11 +174,11 @@ function results(count: number): string {
   return pluralize(count, 'result', 'results')
 }
 
-function relaxOptions(restaurants: Restaurant[], f: Filters, near: NearCard[]): Relax[] {
+function relaxOptions(restaurants: Restaurant[], f: Filters, near: NearCard[], ranges: Ranges): Relax[] {
   const options = [
     relaxBudget(restaurants, f),
-    relaxTime(restaurants, f),
-    relaxDistance(restaurants, f),
+    relaxTime(restaurants, f, ranges),
+    relaxDistance(restaurants, f, ranges),
     near.length === 0 ? relaxCuisine(restaurants, f) : null,
   ]
   // Only offer a change that gives at least one result.
@@ -225,18 +220,18 @@ function firstStep<T extends number>(
   return { to: null, count: countAt(null) }
 }
 
-function relaxTime(restaurants: Restaurant[], f: Filters): Relax | null {
+function relaxTime(restaurants: Restaurant[], f: Filters, ranges: Ranges): Relax | null {
   if (f.timeMin === null) return null
-  const { to, count } = firstStep(TIME_STEPS, f.timeMin, (timeMin) =>
+  const { to, count } = firstStep(stepsOf(ranges.time), f.timeMin, (timeMin) =>
     countExact(restaurants, { ...f, timeMin }),
   )
   const text = to === null ? 'Remove time' : `Time up to ${to} min`
   return { filter: 'time', to, count, label: `${text} · ${results(count)}` }
 }
 
-function relaxDistance(restaurants: Restaurant[], f: Filters): Relax | null {
+function relaxDistance(restaurants: Restaurant[], f: Filters, ranges: Ranges): Relax | null {
   if (f.distanceMi === null) return null
-  const { to, count } = firstStep(DISTANCE_STEPS, f.distanceMi, (distanceMi) =>
+  const { to, count } = firstStep(stepsOf(ranges.distance), f.distanceMi, (distanceMi) =>
     countExact(restaurants, { ...f, distanceMi }),
   )
   const text = to === null ? 'Remove distance' : `Distance up to ${formatMiles(to)}`

@@ -1,12 +1,7 @@
-import { DEFAULT_RANGES, stepsOf } from './ranges';
 import type { SortId } from './types';
 
 export const BUDGET_MIN = 10; // dollars
 export const BUDGET_MAX = 40; // dollars; the slider's max means "any budget" (null)
-// Every minute from 15 to 45. The slider's last stop after 45 means "any time" (null).
-export const TIME_STEPS: readonly number[] = stepsOf(DEFAULT_RANGES.time);
-// Every half mile from 0.5 to 5. The slider's last stop after 5 means "any distance" (null).
-export const DISTANCE_STEPS: readonly number[] = stepsOf(DEFAULT_RANGES.distance);
 export const SERVICE_FEE_BPS = 1500; // 15%
 export const TIP_BPS = 1500; // 15%
 export const SMALL_ORDER_THRESHOLD_CENTS = 1200;

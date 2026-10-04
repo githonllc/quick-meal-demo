@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { DISTANCE_STEPS, TIME_STEPS } from '../shared/constants'
 import { DEFAULT_RANGES, isValidRange, stepsOf } from '../shared/ranges'
 import { DEFAULT_CONFIG, applyLayoutParam, loadConfig, parseConfig, resetConfig, saveConfig } from '../src/state/config'
 import type { Store } from '../src/state/savedDefault'
@@ -30,11 +29,9 @@ const broken: Store = {
 }
 
 describe('ranges', () => {
-  it('the default ranges give the steps the sliders have today', () => {
+  it('the default ranges give every minute from 15 to 45 and every half mile from 0.5 to 5', () => {
     expect(stepsOf(DEFAULT_RANGES.time)).toEqual(Array.from({ length: 31 }, (_, i) => 15 + i))
     expect(stepsOf(DEFAULT_RANGES.distance)).toEqual([0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5])
-    expect(TIME_STEPS).toEqual(stepsOf(DEFAULT_RANGES.time))
-    expect(DISTANCE_STEPS).toEqual(stepsOf(DEFAULT_RANGES.distance))
   })
 
   it('lists every stop from min to max, rounded to 2 decimals', () => {
@@ -47,10 +44,9 @@ describe('ranges', () => {
     expect(isValidRange('time', DEFAULT_RANGES.time)).toBe(true)
     expect(isValidRange('distance', DEFAULT_RANGES.distance)).toBe(true)
     expect(isValidRange('time', { min: 5, max: 90, step: 5 })).toBe(true)
-    expect(isValidRange('time', { min: 10, max: 55, step: 15 })).toBe(true)
+    expect(isValidRange('time', { min: 15, max: 60, step: 15 })).toBe(true)
     expect(isValidRange('distance', { min: 0.5, max: 10, step: 0.5 })).toBe(true)
-    // Tenths of a mile are on the grid; float noise (0.7 * 10) does not matter.
-    expect(isValidRange('distance', { min: 0.7, max: 2.7, step: 1 })).toBe(true)
+    expect(isValidRange('distance', { min: 1, max: 10, step: 1 })).toBe(true)
   })
 
   it.each([
@@ -61,6 +57,8 @@ describe('ranges', () => {
     ['time', { min: 15, max: 45, step: 2 }, 'step not allowed'],
     ['time', { min: 15, max: 40, step: 10 }, 'max not a whole number of steps'],
     ['time', { min: 15.5, max: 45.5, step: 1 }, 'not whole minutes'],
+    ['time', { min: 10, max: 55, step: 15 }, 'min not on the step grid'],
+    ['distance', { min: 0.7, max: 2.7, step: 1 }, 'min not on the step grid'],
     ['time', { min: '15', max: 45, step: 1 }, 'a string'],
     ['time', null, 'null'],
     ['distance', { min: 0.25, max: 5, step: 0.5 }, 'quarter miles'],

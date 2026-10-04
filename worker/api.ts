@@ -1,5 +1,7 @@
-import { BUDGET_MAX, BUDGET_MIN, CUISINES, DISTANCE_STEPS, SORTS, TIME_STEPS, sortFor } from '../shared/constants'
+import { BUDGET_MAX, BUDGET_MIN, CUISINES, SORTS, sortFor } from '../shared/constants'
 import { menuView } from '../shared/menu'
+import { parseRangeParam, stepsOf } from '../shared/ranges'
+import type { Ranges } from '../shared/ranges'
 import { search } from '../shared/search'
 import type { Filters } from '../shared/types'
 import { homeData } from './data/home'
@@ -29,14 +31,24 @@ function parseStep<T extends number>(raw: string | null, steps: readonly T[]): T
   return steps.find((s) => s === Number(raw)) // undefined when not allowed
 }
 
-export function parseFilters(params: URLSearchParams): Filters | { error: string } {
+// trange=min,max,step and drange=min,max,step: the ranges the demo settings chose.
+// Missing means the default range.
+function parseRanges(params: URLSearchParams): Ranges | { error: string } {
+  const time = parseRangeParam('time', params.get('trange'))
+  const distance = parseRangeParam('distance', params.get('drange'))
+  if (!time || !distance) return { error: 'Invalid range' }
+  return { time, distance }
+}
+
+// Time and distance must be stops of their ranges.
+export function parseFilters(params: URLSearchParams, ranges: Ranges): Filters | { error: string } {
   const budgetCents = parseBudget(params.get('budget'))
   if (budgetCents !== null && typeof budgetCents === 'object') return budgetCents
 
-  const timeMin = parseStep(params.get('time'), TIME_STEPS)
+  const timeMin = parseStep(params.get('time'), stepsOf(ranges.time))
   if (timeMin === undefined) return { error: 'Invalid time' }
 
-  const distanceRaw = parseStep(params.get('distance'), DISTANCE_STEPS)
+  const distanceRaw = parseStep(params.get('distance'), stepsOf(ranges.distance))
   if (distanceRaw === undefined) return { error: 'Invalid distance' }
   // Delivery or pickup, never both. An old link with both keeps the time (design P7).
   const distanceMi = timeMin === null ? distanceRaw : null
@@ -69,22 +81,27 @@ export async function handleApi(request: Request, opts: { delayMs: number }): Pr
   if (path === '/api/home') return json(homeData())
 
   if (path === '/api/quick-meal/search') {
-    const filters = parseFilters(url.searchParams)
+    const ranges = parseRanges(url.searchParams)
+    if (hasError(ranges)) return json(ranges, 400)
+    const filters = parseFilters(url.searchParams, ranges)
     if (hasError(filters)) return json(filters, 400)
-    return json(search(RESTAURANTS, filters))
+    return json(search(RESTAURANTS, filters, ranges))
   }
 
   const match = MENU_PATH.exec(path)
   if (match) {
     // The menu page only uses budget, distance (pickup prices) and sort. Other params are ignored.
     // Time is read too, so a link with both time and distance keeps delivery prices, as in search.
+    // The ranges are read so that a time or distance of a non-default range is valid.
     const { searchParams } = url
     const only = new URLSearchParams()
-    for (const key of ['budget', 'time', 'distance', 'sort']) {
+    for (const key of ['budget', 'time', 'distance', 'sort', 'trange', 'drange']) {
       const value = searchParams.get(key)
       if (value !== null) only.set(key, value)
     }
-    const filters = parseFilters(only)
+    const ranges = parseRanges(only)
+    if (hasError(ranges)) return json(ranges, 400)
+    const filters = parseFilters(only, ranges)
     if (hasError(filters)) return json(filters, 400)
     const restaurant = RESTAURANTS.find((r) => r.id === match[1])
     if (!restaurant) return json({ error: 'Restaurant not found' }, 404)

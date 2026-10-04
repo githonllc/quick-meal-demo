@@ -1,5 +1,8 @@
-import { BUDGET_MAX, BUDGET_MIN, CUISINES, DISTANCE_STEPS, TIME_STEPS, sortFor } from '../../shared/constants'
+import { BUDGET_MAX, BUDGET_MIN, CUISINES, sortFor } from '../../shared/constants'
+import { DEFAULT_RANGES, stepsOf } from '../../shared/ranges'
+import type { Ranges } from '../../shared/ranges'
 import type { CuisineId, DistanceStep, SortId, TimeStep } from '../../shared/types'
+import { loadConfig } from './config'
 import type { Layout } from './config'
 import { browserStorage, loadDefault } from './savedDefault'
 import { sortForLayout } from './sorts'
@@ -29,10 +32,11 @@ function parseStep<T extends number>(raw: string | null, steps: readonly T[]): T
 
 // An old link with both time and distance keeps the time and drops the distance.
 // The sort is one the layout shows: Most liked and Top rated swap with the layout.
-export function parseUrl(search: string, layout: Layout = 'meals'): UiFilters {
+// Time and distance must be stops of the ranges in the demo settings (pass the config).
+export function parseUrl(search: string, layout: Layout = 'meals', ranges: Ranges = DEFAULT_RANGES): UiFilters {
   const q = new URLSearchParams(search)
-  const time = parseStep(q.get('time'), TIME_STEPS)
-  const distance = time === null ? parseStep(q.get('distance'), DISTANCE_STEPS) : null
+  const time = parseStep(q.get('time'), stepsOf(ranges.time))
+  const distance = time === null ? parseStep(q.get('distance'), stepsOf(ranges.distance)) : null
   return {
     budget: parseBudget(q.get('budget')),
     time,
@@ -64,7 +68,7 @@ export function toQuery(f: UiFilters): string {
 // (even budget=40, "any") means the URL wins; otherwise the saved default fills them.
 // Cuisine always comes from the URL (design P8).
 export function initialFilters(search: string, store = browserStorage(), layout: Layout = 'meals'): UiFilters {
-  const url = parseUrl(search, layout)
+  const url = parseUrl(search, layout, loadConfig(store))
   const q = new URLSearchParams(search)
   if (['budget', 'time', 'distance', 'sort'].some((k) => q.has(k))) return url
   return { ...url, ...loadDefault(store, layout), cuisine: url.cuisine }

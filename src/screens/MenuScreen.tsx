@@ -22,8 +22,9 @@ type Result = { req: string; menu: MenuView | null; missing: boolean }
 
 export function MenuScreen() {
   const { params, query } = useRoute()
-  const { layout } = useConfig()
-  const filters = parseUrl(query.toString(), layout)
+  const config = useConfig()
+  const { layout } = config
+  const filters = parseUrl(query.toString(), layout, config)
   // Distance stays: it means pickup prices (design P6).
   const key = toQuery({ ...filters, time: null, cuisine: null })
   const path = `/quick-meal/restaurants/${params.id}`

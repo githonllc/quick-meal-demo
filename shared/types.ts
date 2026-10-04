@@ -1,10 +1,11 @@
-import type { CUISINES, SORTS, PHOTO_KINDS, TIME_STEPS, DISTANCE_STEPS } from './constants'
+import type { CUISINES, SORTS, PHOTO_KINDS } from './constants'
 
 export type CuisineId = (typeof CUISINES)[number]['id']
 export type SortId = (typeof SORTS)[number]['id']
 export type PhotoKind = (typeof PHOTO_KINDS)[number]
-export type TimeStep = (typeof TIME_STEPS)[number]
-export type DistanceStep = (typeof DISTANCE_STEPS)[number]
+// A stop of the time or distance range in use (shared/ranges.ts): minutes or miles.
+export type TimeStep = number
+export type DistanceStep = number
 
 export interface MenuItem {
   id: string

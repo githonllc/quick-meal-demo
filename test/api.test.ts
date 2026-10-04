@@ -81,6 +81,60 @@ describe('handleApi', () => {
     expect(body).toEqual({ error })
   })
 
+  it('search takes the time and distance stops of trange and drange', async () => {
+    const time = await get('/api/quick-meal/search?trange=10,60,5&time=50')
+    expect(time.res.status).toBe(200)
+    expect(time.body.filters.timeMin).toBe(50)
+    const distance = await get('/api/quick-meal/search?drange=1,10,1&distance=7')
+    expect(distance.res.status).toBe(200)
+    expect(distance.body.filters.distanceMi).toBe(7)
+    // The relax option moves by the range's steps: 20 min, not 16.
+    const relax = await get('/api/quick-meal/search?budget=15&time=15&trange=10,60,5')
+    expect(relax.body.relax.map((r: { label: string }) => r.label)).toEqual([
+      'Budget up to $17 · 1 result',
+      'Time up to 20 min · 2 results',
+    ])
+  })
+
+  it.each([
+    ['trange=10,60,5&time=22', 'Invalid time'],
+    ['trange=10,60,5&time=12', 'Invalid time'],
+    ['drange=1,10,1&distance=1.5', 'Invalid distance'],
+    ['trange=10,60,7', 'Invalid range'],
+    ['trange=60,10,5', 'Invalid range'],
+    ['trange=0,60,5', 'Invalid range'],
+    ['trange=10,95,5', 'Invalid range'],
+    ['trange=10,60', 'Invalid range'],
+    ['trange=10,60,5,5', 'Invalid range'],
+    ['trange=a,b,c', 'Invalid range'],
+    ['trange=', 'Invalid range'],
+    ['drange=0.5,10,0.25', 'Invalid range'],
+    ['drange=0.5,10,1', 'Invalid range'],
+    ['drange=0.25,5,0.5', 'Invalid range'],
+  ])('search?%s is 400', async (query, error) => {
+    const { res, body } = await get(`/api/quick-meal/search?${query}`)
+    expect(res.status).toBe(400)
+    expect(body).toEqual({ error })
+  })
+
+  it('the menu reads trange and drange too', async () => {
+    const pickup = await get('/api/quick-meal/restaurants/paseo-rice-bowl?budget=20&distance=7&drange=1,10,1')
+    expect(pickup.res.status).toBe(200)
+    expect(pickup.body.pickup).toBe(true)
+    const time = await get('/api/quick-meal/restaurants/paseo-rice-bowl?time=50&trange=10,60,5')
+    expect(time.res.status).toBe(200)
+    expect(time.body.pickup).toBe(false)
+    // Without its range, 7 mi is not a stop.
+    const noRange = await get('/api/quick-meal/restaurants/paseo-rice-bowl?distance=7')
+    expect(noRange.res.status).toBe(400)
+    expect(noRange.body).toEqual({ error: 'Invalid distance' })
+    for (const bad of ['trange=10,60,7', 'drange=x']) {
+      const { res, body } = await get(`/api/quick-meal/restaurants/paseo-rice-bowl?${bad}`)
+      expect(res.status).toBe(400)
+      expect(body).toEqual({ error: 'Invalid range' })
+    }
+  })
+
   it('menu view with budget', async () => {
     const { res, body } = await get('/api/quick-meal/restaurants/paseo-rice-bowl?budget=20')
     expect(res.status).toBe(200)

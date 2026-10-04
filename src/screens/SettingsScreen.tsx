@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { formatCents, pluralize } from '../../shared/format'
+import { formatCents, formatMiles, pluralize } from '../../shared/format'
+import { DEFAULT_RANGES, isValidRange, rangeParam, stepsOf } from '../../shared/ranges'
+import type { Range, RangeKind } from '../../shared/ranges'
 import { useToast } from '../components/Toast'
 import { TopBar } from '../components/TopBar'
 import { DELAYS, resetConfig, saveConfig, useConfig } from '../state/config'
@@ -25,6 +27,48 @@ function Toggle({ label, on, onChange }: { label: string; on: boolean; onChange:
     </button>
   )
 }
+
+// The choices of the range selects. Each select only offers values that make a valid range
+// with the other two (shared/ranges.ts), so every pick is valid.
+const RANGE_CHOICES: Record<RangeKind, { values: number[]; steps: number[]; show: (v: number) => string }> = {
+  time: { values: stepsOf({ min: 5, max: 90, step: 1 }), steps: [1, 5, 10, 15], show: (v) => `${v} min` },
+  distance: { values: stepsOf({ min: 0.5, max: 10, step: 0.5 }), steps: [0.5, 1], show: formatMiles },
+}
+
+function RangeSelects({ kind, range, onChange }: { kind: RangeKind; range: Range; onChange: (r: Range) => void }) {
+  const { values, steps, show } = RANGE_CHOICES[kind]
+  const fields = [
+    { field: 'min', label: 'From', options: values },
+    { field: 'max', label: 'To', options: values },
+    { field: 'step', label: 'Step', options: steps },
+  ] as const
+  return (
+    <div className="set-range">
+      {fields.map(({ field, label, options }) => (
+        <label key={field}>
+          <span>{label}</span>
+          <select
+            value={range[field]}
+            data-testid={`${kind}-${field}`}
+            onChange={(e) => onChange({ ...range, [field]: Number(e.target.value) })}
+          >
+            {options
+              .filter((v) => isValidRange(kind, { ...range, [field]: v }))
+              .map((v) => (
+                <option key={v} value={v}>
+                  {show(v)}
+                </option>
+              ))}
+          </select>
+        </label>
+      ))}
+    </div>
+  )
+}
+
+const sameRanges = (c: DemoConfig) =>
+  rangeParam(c.time) === rangeParam(DEFAULT_RANGES.time) &&
+  rangeParam(c.distance) === rangeParam(DEFAULT_RANGES.distance)
 
 function Group({ title, help, children }: { title: string; help?: string; children?: ReactNode }) {
   return (
@@ -67,7 +111,14 @@ export function SettingsScreen() {
     show('Demo state reset.')
   }
 
+  // A new range clears the saved filters: a saved time or distance may not be a stop of it.
+  const setRange = (kind: RangeKind, r: Range) => {
+    set(kind === 'time' ? { time: r } : { distance: r })
+    forgetDefault()
+  }
+
   const restoreDefaults = () => {
+    if (!sameRanges(config)) forgetDefault()
     resetConfig()
     show('Default settings restored.')
   }
@@ -94,6 +145,17 @@ export function SettingsScreen() {
             </button>
           ))}
         </div>
+      </Group>
+
+      <Group title="Time range" help="The stops of the Delivery time slider.">
+        <RangeSelects kind="time" range={config.time} onChange={(r) => setRange('time', r)} />
+      </Group>
+
+      <Group title="Distance range" help="The stops of the Pickup distance slider.">
+        <RangeSelects kind="distance" range={config.distance} onChange={(r) => setRange('distance', r)} />
+        <p className="grp-help" data-testid="range-note">
+          Changing a range clears the saved filters.
+        </p>
       </Group>
 
       <Group
@@ -161,7 +223,7 @@ export function SettingsScreen() {
         </button>
       </Group>
 
-      <Group title="Restore default settings" help="Dish first, Save filters on, Study timer off, no delay or failure.">
+      <Group title="Restore default settings" help="Dish first, time 15 to 45 min by 1, distance 0.5 to 5 mi by 0.5, Save filters on, Study timer off, no delay or failure.">
         <button className="opt set-wide" onClick={restoreDefaults}>
           Restore default settings
         </button>
