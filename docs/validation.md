@@ -1,6 +1,6 @@
 # Validation
 
-One app, design version 40. Dish first is the default layout; Restaurant first and the other research settings are on the Demo settings page (gear at the top right of Quick Meal).
+One app, design version 40. Restaurant first is the default layout; Dish first and the other research settings are on the Demo settings page (the sliders icon at the top right of Quick Meal, named "Demo settings").
 
 - Date: 2026-10-04
 - Live URL: https://quick-meal-demo.ioenv.workers.dev
@@ -66,13 +66,13 @@ All shots are 390x844 at 3x, taken from the live URL.
 
 ![Home with Quick Meal first in the category row](screenshots/1-home.png)
 
-**2. Quick Meal list at 30 min and $20.** Must-have features: dish cards (the default layout) with estimated times and all-in prices, cuisine tabs and chip row (time first). The gear at the top right opens Demo settings. Also saved default (these are the filters that come back next visit).
+**2. Quick Meal list at 30 min and $20.** Must-have features: restaurant cards (the default layout) with estimated times and the meals that fit under $20, cuisine tabs and chip row (time first). Cards show no price; the menu has it. The sliders icon at the top right opens Demo settings. Also saved default (these are the filters that come back next visit).
 
-![Quick Meal list with dish cards for 6 places that have a meal that fits](screenshots/2-list.png)
+![Quick Meal list with restaurant cards for 6 places that have a meal that fits](screenshots/2-list.png)
 
-**3. Filters sheet.** Must-have feature: Filters sheet. Also saved default (applying saves the filters).
+**3. Filters sheet.** Must-have feature: Filters sheet. The sort row shows Fastest, Lowest price and Top rated, the sorts for restaurant cards. Also saved default (applying saves the filters).
 
-![Filters sheet with the Delivery | Pickup switch, time steps, budget and sort](screenshots/3-filters.png)
+![Filters sheet with the Delivery | Pickup switch, time slider, budget and the sort with Top rated](screenshots/3-filters.png)
 
 **4. No match at $15 and 15 min.** Must-have feature: no-match results with relax chips.
 
@@ -82,9 +82,9 @@ All shots are 390x844 at 3x, taken from the live URL.
 
 ![Paseo Rice Bowl menu with the price breakdown open](screenshots/5-menu-breakdown.png)
 
-**6. Pickup within 1 mi at $20.** Must-have feature: Filters sheet with the Delivery | Pickup switch (AC-09). Cards show the distance and no time; prices have no delivery fee.
+**6. Pickup within 1 mi at $20.** Must-have feature: Filters sheet with the Delivery | Pickup switch (AC-09). Restaurant cards show only the distance: no time and no price. Menu prices have no delivery fee.
 
-![Quick Meal list in Pickup with 7 places, nearest first](screenshots/6-pickup.png)
+![Quick Meal list in Pickup with 7 restaurant cards, nearest first](screenshots/6-pickup.png)
 
 ## Manual walkthrough
 

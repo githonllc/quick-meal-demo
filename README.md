@@ -10,9 +10,9 @@ Add it to your Home Screen to open it full screen like an app. iPhone: open it i
 
 ## Demo settings
 
-For the research team, not for students. The gear at the top right of Quick Meal opens `/demo-settings`. There you can:
+For the research team, not for students. The sliders icon at the top right of Quick Meal (named "Demo settings") opens `/demo-settings`. There you can:
 
-- pick the card layout: Dish first (the default) or Restaurant first. A link with `?layout=meals` or `?layout=places` sets it too.
+- pick the card layout: Restaurant first (the default) or Dish first. A link with `?layout=meals` or `?layout=places` sets it too.
 - set the time range (default 15 to 45 min, 1 min steps) and the distance range (default 0.5 to 5 mi, 0.5 mi steps). Changing a range clears the saved filters, and old links with other values may not work.
 - turn Save filters on or off (on by default).
 - turn on the Study timer: it records the time from opening Quick Meal to the first Add to cart, per try, and copies the results as CSV.
@@ -42,7 +42,7 @@ The full design page has the screens, product decisions and acceptance criteria.
 <table>
   <tr>
     <td align="center"><img src="docs/design/1-home.png" width="240" alt="Home"><br>1 Home</td>
-    <td align="center"><img src="docs/design/2-meal-list.png" width="240" alt="Meal list"><br>2 Meal list</td>
+    <td align="center"><img src="docs/design/2-meal-list.png" width="240" alt="Result list"><br>2 Result list</td>
     <td align="center"><img src="docs/design/3-filters.png" width="240" alt="Filters sheet"><br>3 Filters sheet</td>
   </tr>
   <tr>
