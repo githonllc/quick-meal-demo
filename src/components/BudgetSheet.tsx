@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import type { UiFilters } from '../state/filters'
 import { BudgetSlider } from './BudgetSlider'
-import { ApplyButton } from './FiltersSheet'
+import { SheetFoot } from './FiltersSheet'
 import { Sheet } from './Sheet'
 
-// Sheet behind the Budget chip. A drag only moves the draft; the button applies it.
+// Sheet behind the Budget chip. A drag or Clear only moves the draft; the button applies it.
 export function BudgetSheet({
   filters,
   applyText,
@@ -27,7 +27,11 @@ export function BudgetSheet({
       <div className="grp">
         <BudgetSlider value={draft.budget} onChange={(budget) => setDraft((d) => ({ ...d, budget }))} />
       </div>
-      <ApplyButton text={applyText} onClick={() => onApply(draft)} />
+      <SheetFoot
+        applyText={applyText}
+        onClear={() => setDraft((d) => ({ ...d, budget: null }))}
+        onApply={() => onApply(draft)}
+      />
     </Sheet>
   )
 }

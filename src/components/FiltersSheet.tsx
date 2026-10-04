@@ -11,11 +11,28 @@ const sorts = (ids: readonly string[]) => ids.map((id) => SORTS.find((s) => s.id
 const DELIVERY_SORTS = sorts(DELIVERY_SORT_IDS)
 const PICKUP_SORTS = sorts(PICKUP_SORT_IDS)
 
-export function ApplyButton({ onClick, text = 'Show results' }: { onClick: () => void; text?: string }) {
+// Every filter sheet ends with Clear and Show results. Clear only resets the draft;
+// nothing changes on the list until the user applies.
+export function SheetFoot({
+  clearText = 'Clear',
+  applyText = 'Show results',
+  onClear,
+  onApply,
+}: {
+  clearText?: string
+  applyText?: string
+  onClear: () => void
+  onApply: () => void
+}) {
   return (
-    <button className="sheet-go" data-testid="sheet-apply" onClick={onClick}>
-      {text}
-    </button>
+    <div className="sheet-foot">
+      <button className="sheet-clear" data-testid="sheet-clear" onClick={onClear}>
+        {clearText}
+      </button>
+      <button className="sheet-go" data-testid="sheet-apply" onClick={onApply}>
+        {applyText}
+      </button>
+    </div>
   )
 }
 
@@ -67,19 +84,14 @@ export function FiltersSheet({
           ))}
         </div>
       </div>
-      <div className="sheet-foot">
-        <button
-          className="sheet-clear"
-          data-testid="sheet-clear"
-          onClick={() => {
-            setPickup(false)
-            set({ budget: null, time: null, distance: null, sort: 'fastest' })
-          }}
-        >
-          Clear all
-        </button>
-        <ApplyButton onClick={() => onApply(draft)} />
-      </div>
+      <SheetFoot
+        clearText="Clear all"
+        onClear={() => {
+          setPickup(false)
+          set({ budget: null, time: null, distance: null, sort: 'fastest' })
+        }}
+        onApply={() => onApply(draft)}
+      />
     </Sheet>
   )
 }

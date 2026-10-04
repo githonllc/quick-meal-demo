@@ -2,7 +2,7 @@ import type { CSSProperties, ReactNode } from 'react'
 
 // Native range input over the stop index, so it snaps to the stops.
 // One more stop at the far right means "any", stored as null.
-// With many stops, `ends` labels only the two ends, like the budget slider.
+// Only the two ends have labels, like the budget slider: there are too many stops to label each.
 export function StepSlider<T extends number>({
   stops,
   value,
@@ -11,7 +11,7 @@ export function StepSlider<T extends number>({
   show,
   say,
   testId,
-  ends,
+  first,
   onChange,
 }: {
   stops: readonly T[]
@@ -21,7 +21,7 @@ export function StepSlider<T extends number>({
   show: (v: T) => ReactNode // the header at a stop
   say: (v: T) => string // aria-valuetext at a stop
   testId: string
-  ends?: [string, string]
+  first: string // the label under the first stop, e.g. "15 min"
   onChange: (v: T | null) => void
 }) {
   const i = value === null ? stops.length : stops.indexOf(value)
@@ -43,19 +43,10 @@ export function StepSlider<T extends number>({
         style={{ '--fill': fill, touchAction: 'pan-x' } as CSSProperties}
         onChange={(e) => onChange(stops[Number(e.target.value)] ?? null)}
       />
-      {ends ? (
-        <div className="slider-ends">
-          <span>{ends[0]}</span>
-          <span>{ends[1]}</span>
-        </div>
-      ) : (
-        <div className="slider-ticks">
-          {stops.map((s) => (
-            <span key={s}>{s}</span>
-          ))}
-          <span>Any</span>
-        </div>
-      )}
+      <div className="slider-ends">
+        <span>{first}</span>
+        <span>Any</span>
+      </div>
     </div>
   )
 }

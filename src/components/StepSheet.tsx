@@ -3,7 +3,7 @@ import { DISTANCE_STEPS, TIME_STEPS } from '../../shared/constants'
 import { formatMiles } from '../../shared/format'
 import { toSide } from '../state/filters'
 import type { UiFilters } from '../state/filters'
-import { ApplyButton } from './FiltersSheet'
+import { SheetFoot } from './FiltersSheet'
 import { Sheet } from './Sheet'
 import { StepSlider } from './StepSlider'
 
@@ -55,6 +55,7 @@ export function SpeedPicker({
             )}
             say={(m) => (m === 1 ? '1 mile' : `${m} miles`)}
             testId="distance-slider"
+            first={formatMiles(DISTANCE_STEPS[0])}
             onChange={(distance) => onPick({ ...filters, time: null, distance })}
           />
         </>
@@ -74,7 +75,7 @@ export function SpeedPicker({
             )}
             say={(t) => `${t} minutes`}
             testId="time-slider"
-            ends={[`${TIME_STEPS[0]} min`, 'Any']}
+            first={`${TIME_STEPS[0]} min`}
             onChange={(time) => onPick({ ...filters, distance: null, time })}
           />
         </>
@@ -85,6 +86,7 @@ export function SpeedPicker({
 
 // Sheet behind the Time chip. The slider only moves the draft; the button applies it.
 // After a flip the slider is at Any, on either side.
+// Clear goes back to Delivery at Any time, like Clear all in the Filters sheet.
 export function StepSheet({
   filters,
   onApply,
@@ -106,7 +108,13 @@ export function StepSheet({
       <div className="grp">
         <SpeedPicker pickup={pickup} filters={draft} onSide={switchSide} onPick={setDraft} />
       </div>
-      <ApplyButton onClick={() => onApply(draft)} />
+      <SheetFoot
+        onClear={() => {
+          setPickup(false)
+          setDraft((d) => ({ ...toSide(d, false), time: null, distance: null }))
+        }}
+        onApply={() => onApply(draft)}
+      />
     </Sheet>
   )
 }

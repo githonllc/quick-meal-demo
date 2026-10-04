@@ -46,7 +46,7 @@ describe('filters in the URL', () => {
   })
 
   it('ignores invalid values and never throws', () => {
-    expect(parseUrl('?budget=9&time=46&distance=4&cuisine=thai&sort=cheap')).toEqual(NONE)
+    expect(parseUrl('?budget=9&time=46&distance=5.5&cuisine=thai&sort=cheap')).toEqual(NONE)
     expect(parseUrl('?budget=20.5').budget).toBeNull()
     expect(parseUrl('?budget=abc&time=&cuisine=').budget).toBeNull()
     expect(parseUrl('?budget=41').budget).toBeNull()

@@ -302,17 +302,19 @@ describe('search: relax', () => {
   })
 
   it('picks the first distance step that has a result', () => {
-    // Slice House 2.5 mi: 1 and 2 mi give 0, 3 mi gives 1.
+    // Slice House 2.5 mi: 1 to 2 mi give 0, 2.5 mi gives 1.
     const res = search(restaurants, filters({ distanceMi: 0.5, cuisine: 'pizza' }))
     expect(res.relax).toEqual([
-      { filter: 'distance', to: 3, count: 1, label: 'Distance up to 3 mi · 1 result' },
+      { filter: 'distance', to: 2.5, count: 1, label: 'Distance up to 2.5 mi · 1 result' },
     ])
-    expect(search([sliceHouse], filters({ distanceMi: 2 })).relax[0].to).toBe(3)
+    expect(search([sliceHouse], filters({ distanceMi: 2 })).relax[0].to).toBe(2.5)
+    // Far Burger 3.6 mi: the next half mile that reaches it is 4.
+    expect(search([farBurger], filters({ distanceMi: 1 })).relax[0].to).toBe(4)
   })
 
   it('offers "Remove distance" when no step has a result', () => {
-    // Far Burger 3.6 mi: 2 and 3 mi give 0.
-    const res = search(restaurants, filters({ distanceMi: 1, cuisine: 'burgers' }))
+    // A burger place 5.4 mi away: no step up to 5 mi gives a result.
+    const res = search([{ ...farBurger, distanceMi: 5.4 }], filters({ distanceMi: 1 }))
     expect(res.relax).toEqual([
       { filter: 'distance', to: null, count: 1, label: 'Remove distance · 1 result' },
     ])
@@ -329,7 +331,7 @@ describe('search: relax', () => {
     const pickup = search([tacoLoco, cheap], filters({ budgetCents: 1000, distanceMi: 0.5 }))
     expect(pickup.relax).toEqual([
       { filter: 'budget', to: 11, count: 1, label: 'Budget up to $11 · 1 result' },
-      { filter: 'distance', to: 2, count: 1, label: 'Distance up to 2 mi · 1 result' },
+      { filter: 'distance', to: 1.5, count: 1, label: 'Distance up to 1.5 mi · 1 result' },
     ])
   })
 
